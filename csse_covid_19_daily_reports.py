@@ -5,7 +5,7 @@ import pandas as pd
 import os
 import glob
 
-
+#seals and seals
 # %%
 #extracting all files from local directory for csse are merging them
 extension = 'csv'
