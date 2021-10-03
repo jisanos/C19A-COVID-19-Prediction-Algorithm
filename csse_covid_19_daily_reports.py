@@ -2,7 +2,6 @@
 # To add a new markdown cell, type '# %% [markdown]'
 # %%
 import pandas as pd
-import os
 import glob
 
 #seals and seals
@@ -30,15 +29,15 @@ combinedOfCsv['date'] = combinedOfCsv['date'].astype('datetime64[ns]') #MM-DD-YY
 
 
 # %%
-display(combinedOfCsv)
+print(combinedOfCsv)
 combinedOfCsv.info()
 
 
 # %%
 #comparing the merged dataset csse with the dataset CCI to check the differences between them 
 datasetCCI = pd.read_csv(".\\CCI_C-19\\data_tables\\testing_data\\time_series_covid19_US.csv")
-display(datasetCCI)
-display(combinedOfCsv)
+print(datasetCCI)
+print(combinedOfCsv)
 
 
 # %%
@@ -92,7 +91,7 @@ df_diff = pd.concat([combinedOfCsv,datasetCCI]).drop_duplicates(keep=False)
 
 
 # %%
-display(df_diff)
+print(df_diff)
 
 
 # %%
