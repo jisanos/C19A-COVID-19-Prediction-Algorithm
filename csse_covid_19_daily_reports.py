@@ -12,7 +12,7 @@ extension = 'csv'
 path = ".\\CSSE_C-19\\csse_covid_19_data\\csse_covid_19_daily_reports\\"
 allFilesInFolder = [i for i in glob.glob((path + '*.{}').format(extension))]
 
-
+#test seals
 # %%
 print("The csv files ending with .csv are: ", allFilesInFolder)
 
