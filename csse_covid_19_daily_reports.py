@@ -6,6 +6,8 @@ import os
 import glob
 # This is a test comment
 # another test comment xd
+
+#seals and seals
 # %%
 #extracting all files from local directory for csse are merging them
 extension = 'csv'
