@@ -1,10 +1,3 @@
-# To add a new cell, type '# %%'
-# To add a new markdown cell, type '# %% [markdown]'
-# %% [markdown]
-# # Import
-# %% [markdown]
-# ## Library import
-
 # %%
 import pandas as pd
 # pd.set_option('display.max_rows', None)
@@ -26,12 +19,6 @@ import seaborn as sns
 from wordcloud import WordCloud
 #import snowballstemmer
 
-# %% [markdown]
-# # Analysis
-# %% [markdown]
-# ## Hector
-# %% [markdown]
-# ### Policies
 # Importing, merging, and creating a column containing the state of policies.
 
 # %%
@@ -358,14 +345,3 @@ plt.imshow(wordcloud)
 # Vaccine: Vaccines were active?
 # 
 # Opening (County): ?
-# %% [markdown]
-# #### Will attempt keyword extraction from the dataset
-
-# %%
-
-
-
-
-# %%
-
-# %%
