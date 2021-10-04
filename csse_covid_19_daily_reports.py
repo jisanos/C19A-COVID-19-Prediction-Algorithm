@@ -2,17 +2,18 @@
 # To add a new markdown cell, type '# %% [markdown]'
 # %%
 import pandas as pd
-import os
 import glob
+# This is a test comment
+# another test comment xd
 
-
+#seals and seals
 # %%
 #extracting all files from local directory for csse are merging them
 extension = 'csv'
 path = ".\\CSSE_C-19\\csse_covid_19_data\\csse_covid_19_daily_reports\\"
 allFilesInFolder = [i for i in glob.glob((path + '*.{}').format(extension))]
 
-
+#test seals
 # %%
 print("The csv files ending with .csv are: ", allFilesInFolder)
 
@@ -30,15 +31,15 @@ combinedOfCsv['date'] = combinedOfCsv['date'].astype('datetime64[ns]') #MM-DD-YY
 
 
 # %%
-display(combinedOfCsv)
+print(combinedOfCsv)
 combinedOfCsv.info()
 
 
 # %%
 #comparing the merged dataset csse with the dataset CCI to check the differences between them 
 datasetCCI = pd.read_csv(".\\CCI_C-19\\data_tables\\testing_data\\time_series_covid19_US.csv")
-display(datasetCCI)
-display(combinedOfCsv)
+print(datasetCCI)
+print(combinedOfCsv)
 
 
 # %%
@@ -92,7 +93,7 @@ df_diff = pd.concat([combinedOfCsv,datasetCCI]).drop_duplicates(keep=False)
 
 
 # %%
-display(df_diff)
+print(df_diff)
 
 
 # %%
