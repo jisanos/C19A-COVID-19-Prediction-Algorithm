@@ -1,3 +1,0 @@
-git clone https://github.com/CSSEGISandData/COVID-19.git "./CSSE_C-19" #Cases and Deaths
-git clone https://github.com/govex/COVID-19.git "./CCI_C-19" #Vaccinations, Testing, US State Level Policy Tracker
-git clone -b govex_data https://github.com/govex/COVID-19.git "./CCI_C-19_Policies" #Alternate branch of CCI containing the policies data

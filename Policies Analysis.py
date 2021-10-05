@@ -38,11 +38,6 @@ for filepath in policies_files:
 
 policies_df = pd.concat(content)
 
-
-# %%
-policies_df
-
-
 # %%
 # Getting all unique values from the columns after "policy" columns in the dataframe
 for col in policies_df.columns[3:]:
@@ -59,7 +54,7 @@ policies_df.replace(to_replace=r'^y$',value="Y",regex=True,inplace=True)
 
 # %%
 # Finding which entry has a whitespace
-policies_df[policies_df['Restrict/Close'].str.contains("\s", regex=True, na=False)]
+print(policies_df[policies_df['Restrict/Close'].str.contains("\s", regex=True, na=False)])
 
 
 # %%
@@ -92,11 +87,11 @@ policies_df[policies_df.duplicated(["date","State"], keep= False)]
 # There seem to be multiple entries per date,state. Maybe merging them could be a good idea.
 
 # %%
-list(policies_df.columns[2:])
+print(list(policies_df.columns[2:]))
 
 
 # %%
-policies_df.dtypes
+print(policies_df.dtypes)
 
 
 # %%
