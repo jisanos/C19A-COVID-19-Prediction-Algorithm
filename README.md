@@ -18,7 +18,8 @@ Alternate branch of CCI containing US State Level Policy Tracker:
 `git clone -b govex_data https://github.com/govex/COVID-19.git "./CCI_C-19_Policies"`
 
 ## Dictionary
+CSSE: Johns Hopkins Center for Systems Science and Engineering
 
 CCI: Johns Hopkins Centers for Civic Impact
-CSSE: Johns Hopkins Center for Systems Science and Engineering
+
 WHO: World Health Organization

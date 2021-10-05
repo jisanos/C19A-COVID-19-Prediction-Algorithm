@@ -108,5 +108,19 @@ ts_vaccine_df = ts_vaccine_df[~(ts_vaccine_df["Country_Region"] == "US")]
 ts_vaccine_df = ts_vaccine_df[~(ts_vaccine_df["Country_Region"] == "US (Aggregate)")]
 ts_vaccine_df = ts_vaccine_df[~(ts_vaccine_df["Country_Region"] == "World")]
 
+# %%
+
+unique_us_states= set(ts_vaccine_us_df['Province_State'])
+
+# %%
+# Creating a list of "states" in the ts_vaccine_us_df which arent really states:
+    #Long Term Care (LTC) Program
+    #Veterans Health Administration
+    #Bureau of Prisons
+    #Department of Defense
+not_really_states = {"Long Term Care (LTC) Program","Veterans Health Administration",
+                     "Bureau of Prisons","Department of Defense"}
+
+# %%
 
 
