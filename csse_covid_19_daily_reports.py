@@ -1,79 +1,77 @@
 # To add a new cell, type '# %%'
 # To add a new markdown cell, type '# %% [markdown]'
 # %%
+#adding libraries needed
 import pandas as pd
 import glob
-# This is a test comment
-# another test comment xd
+import matplotlib.pyplot as plt
 
-#seals and seals
 # %%
 #extracting all files from local directory for csse are merging them
 extension = 'csv'
 path = ".\\CSSE_C-19\\csse_covid_19_data\\csse_covid_19_daily_reports\\"
 allFilesInFolder = [i for i in glob.glob((path + '*.{}').format(extension))]
 
-#test seals
 # %%
 print("The csv files ending with .csv are: ", allFilesInFolder)
 
 
 # %%
-combinedOfCsv = pd.concat([pd.read_csv(file).assign(date = file.replace(path,"").replace(".csv","")) for file in allFilesInFolder],ignore_index = True)
+combinedOfCsvCSSE = pd.concat([pd.read_csv(file).assign(date = file.replace(path,"").replace(".csv","")) for file in allFilesInFolder],ignore_index = True)
 
 
 # %%
-combinedOfCsv
+print(combinedOfCsvCSSE)
 
 
 # %%
-combinedOfCsv['date'] = combinedOfCsv['date'].astype('datetime64[ns]') #MM-DD-YYYY
+combinedOfCsvCSSE['date'] = combinedOfCsvCSSE['date'].astype('datetime64[ns]') #MM-DD-YYYY
 
 
 # %%
-print(combinedOfCsv)
-combinedOfCsv.info()
+print(combinedOfCsvCSSE)
+combinedOfCsvCSSE.info()
 
 
 # %%
 #comparing the merged dataset csse with the dataset CCI to check the differences between them 
 datasetCCI = pd.read_csv(".\\CCI_C-19\\data_tables\\testing_data\\time_series_covid19_US.csv")
 print(datasetCCI)
-print(combinedOfCsv)
+print(combinedOfCsvCSSE)
 
 
 # %%
 #there's currently a duplicate of columns in this dataset so we're going to remove the one with the most nans which has little to no data
-print('The amount of missing data on Province_State column of CSSE is:', combinedOfCsv['Province_State'].isnull().sum())
-print('The amount of missing data on Province/State column of CSSE is:', combinedOfCsv['Province/State'].isnull().sum())
+print('The amount of missing data on Province_State column of CSSE is:', combinedOfCsvCSSE['Province_State'].isnull().sum())
+print('The amount of missing data on Province/State column of CSSE is:', combinedOfCsvCSSE['Province/State'].isnull().sum())
 print("")
-print('The amount of missing data on Country_Region column of CSSE is:', combinedOfCsv['Country_Region'].isnull().sum())
-print('The amount of missing data on Country/Region column of CSSE is:', combinedOfCsv['Country/Region'].isnull().sum())
+print('The amount of missing data on Country_Region column of CSSE is:', combinedOfCsvCSSE['Country_Region'].isnull().sum())
+print('The amount of missing data on Country/Region column of CSSE is:', combinedOfCsvCSSE['Country/Region'].isnull().sum())
 print("")
-print('The amount of missing data on Last_Update column of CSSE is:', combinedOfCsv['Last_Update'].isnull().sum())
-print('The amount of missing data on Last Update column of CSSE is:', combinedOfCsv['Last Update'].isnull().sum())
+print('The amount of missing data on Last_Update column of CSSE is:', combinedOfCsvCSSE['Last_Update'].isnull().sum())
+print('The amount of missing data on Last Update column of CSSE is:', combinedOfCsvCSSE['Last Update'].isnull().sum())
 print("")
-print('The amount of missing data on Latitude column of CSSE is:', combinedOfCsv['Latitude'].isnull().sum())
-print('The amount of missing data on Lat column of CSSE is:', combinedOfCsv['Lat'].isnull().sum())
+print('The amount of missing data on Latitude column of CSSE is:', combinedOfCsvCSSE['Latitude'].isnull().sum())
+print('The amount of missing data on Lat column of CSSE is:', combinedOfCsvCSSE['Lat'].isnull().sum())
 print("")
-print('The amount of missing data on Longitude column of CSSE is:', combinedOfCsv['Longitude'].isnull().sum())
-print('The amount of missing data on Long_ column of CSSE is:', combinedOfCsv['Long_'].isnull().sum())
+print('The amount of missing data on Longitude column of CSSE is:', combinedOfCsvCSSE['Longitude'].isnull().sum())
+print('The amount of missing data on Long_ column of CSSE is:', combinedOfCsvCSSE['Long_'].isnull().sum())
 print("")
-print('The amount of missing data on Incident_Rate column of CSSE is:', combinedOfCsv['Incident_Rate'].isnull().sum())
-print('The amount of missing data on Incidence_Rate column of CSSE is:', combinedOfCsv['Incidence_Rate'].isnull().sum())
+print('The amount of missing data on Incident_Rate column of CSSE is:', combinedOfCsvCSSE['Incident_Rate'].isnull().sum())
+print('The amount of missing data on Incidence_Rate column of CSSE is:', combinedOfCsvCSSE['Incidence_Rate'].isnull().sum())
 print("")
-print('The amount of missing data on Case_Fatality_Ratio column of CSSE is:', combinedOfCsv['Case_Fatality_Ratio'].isnull().sum())
-print('The amount of missing data on Case-Fatality_Ratio column of CSSE is:', combinedOfCsv['Case-Fatality_Ratio'].isnull().sum())
+print('The amount of missing data on Case_Fatality_Ratio column of CSSE is:', combinedOfCsvCSSE['Case_Fatality_Ratio'].isnull().sum())
+print('The amount of missing data on Case-Fatality_Ratio column of CSSE is:', combinedOfCsvCSSE['Case-Fatality_Ratio'].isnull().sum())
 
 
 # %%
 #drop the duplicate columns that have the most nans 
-combinedOfCsv.drop(['Province/State', 'Country/Region','Last Update', 'Latitude','Longitude','Incidence_Rate','Case-Fatality_Ratio'], axis=1, inplace=True)
+combinedOfCsvCSSE.drop(['Province/State', 'Country/Region','Last Update', 'Latitude','Longitude','Incidence_Rate','Case-Fatality_Ratio'], axis=1, inplace=True)
 
 
 # %%
-#show CSSE dataset without the changes
-combinedOfCsv
+#show CSSE dataset with the changes
+print(combinedOfCsvCSSE)
 
 
 # %%
@@ -84,12 +82,12 @@ combinedOfCsv
 # %%
 #checking if any of the data frames if theres any similarities in the states columns of both datasets
 #combinedOfCsv['Province_State'].isin(datasetCCI['state'])
-combinedOfCsv[combinedOfCsv['Province_State'].isin(datasetCCI['state'].values)]
+print(combinedOfCsvCSSE[combinedOfCsvCSSE['Province_State'].isin(datasetCCI['state'].values)])
 
 
 # %%
 #merging both datasets and dropping duplicates to see any differences
-df_diff = pd.concat([combinedOfCsv,datasetCCI]).drop_duplicates(keep=False)
+df_diff = pd.concat([combinedOfCsvCSSE,datasetCCI]).drop_duplicates(keep=False)
 
 
 # %%
@@ -111,7 +109,7 @@ print(df_diff)
 
 # %%
 #now we're going to try to rename the names of some states of the us in acronym version so that the two datasets have a similarity 
-combinedOfCsv['Province_State'].replace({'Alaska': 'AK', 'Alabama': 'AL', 'Arkansas': 'AR', 'American Samoa': 'AS', 
+combinedOfCsvCSSE['Province_State'].replace({'Alaska': 'AK', 'Alabama': 'AL', 'Arkansas': 'AR', 'American Samoa': 'AS', 
                                                      'Arizona': 'AZ', 'Colorado': 'CO', 'Connecticut': 'CT', 'District of Columbia': 'DC', 
                                                      'Delaware': 'DE', 'Florida': 'FL','Georgia': 'GA', 'Guam': 'GU', 'Hawaii': 'HI', 'Iowa': 'IA', 
                                                      'Idaho': 'ID', 'Illinois': 'IL','Indiana': 'IN', 
@@ -133,10 +131,22 @@ combinedOfCsv['Province_State'].replace({'Alaska': 'AK', 'Alabama': 'AL', 'Arkan
 
 
 # %%
-combinedOfCsv[combinedOfCsv['Province_State'].isin(datasetCCI['state'].values)]
-
-
+print(combinedOfCsvCSSE[combinedOfCsvCSSE['Province_State'].isin(datasetCCI['state'].values)])
+# %%
+states_with_more_deaths_CSSE = combinedOfCsvCSSE[['Province_State','Deaths']]
+# %%
+group_CSSE = states_with_more_deaths_CSSE.groupby('Province_State').sum().reset_index().sort_values("Deaths",ascending=False)
+#print(group_CSSE.sort_values("Deaths",ascending=False))
+print(group_CSSE.head(5))
+# %%
+group_CSSE.head(5).plot(kind='bar',x='Province_State',y='Deaths',color='red',title = 'States with more deaths',rot=0)
+# %%
+#data.iloc[0:300].plot(kind='bar',x='Province_State',y='Deaths',color='red')
+#sample_of_combinedOfCsvCSSE = combinedOfCsvCSSE.head(200)
+#sample_of_combinedOfCsvCSSE.plot(kind='bar',x='Province_State',y='Deaths',color='red')
+#plt.show()
 # %%
 
 
+# %%
 
