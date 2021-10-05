@@ -5,7 +5,10 @@
 import pandas as pd
 import glob
 import matplotlib.pyplot as plt
+import seaborn as sns
 
+#set the plot's theme to something more beautiful
+sns.set()
 # %%
 #extracting all files from local directory for csse are merging them
 extension = 'csv'
@@ -75,15 +78,43 @@ print(combinedOfCsvCSSE)
 
 
 # %%
-#df['n'].replace({'a': 'x', 'b': 'y', 'c': 'w', 'd': 'z'})
-#df['col_name'] = df['col_name'].str.replace('G', '1')
+group_CSSE = combinedOfCsvCSSE[['Province_State','Deaths']].groupby('Province_State').sum().reset_index().sort_values("Deaths",ascending=False)
+#group_CSSE.head(5).plot(kind='bar',x='Province_State',y='Deaths',color='red',title = 'States with more deaths',rot=0)
+sns.barplot(x='Province_State', y='Deaths', data = group_CSSE.head(5)).set_title('States with more deaths')
+plt.show()
+print(group_CSSE.head(5))
+#print(group_CSSE.sort_values("Deaths",ascending=False))
+# %%
+group_CSSE = combinedOfCsvCSSE[['Province_State','Confirmed']].groupby('Province_State').sum().reset_index().sort_values("Confirmed",ascending=False)
+#group_CSSE.head(5).plot(kind='bar',x='Province_State',y='Confirmed',color='red',title = 'States with more confirmed',rot=0)
+sns.barplot(x='Province_State', y='Confirmed', data = group_CSSE.head(5)).set_title('States with more confirmed')
+plt.show()
+print(group_CSSE.head(5))
 
+# %%
+group_CSSE = combinedOfCsvCSSE[['Province_State','Recovered']].groupby('Province_State').sum().reset_index().sort_values("Recovered",ascending=False)
+#group_CSSE.head(5).plot(kind='bar',x='Province_State',y='Recovered',color='red',title = 'States with more Recovered',rot=0)
+sns.barplot(x='Province_State', y='Recovered', data = group_CSSE.head(5)).set_title('States with more recovered')
+plt.show()
+print(group_CSSE.head(5))
+
+
+# %%
+group_CSSE = combinedOfCsvCSSE[['Country_Region','Deaths']].groupby('Country_Region').sum().reset_index().sort_values("Deaths",ascending=False)
+#group_CSSE.head(5).plot(kind='bar',x='Country_Region',y='Deaths',color='red',title = 'Regions with more deaths',rot=0)
+sns.barplot(x='Country_Region', y='Deaths', data = group_CSSE.head(5)).set_title('Regions with more deaths')
+plt.show()
+print(group_CSSE.head(5))
+
+# %%
+group_CSSE = combinedOfCsvCSSE[['Country_Region','Deaths']].groupby('Country_Region')
+#sns.scatterplot(x='Confirmed', y='Deaths', data = group_CSSE.head(5), hue="Country_Region", palette="viridis", edgecolors="black", alpha=0.5, sizes=(10, 1000)).set_title('Regions with more deaths')
+#plt.show()
 
 # %%
 #checking if any of the data frames if theres any similarities in the states columns of both datasets
 #combinedOfCsv['Province_State'].isin(datasetCCI['state'])
 print(combinedOfCsvCSSE[combinedOfCsvCSSE['Province_State'].isin(datasetCCI['state'].values)])
-
 
 # %%
 #merging both datasets and dropping duplicates to see any differences
@@ -129,24 +160,9 @@ combinedOfCsvCSSE['Province_State'].replace({'Alaska': 'AK', 'Alabama': 'AL', 'A
 #statesCSSE = combinedOfCsv['Province_State']
 #statesCSSE.tolist()
 
-
 # %%
-print(combinedOfCsvCSSE[combinedOfCsvCSSE['Province_State'].isin(datasetCCI['state'].values)])
-# %%
-states_with_more_deaths_CSSE = combinedOfCsvCSSE[['Province_State','Deaths']]
-# %%
-group_CSSE = states_with_more_deaths_CSSE.groupby('Province_State').sum().reset_index().sort_values("Deaths",ascending=False)
-#print(group_CSSE.sort_values("Deaths",ascending=False))
-print(group_CSSE.head(5))
-# %%
-group_CSSE.head(5).plot(kind='bar',x='Province_State',y='Deaths',color='red',title = 'States with more deaths',rot=0)
-# %%
-#data.iloc[0:300].plot(kind='bar',x='Province_State',y='Deaths',color='red')
-#sample_of_combinedOfCsvCSSE = combinedOfCsvCSSE.head(200)
-#sample_of_combinedOfCsvCSSE.plot(kind='bar',x='Province_State',y='Deaths',color='red')
-#plt.show()
-# %%
-
-
+#Now checking the similarities of the dates of the two datasets 
+similarities_of_CSSE_and_CCI = combinedOfCsvCSSE[combinedOfCsvCSSE['Province_State'].isin(datasetCCI['state'].values)]
+print(similarities_of_CSSE_and_CCI)
 # %%
 
