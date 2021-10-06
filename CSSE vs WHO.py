@@ -136,14 +136,14 @@ plt.show()
 
 # %%
 
-sum_test = Merged_Confirmed_df[["Country/Region","ConfirmedCases","DeathCases","RecoveredCases"]].groupby("Country/Region").sum()
+sum_test = Merged_Confirmed_df[["Country/Region","ConfirmedCases","DeathCases","RecoveredCases"]].groupby("Country/Region").sum().reset_index()
 
 #%%
 #Looking for Mean Value of all Confirmed Cases and Graph
 
 Merged_Confirmed_df['Mean'] = Merged_Confirmed_df[['WHO Confirmed Cases', 'ConfirmedCases']].mean(axis=1)
 
-sns.barplot(x='Country/Region', y='ConfirmedCases', data = Merged_Confirmed_df.iloc[42:50]).set_title('Confirmed Cases')
+sns.barplot(x='Country/Region', y='ConfirmedCases', data = sum_test.iloc[42:50]).set_title('Confirmed Cases')
 plt.show()
 
 
