@@ -152,9 +152,11 @@ ts_vaccine_df.rename(columns={"People_partially_vaccinated": "Stage_One_Doses",
 # important as Doses_admin
 
 # %%
+# Merging global dataframe with us dataframe
 merge_df = pd.merge(ts_vaccine_us_df, ts_vaccine_df, how='outer',
                     on=['Country_Region', 'Province_State', 'Vaccine_Type', 'Doses_admin',
                         'Stage_One_Doses', 'Stage_Two_Doses', 'Date'])
 
+# %%
 
-# Merging global dataframe with us dataframe
+

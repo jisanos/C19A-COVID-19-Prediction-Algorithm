@@ -136,7 +136,7 @@ plt.show()
 
 # %%
 
-Merged_Confirmed_df[["Country/Region","ConfirmedCases"]].groupby("Country/Region").sum()
+sum_test = Merged_Confirmed_df[["Country/Region","ConfirmedCases","DeathCases","RecoveredCases"]].groupby("Country/Region").sum()
 
 #%%
 #Looking for Mean Value of all Confirmed Cases and Graph
