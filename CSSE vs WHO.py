@@ -3,7 +3,7 @@
 # %%
 import pandas as pd
 import glob
-import numpy as np
+import seaborn as sns
 import matplotlib.pyplot as plt
 
 
@@ -139,13 +139,14 @@ plt.show()
 Merged_Confirmed_df[["Country/Region","ConfirmedCases"]].groupby("Country/Region").sum()
 
 #%%
-#Looking for Mean Value of all Confrimed Cases and Graph
+#Looking for Mean Value of all Confirmed Cases and Graph
 
-Confirmed_diff['ConfirmedCases'] = Confirmed_diff['ConfirmedCases'].dropna(how = 'all')
+Merged_Confirmed_df['Mean'] = Merged_Confirmed_df[['WHO Confirmed Cases', 'ConfirmedCases']].mean(axis=1)
 
-col = Confirmed_diff.loc[: , "WHO Confirmed Cases":"ConfirmedCases"]
+sns.barplot(x='Country/Region', y='ConfirmedCases', data = Merged_Confirmed_df.iloc[42:50]).set_title('Confirmed Cases')
+plt.show()
 
-Confirmed_diff['Mean'] = col.mean()
+
 # %%
 
 
