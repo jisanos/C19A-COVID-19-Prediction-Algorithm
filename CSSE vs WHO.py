@@ -134,6 +134,10 @@ plt.rcParams["figure.figsize"] = (8, 5)
 plt.title("CSSE vs WHO Cases Diff")
 plt.show()
 
+# %%
+
+Merged_Confirmed_df[["Country/Region","ConfirmedCases"]].groupby("Country/Region").sum()
+
 #%%
 #Looking for Mean Value of all Confrimed Cases and Graph
 
