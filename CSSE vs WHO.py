@@ -18,6 +18,7 @@ WHO = pd.read_csv('.\\CSSE_C-19\\who_covid_19_situation_reports\\who_covid_19_si
 
 
 # %%
+#Changing Dataframe column names to Dates and Cases from WHO DF
 dfWHO = pd.DataFrame(WHO)
 
 dfWHO_new = pd.melt(dfWHO,col_level = 0, id_vars=['Province/States', 'Country/Region','WHO region', 'WHO region label'])
@@ -25,7 +26,7 @@ dfWHO_new = pd.melt(dfWHO,col_level = 0, id_vars=['Province/States', 'Country/Re
 dfWHO_New = dfWHO_new.rename(columns = {'variable': 'Dates', 'value':'Cases'})
 
 WHO_CASES = dfWHO_New.reindex(columns = ['Dates','Province/States','Country/Region','WHO region','WHO region label','Cases'])
-#print(WHO_CASES)
+
 
 
 # %%
@@ -35,10 +36,11 @@ path = "./CSSE_C-19/csse_covid_19_data/csse_covid_19_time_series/"
 extension_CSSE = 'csv'
 all_filenames_CSSE = [i for i in glob.glob(path + '*.{}'.format(extension_CSSE))]
 
-#print(all_filenames_CSSE)
+
 
 
 # %%
+#Choosing only the global .csv files
 output = []
 for i in all_filenames_CSSE:
     if 'global' in i.lower():
@@ -46,10 +48,7 @@ for i in all_filenames_CSSE:
 
 
 # %%
-#output
-
-
-# %%
+#separating the Confirmed, death and recovered cases files for further filtering
 csv_output0 = pd.read_csv(output[0])
 csv_output1 = pd.read_csv(output[1])
 csv_output2 = pd.read_csv(output[2])
@@ -87,7 +86,7 @@ RecoveredCases = df2_New.reindex(columns = ['Dates','Province/State','Country/Re
 
 # %%
 #Differences between the dataframes from the Confirmed, Death and recovered cases from CSSE
-#axis='columns'
+
 df_merge1 = pd.merge(ConfirmedCases,DeathCases, how = "right", on = ["Dates","Country/Region","Province/State","Lat","Long"])
 
 df_merge2 = pd.merge(df_merge1,RecoveredCases,how = "right", on = ["Dates","Country/Region","Province/State","Lat","Long"] )
@@ -96,6 +95,7 @@ df_merge2 = pd.merge(df_merge1,RecoveredCases,how = "right", on = ["Dates","Coun
 
 
 # %%
+#Renaming Columns for better understanding
 WHO_CASES = WHO_CASES.rename(columns={"Province/States":"Province/State", "Cases":"WHO Confirmed Cases"})
 #WHO_CASES
 
@@ -115,27 +115,9 @@ Confirmed_Equal = Merged_Confirmed_df[Merged_Confirmed_df["WHO Confirmed Cases"]
 Confirmed_diff = Merged_Confirmed_df[(Merged_Confirmed_df["WHO Confirmed Cases"] != Merged_Confirmed_df["ConfirmedCases"]) & (Merged_Confirmed_df["WHO Confirmed Cases"].notna())]
 
 #print(Merged_Confirmed_df)
-# %%
-#Graphing Comparations
-Merged_Confirmed_df.plot(x ='Dates', y=['ConfirmedCases','DeathCases','RecoveredCases'], kind = 'line')
-plt.rcParams["figure.figsize"] = (8, 5)
-plt.title("CSSE vs WHO Cases")
-plt.show()
-
-#Equal Values of Confirmed Cases
-Confirmed_Equal.plot(x ='Dates', y=['ConfirmedCases','WHO Confirmed Cases'], kind = 'line')
-plt.rcParams["figure.figsize"] = (8, 5)
-plt.title("CSSE vs WHO Cases Equal")
-plt.show()
-
-#Difference values of Confirmed Cases
-Confirmed_diff.plot(x ='Dates', y=['ConfirmedCases','WHO Confirmed Cases'], kind = 'line')
-plt.rcParams["figure.figsize"] = (8, 5)
-plt.title("CSSE vs WHO Cases Diff")
-plt.show()
 
 # %%
-
+#Filtered by countries/regions for better visualization on graphs
 sum_test = Merged_Confirmed_df[["Country/Region","ConfirmedCases","DeathCases","RecoveredCases"]].groupby("Country/Region").sum().reset_index()
 
 #%%
@@ -143,6 +125,7 @@ sum_test = Merged_Confirmed_df[["Country/Region","ConfirmedCases","DeathCases","
 
 Merged_Confirmed_df['Mean'] = Merged_Confirmed_df[['WHO Confirmed Cases', 'ConfirmedCases']].mean(axis=1)
 
+#Graphing filtered data by Country/Region
 sns.barplot(x='Country/Region', y='ConfirmedCases', data = sum_test.iloc[42:50]).set_title('Confirmed Cases')
 plt.show()
 
