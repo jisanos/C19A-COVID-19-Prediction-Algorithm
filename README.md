@@ -23,3 +23,22 @@ CSSE: Johns Hopkins Center for Systems Science and Engineering
 CCI: Johns Hopkins Centers for Civic Impact
 
 WHO: World Health Organization
+
+# Paths of datasets being used
+
+csse_covid_19_daily_reports.py
+`.\\CSSE_C-19\\csse_covid_19_data\\csse_covid_19_daily_reports\\`
+
+`.\\CCI_C-19\\data_tables\\testing_data\\time_series_covid19_US.csv`
+
+CSSE vs WHO.py
+
+`.\\CSSE_C-19\\who_covid_19_situation_reports\\who_covid_19_sit_rep_time_series\\who_covid_19_sit_rep_time_series.csv`
+
+`./CSSE_C-19/csse_covid_19_data/csse_covid_19_time_series/`
+
+
+policies_analysis.py
+
+`.\\CCI_C-19_Policies\\data_tables\\policy_data\\table_data\\Current\\`
+
