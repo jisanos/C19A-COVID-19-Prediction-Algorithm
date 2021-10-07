@@ -76,7 +76,20 @@ combinedOfCsvCSSE.drop(['Province/State', 'Country/Region','Last Update', 'Latit
 #show CSSE dataset with the changes
 print(combinedOfCsvCSSE)
 
+# %%
+#checking all the province states of the dataset to see if there's any bad data
+print(combinedOfCsvCSSE[['Province_State','Recovered']].groupby('Province_State').sum().index.values)
+group_CSSE = combinedOfCsvCSSE[['Province_State','Recovered']]
+print(group_CSSE[group_CSSE['Province_State'] == 'Unknown'])
+print(group_CSSE[group_CSSE['Province_State'] == 'Recovered'])
 
+# %%
+#Removing that unkown and recovered rows which are invalid data in our dataset and then checking to see if it's gone with our coding
+combinedOfCsvCSSE.drop(combinedOfCsvCSSE.index[combinedOfCsvCSSE['Province_State'] == 'Unknown'], inplace = True)
+combinedOfCsvCSSE.drop(combinedOfCsvCSSE.index[combinedOfCsvCSSE['Province_State'] == 'Recovered'], inplace = True)
+print(combinedOfCsvCSSE[['Province_State','Recovered']].groupby('Province_State').sum().index.values)
+print(group_CSSE[group_CSSE['Province_State'] == 'Unknown'])
+print(group_CSSE[group_CSSE['Province_State'] == 'Recovered'])
 # %%
 group_CSSE = combinedOfCsvCSSE[['Province_State','Deaths']].groupby('Province_State').sum().reset_index().sort_values("Deaths",ascending=False)
 #group_CSSE.head(5).plot(kind='bar',x='Province_State',y='Deaths',color='red',title = 'States with more deaths',rot=0)
@@ -98,7 +111,6 @@ sns.barplot(x='Province_State', y='Recovered', data = group_CSSE.head(5)).set_ti
 plt.show()
 print(group_CSSE.head(5))
 
-
 # %%
 group_CSSE = combinedOfCsvCSSE[['Country_Region','Deaths']].groupby('Country_Region').sum().reset_index().sort_values("Deaths",ascending=False)
 #group_CSSE.head(5).plot(kind='bar',x='Country_Region',y='Deaths',color='red',title = 'Regions with more deaths',rot=0)
@@ -107,7 +119,7 @@ plt.show()
 print(group_CSSE.head(5))
 
 # %%
-group_CSSE = combinedOfCsvCSSE[['Country_Region','Deaths']].groupby('Country_Region')
+#group_CSSE = combinedOfCsvCSSE[['Country_Region','Case_Fatality_Ratio']].groupby('Country_Region').sum()
 #sns.scatterplot(x='Confirmed', y='Deaths', data = group_CSSE.head(5), hue="Country_Region", palette="viridis", edgecolors="black", alpha=0.5, sizes=(10, 1000)).set_title('Regions with more deaths')
 #plt.show()
 
