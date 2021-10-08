@@ -29,6 +29,7 @@ extension = 'csv'
 # 
 # Confirmed values here are cummulative.
 # 
+# Long format
 path = ".\\CSSE_C-19\\csse_covid_19_data\\csse_covid_19_daily_reports\\"
 allFilesInFolder = [i for i in glob.glob((path + '*.{}').format(extension))]
 
@@ -44,6 +45,8 @@ csse_covid_19_daily_reports = pd.concat(
 # some columns that might differ
 # 
 # is cumulative
+#
+# long format
 path = ".\\CSSE_C-19\\csse_covid_19_data\\csse_covid_19_daily_reports_us\\"
 allFilesInFolder = [i for i in glob.glob((path + '*.{}').format(extension))]
 
@@ -59,11 +62,14 @@ csse_covid_19_daily_reports_us = pd.concat(
 # recovered. Updated daily.
 #
 # Values are CUMULATIVE
+# Wide format
 #
 path = ".\\CSSE_C-19\\csse_covid_19_data\\csse_covid_19_time_series\\"
 # US only
 # 
 # Contains US States separately as well as County
+#
+# Can be used for proper visualization as it contains counties
 time_series_covid19_deaths_US = pd.read_csv(
     path + "time_series_covid19_deaths_US.csv")
 time_series_covid19_confirmed_US = pd.read_csv(
@@ -72,6 +78,9 @@ time_series_covid19_confirmed_US = pd.read_csv(
 # Global
 #
 # Do not contain US states separately. Not all countries contain states either.
+#
+# These ones might NOT be necesary as it is pretty much melted in the 
+# csse_covid_19_daily_reports
 time_series_covid19_confirmed_global = pd.read_csv(
     path+ "time_series_covid19_confirmed_global.csv")
 time_series_covid19_deaths_global = pd.read_csv(
@@ -107,12 +116,15 @@ who_covid_19_sit_rep_time_series = pd.read_csv(path)
 # CCI_C-19\data_tables\testing_data\readme.md
 # CCI_C-19\data_tables\testing_data\data_dictionary.csv
 #
-# This mainly focuses on the number of confirmed and probable cases in the US
-# it has columns cummulative totals of confirmed and
 # probable cases.
 #
 # Values here are cummulative.
 #
+# Only US data
+#
+# Contains more specific data such as positive results and total tests done.
+# Negative results could be estimated from this dataset which would be useful.
+# could be redundant, or maybe not. Needs to be tested.
 path = ".\\CCI_C-19\\data_tables\\testing_data\\time_series_covid19_US.csv"
 time_series_covid19_US = pd.read_csv(path)
 
@@ -147,15 +159,14 @@ policy_data_current = pd.concat(content,ignore_index=True)
 # Demographic data of various states in US
 # 
 # Reported twice a month starting April 2021 (semi monthly)
+# 
+#
 path = ".\\CCI_C-19\\data_tables\\demographic_data\\"\
     "demographics_by_state_standardized.csv"
 demographics_by_state_standardized = pd.read_csv(path)
 
 ################# world_pop_by_country
 # Contains countries with their respective populations, as of 2018 (currently)
-#
-#
-#
 #
 path = ".\\CCI_C-19\\data_tables\\world_pop_by_country.csv"
 world_pop_by_country=pd.read_csv(path)
@@ -167,7 +178,7 @@ world_pop_by_country=pd.read_csv(path)
 # CCI_C-19\data_tables\vaccine_data\global_data\readme.md
 # CCI_C-19\data_tables\vaccine_data\global_data\data_dictionary.csv
 #
-#
+# Cumulative
 
 # vaccine_data_global and time_series_covid19_vaccine_global contain the same
 # columns.
@@ -201,7 +212,7 @@ time_series_covid19_vaccine_doses_admin_global = pd.read_csv(path)
 # CCI_C-19\data_tables\vaccine_data\us_data\data_dictionary.csv
 #
 #
-#
+# Cumulative
 #
 #
 
