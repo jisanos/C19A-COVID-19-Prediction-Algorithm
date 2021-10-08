@@ -16,8 +16,14 @@ extension = 'csv'
 
 # CSSE_C-19\csse_covid_19_data\README.md
 # 
-# This one contains daily case reports GLOBALLY. Also contains
-# US and each of its states. Updated daily.
+# This one contains CUMMULATIVE daily case reports GLOBALLY.
+#
+# Also contains US and each of its states.
+#
+# Updated daily.
+# 
+# Confirmed values here are cummulative.
+# 
 path = ".\\CSSE_C-19\\csse_covid_19_data\\csse_covid_19_daily_reports\\"
 allFilesInFolder = [i for i in glob.glob((path + '*.{}').format(extension))]
 
@@ -30,7 +36,17 @@ csse_covid_19_daily_reports = pd.concat(
 # This one is a summary of confirmed cases from world health organization
 # from the covid 19 situation reports. These are "Lab confirmed" cases.
 # it should work as complement to csse_covid_19_daily_reports.
+#
+# Contains Global data 
+#
 # This was last updated on Aug 18, 2020.
+#
+# The last signigicant amount of data was on March 15, 2020.
+# 
+# Is cummulative
+#
+# Does not contain enough significant data so it could be ignored.
+# 
 path = ".\\CSSE_C-19\\who_covid_19_situation_reports\\"\
     "who_covid_19_sit_rep_time_series\\who_covid_19_sit_rep_time_series.csv"
 who_covid_19_sit_rep_time_series = pd.read_csv(path)
@@ -41,16 +57,23 @@ who_covid_19_sit_rep_time_series = pd.read_csv(path)
 # 
 # Contains daily time series summary tables of confirmed cases, deaths and
 # recovered. Updated daily.
+#
+# Values are CUMULATIVE
+#
 path = ".\\CSSE_C-19\\csse_covid_19_data\\csse_covid_19_time_series\\"
 # US only
-time_series_covid19_confirmed_global = pd.read_csv(
-    path+ "time_series_covid19_confirmed_global.csv")
+# 
+# Contains US States separately as well as County
 time_series_covid19_deaths_US = pd.read_csv(
     path + "time_series_covid19_deaths_US.csv")
-
-# Global
 time_series_covid19_confirmed_US = pd.read_csv(
     path + "time_series_covid19_confirmed_US.csv")
+
+# Global
+#
+# Do not contain US states separately. Not all countries contain states either.
+time_series_covid19_confirmed_global = pd.read_csv(
+    path+ "time_series_covid19_confirmed_global.csv")
 time_series_covid19_deaths_global = pd.read_csv(
     path + "time_series_covid19_deaths_global.csv")
 time_series_covid19_recovered_global = pd.read_csv(
@@ -64,9 +87,12 @@ time_series_covid19_recovered_global = pd.read_csv(
 # CCI_C-19\data_tables\testing_data\readme.md
 # CCI_C-19\data_tables\testing_data\data_dictionary.csv
 #
-# This mainly focuses on the number of confurmed and probable cases in the US
-# it has columns with daily totals and cummulative totals of confirmed and
+# This mainly focuses on the number of confirmed and probable cases in the US
+# it has columns cummulative totals of confirmed and
 # probable cases.
+#
+# Values here are cummulative.
+#
 path = ".\\CCI_C-19\\data_tables\\testing_data\\time_series_covid19_US.csv"
 time_series_covid19_US = pd.read_csv(path)
 

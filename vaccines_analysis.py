@@ -35,7 +35,7 @@ ts_vaccine_us_df = pd.read_csv(
     ".\\CCI_C-19\\data_tables\\vaccine_data\\us_data\\time_series\\vaccine_data_us_timeline.csv")
 
 # %%
-# Data Dictionary According to the repository:
+# Data Dictionary of Global Data:
 # Metric Name 	                Definition
 # Country_Region 	            Country or region name
 # Date 	                        Data collection date
@@ -53,6 +53,21 @@ ts_vaccine_us_df = pd.read_csv(
 # UID 	                        Country code: https://github.com/CSSEGISandData/COVID-19/blob/master/csse_covid_19_data/UID_ISO_FIPS_LookUp_Table.csv
 
 
+# Data Dictionary of US data:
+# Column name,Definition
+# FIPS,U.S. State identification code
+# Province_State,Name of the State
+# Country_Region,Code of the country
+# Date,Data collection date
+# Lat,Latitude
+# Long_,Longitude
+# Vaccine_Type,"Common name of the vaccine provider. Can be either a combination of all vaccine types labeled as 'All', or a specific provider like Moderna or Pfizer"
+# Doses_alloc,Cumulative number of doses allocated
+# Doses_shipped,Cumulative number of doses that have arrived to the vaccination sites.
+# Doses_admin,Cumulative number of doses administered
+# Stage_One_Doses,Cumulative number of first doses administered
+# Stage_Two_Doses,Cumulative number of second doses administered
+# Combined_Key,"Combination of Province_State, Country_Region"
 # %%
 # print(vaccine_df.columns)
 
@@ -64,10 +79,88 @@ ts_vaccine_us_df = pd.read_csv(
 # print(vaccine_df[vaccine_df.notna()])
 
 # %%
+# %%
+# Analyzing and cleaning US dataset only
+# Dropping combined key column as it is unnecesary
+
+ts_vaccine_us_df.drop('Combined_Key',axis=1,inplace=True)
+
+# %%
+# Changing the date type to a datetime object
+ts_vaccine_us_df['Date'] = ts_vaccine_us_df['Date'].astype('datetime64[ns]')
+
+# %%
+
+#Checking unique values of states in US dataset
+
+unique_us_states = set(ts_vaccine_us_df['Province_State'])
+
+# There are some values in the state column which arent actual US states
+# or are just departments related to the US states.
+
+# %%
+
+# Creating a list of "states" in the ts_vaccine_us_df which are departments
+from the US dataframe:
+not_really_states = ["Long Term Care (LTC) Program",
+                      "Veterans Health Administration",
+                      "Bureau of Prisons", "Department of Defense",
+                      "Federal Bureau of Prisons", "Indian Health Services"]
+# # Dropping them
+# for element in not_really_states:
+#     ts_vaccine_us_df = ts_vaccine_us_df[~(
+#         ts_vaccine_us_df['Province_State'] == element)]
+
+
+# %%
+
+# Checking unique value of country regions from US dataset
+
+unique_us_regions = set(ts_vaccine_us_df['Country_Region'])
+
+# We can see that US is the only value here
+
+# %%
+
+# Checking for unique values of Vaccine_Type from US dataset
+
+unique_vax_us = set(ts_vaccine_us_df['Vaccine_Type'])
+
+# We can see that there are Unnassigned and Unknown values as well as Pfizer,
+# Moderna and Jannsen. Theres also an All which i assume contains a sum of them.
+
+# I believe Unknown and Unassigned can be merged as one
+# %%
+
+print(ts_vaccine_us_df['Doses_admin'].max())
+# %%
+
+# Merging all rows that are unnassigned and unknown to a single one
+
+unknown_and_unnassigned = ts_vaccine_us_df[
+    (ts_vaccine_us_df["Vaccine_Type"] == 'Unassigned') | 
+    (ts_vaccine_us_df["Vaccine_Type"] == 'Unknown')]
+
+# Dropping the unknown and unnassigned from the main dataframe
+ts_vaccine_us_df.drop(index = unknown_and_unnassigned.index, inplace = True)
+
+# Doing a common sum of values of Unknown and unnassigned on equal 
+# country, state, and date
+
+# unknown_and_unnassigned.groupby(['Province_State','Date',
+#                                  'Country_Region','FIPS','Lat','Long_',
+#                                  ])
+
+
+
+# del unknown_and_unnassigned # Deleting from memory
+
+
+# %%
 # Changing date column to a date variable
 
 ts_vaccine_df['Date'] = ts_vaccine_df['Date'].astype('datetime64[ns]')
-ts_vaccine_us_df['Date'] = ts_vaccine_us_df['Date'].astype('datetime64[ns]')
+
 
 # %%
 
@@ -109,20 +202,20 @@ for element in to_remove:
 
 # %%
 
-unique_us_states = set(ts_vaccine_us_df['Province_State'])
+
 
 # %%
 # Creating a list of "states" in the ts_vaccine_us_df which arent really states
 # from the US dataframe:
-not_really_states = ["Long Term Care (LTC) Program",
-                     "Veterans Health Administration",
-                     "Bureau of Prisons", "Department of Defense",
-                     "Federal Bureau of Prisons", "Indian Health Services"]
+# not_really_states = ["Long Term Care (LTC) Program",
+#                      "Veterans Health Administration",
+#                      "Bureau of Prisons", "Department of Defense",
+#                      "Federal Bureau of Prisons", "Indian Health Services"]
 
-# Dropping them
-for element in not_really_states:
-    ts_vaccine_us_df = ts_vaccine_us_df[~(
-        ts_vaccine_us_df['Province_State'] == element)]
+# # Dropping them
+# for element in not_really_states:
+#     ts_vaccine_us_df = ts_vaccine_us_df[~(
+#         ts_vaccine_us_df['Province_State'] == element)]
 
 
 # %%
@@ -137,7 +230,7 @@ in_both = [
 # According to this, they both have unique values of state by this point
 # %%
 # Adding Vaccine_Type column equaling to all for the global dataset for the merging
-ts_vaccine_df["Vaccine_Type"] = "All"
+# ts_vaccine_df["Vaccine_Type"] = "All"
 
 # %%
 # The column "People_partially_vaccinated" from the global dataset is the most
@@ -145,18 +238,28 @@ ts_vaccine_df["Vaccine_Type"] = "All"
 # This goes the same for the People_fully_vaccinated and Stage_two_doses
 # so these will be renamed for the merger
 
-ts_vaccine_df.rename(columns={"People_partially_vaccinated": "Stage_One_Doses",
-                              "People_fully_vaccinated": "Stage_Two_Doses"}, inplace=True)
+# ts_vaccine_df.rename(columns={"People_partially_vaccinated": "Stage_One_Doses",
+#                               "People_fully_vaccinated": "Stage_Two_Doses"}, inplace=True)
 
 # These columns seem to contain lots of nans at times so it might not be as
 # important as Doses_admin
 
 # %%
 # Merging global dataframe with us dataframe
-merge_df = pd.merge(ts_vaccine_us_df, ts_vaccine_df, how='outer',
-                    on=['Country_Region', 'Province_State', 'Vaccine_Type', 'Doses_admin',
-                        'Stage_One_Doses', 'Stage_Two_Doses', 'Date'])
+# merge_df = pd.merge(ts_vaccine_us_df, ts_vaccine_df, how='outer',
+#                     on=['Country_Region', 'Province_State', 'Vaccine_Type', 'Doses_admin',
+#                         'Stage_One_Doses', 'Stage_Two_Doses', 'Date'])
 
 # %%
+
+#Df with only "All" vaccine types
+
+
+# total_global_vax = merge_df[["Province_State", "Vaccine_Type", "Country_Region",
+#                              "Doses_admin", "Stage_One_Doses",
+#                              "Stage_Two_Doses"
+#                              ]].groupby(["Province_State","Country_Region","Vaccine_Type"]).sum().reset_index()
+
+
 
 

@@ -1,7 +1,5 @@
 # %%
 import pandas as pd
-# pd.set_option('display.max_rows', None)
-# pd.set_option('display.max_columns', None)
 import glob
 import numpy as np
 import matplotlib.pyplot as plt
@@ -17,7 +15,7 @@ from nltk.stem.snowball import SnowballStemmer
 from nltk.stem.wordnet import WordNetLemmatizer
 import seaborn as sns
 from wordcloud import WordCloud
-#import snowballstemmer
+# import snowballstemmer
 
 # Importing, merging, and creating a column containing the state of policies.
 
