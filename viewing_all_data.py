@@ -23,22 +23,25 @@ extension = 'csv'
 # 
 # This one contains CUMMULATIVE daily case reports GLOBALLY.
 #
-# Also contains US and each of its states.
+# Also contains US, with states and counties
 #
 # Updated daily.
 # 
 # Confirmed values here are cummulative.
 # 
 # Long format
-path = ".\\CSSE_C-19\\csse_covid_19_data\\csse_covid_19_daily_reports\\"
-allFilesInFolder = [i for i in glob.glob((path + '*.{}').format(extension))]
-
-csse_covid_19_daily_reports = pd.concat(
-    [pd.read_csv(file).assign(
-        date = file.replace(path,"").replace(
-            ".csv","")) for file in allFilesInFolder],ignore_index = True)
 
 
+def csse_covid_19_daily_reports():
+    path = ".\\CSSE_C-19\\csse_covid_19_data\\csse_covid_19_daily_reports\\"
+    allFilesInFolder = [i for i in glob.glob((path + '*.{}').format(extension))]
+    
+    return pd.concat(
+        [pd.read_csv(file).assign(
+            date = file.replace(path,"").replace(
+                ".csv","")) for file in allFilesInFolder],ignore_index = True)
+
+csse_covid_19_daily_reports = csse_covid_19_daily_reports()
 
 ################## csse_covid_19_daily_reports_us
 # Same as previous, but this one contains only US states and
@@ -47,13 +50,16 @@ csse_covid_19_daily_reports = pd.concat(
 # is cumulative
 #
 # long format
-path = ".\\CSSE_C-19\\csse_covid_19_data\\csse_covid_19_daily_reports_us\\"
-allFilesInFolder = [i for i in glob.glob((path + '*.{}').format(extension))]
+def csse_covid_19_daily_reports_us():
+    path = ".\\CSSE_C-19\\csse_covid_19_data\\csse_covid_19_daily_reports_us\\"
+    allFilesInFolder = [i for i in glob.glob((path + '*.{}').format(extension))]
+    
+    return pd.concat(
+        [pd.read_csv(file).assign(
+            date = file.replace(path,"").replace(
+                ".csv","")) for file in allFilesInFolder],ignore_index = True)
 
-csse_covid_19_daily_reports_us = pd.concat(
-    [pd.read_csv(file).assign(
-        date = file.replace(path,"").replace(
-            ".csv","")) for file in allFilesInFolder],ignore_index = True)
+csse_covid_19_daily_reports_us = csse_covid_19_daily_reports_us()
 
 ################### time_series_covid19
 # CSSE_C-19\csse_covid_19_data\csse_covid_19_time_series\README.md
@@ -135,22 +141,25 @@ time_series_covid19_US = pd.read_csv(path)
 #
 # Contains policies stated by their date and their respective state. US only.
 # Updated daily (If new policies are stated)
-path = ".\\CCI_C-19_Policies\\data_tables\\policy_data\\table_data\\Current\\"
-policies_files = glob.glob(path + "*.csv")
+def policy_data_current():
+    path = ".\\CCI_C-19_Policies\\data_tables\\policy_data\\table_data\\Current\\"
+    policies_files = glob.glob(path + "*.csv")
+    
+    content = []  # store contents from files
+    
+    for filepath in policies_files:
+    
+        df = pd.read_csv(filepath, index_col=None)
+        # Stripping the string to store the name of the file to a State column
+        # State column should be the second column
+        df.insert(1, "State", filepath.replace(
+            path, "").replace("_policy.csv", ""))
+        content.append(df)
+        
+    return pd.concat(content,ignore_index=True)
 
-content = []  # store contents from files
 
-for filepath in policies_files:
-
-    df = pd.read_csv(filepath, index_col=None)
-    # Stripping the string to store the name of the file to a State column
-    # State column should be the second column
-    df.insert(1, "State", filepath.replace(
-        path, "").replace("_policy.csv", ""))
-    content.append(df)
-
-
-policy_data_current = pd.concat(content,ignore_index=True)
+policy_data_current = policy_data_current()
 
 #################### demographics_by_state_standardized
 # CCI_C-19\data_tables\demographic_data\README.md
@@ -240,7 +249,6 @@ time_series_covid19_vaccine_doses_admin_US = pd.read_csv(path)
 
 # %% Cleaning Variable Explorer
 del path
-del df
 del extension
 del filepath
 del allFilesInFolder
