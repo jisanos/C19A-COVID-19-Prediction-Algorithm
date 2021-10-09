@@ -1,3 +1,11 @@
+# -*- coding: utf-8 -*-
+"""
+
+Script will work as a more thorough analysis and processing of the policies
+data
+
+@author: jis
+"""
 # %%
 import pandas as pd
 import glob
@@ -20,7 +28,8 @@ from wordcloud import WordCloud
 # Importing, merging, and creating a column containing the state of policies.
 
 # %%
-policies_path = ".\\CCI_C-19_Policies\\data_tables\\policy_data\\table_data\\Current\\"
+policies_path = ".\\CCI_C-19_Policies\\data_tables\\policy_data\\"\
+    "table_data\\Current\\"
 policies_files = glob.glob(policies_path + "*.csv")
 
 content = []  # store contents from files
@@ -38,7 +47,8 @@ for filepath in policies_files:
 policies_df = pd.concat(content)
 
 # %%
-# Getting all unique values from the columns after "policy" columns in the dataframe
+# Getting all unique values from the columns after "policy" columns in the
+# dataframe
 for col in policies_df.columns[3:]:
     print(col, ": ", set(policies_df[col]))
 
@@ -54,7 +64,8 @@ policies_df.replace(to_replace=r'^y$', value="Y", regex=True, inplace=True)
 # %%
 # Finding which entry has a whitespace
 print(
-    policies_df[policies_df['Restrict/Close'].str.contains("\s", regex=True, na=False)])
+    policies_df[policies_df['Restrict/Close'].str.contains("\s", regex=True,
+                                                           na=False)])
 
 
 # %%
@@ -85,7 +96,8 @@ policies_df.drop_duplicates(["date", "State", "policy"], inplace=True)
 policies_df[policies_df.duplicated(["date", "State"], keep=False)]
 
 # %% [markdown]
-# There seem to be multiple entries per date,state. Maybe merging them could be a good idea.
+# There seem to be multiple entries per date,state. Maybe merging them could
+# be a good idea.
 
 # %%
 print(list(policies_df.columns[2:]))
@@ -157,7 +169,8 @@ uncommon_words = pd.Series(
 
 
 # %%
-# Convert all policies lowercase for case sensitivity, as stopwords are lowercase
+# Convert all policies lowercase for case sensitivity, as stopwords are
+# lowercase
 policies_df['policy'] = policies_df['policy'].str.lower()
 
 
@@ -187,7 +200,8 @@ tokenizer = nltk.WordPunctTokenizer()
 
 
 def rem_dup(x):
-    # replace(",","").replace(".","").replace(";","")#removing commas,periods,semicolons
+    # replace(",","").replace(".","").replace(";","")#removing commas,periods,
+    # semicolons
     x = x.strip(",.;")
 
     # words = x.split(' ') #splitting words by space
@@ -319,7 +333,9 @@ plt.imshow(wordcloud)
 # %% [markdown]
 # #### Policies Dictionary
 #
-# No column dictionary was provided in the repository for these. Will make my own.
+# No column dictionary was provided in the repository for these.
+#
+# Making my own
 #
 # **The following are the primary cols**
 #
