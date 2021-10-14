@@ -442,3 +442,6 @@ cases_df.loc[cases_df['Country_Region'] == 'Bahamas, The','Country_Region'] = 'B
 intersection = unique_province_states.intersection(unique_country_regions)
 
 # There are a couple of strings in both that need to be dealt with. 
+
+# %% Exporting cleaned dataframe
+cases_df.to_csv(".\\cases_cleaned.csv")
