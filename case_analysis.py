@@ -287,29 +287,30 @@ unique_country_regions = set(cases_df['Country_Region'])
 
 unique_counties = set(cases_df['Admin2'])
 
-# %% List of countries that might need to be merged
-merge_countries = [('Bahamas', 'Bahamas, The'),
+# %% List of countries that might need to be renamed
+merge_countries = [('Bahamas, The', 'Bahamas'),
                    ('Czech Republic', 'Czechia'),
-                   ('Gambia', 'Gambia, The'),
-                   ('Hong Kong', 'Hong Kong SAR'),
-                   ('Iran', 'Iran (Islamic Republic of)'),
-                   ('Macau', 'Macao SAR'),
-                   ('Russia', 'Russian Federation'),
-                   ('South Korea', 'Korea, South'),
-                   ('South Korea','Republic of Korea'),
-                   ('Taiwan', 'Taiwan*'),
+                   ('Gambia, The', 'Gambia'),
+                   ('Hong Kong SAR','Hong Kong'),
+                   ('Iran (Islamic Republic of)', 'Iran'),
+                   ('Macao SAR', 'Macau'),
+                   ('Russian Federation', 'Russia'),
+                   ('Korea, South','South Korea'),
+                   ('Republic of Korea','South Korea'),
+                   ('Taiwan*','Taiwan'),
                    ('Mainland China', 'China'),  # Maybe?
                    ('United Kingdom','UK')]
 
+
 # %% Inspecting the aforementioned countries
-for i,j in merge_countries:
-    print(i)
-    print()
-    print(cases_df[cases_df['Country_Region'] == i][['Admin2','Province_State','Country_Region']])
-    print()
-    print(j)
-    print()
-    print(cases_df[cases_df['Country_Region'] == j][['Admin2','Province_State','Country_Region']])
+# for i,j in merge_countries:
+#     print(i)
+#     print()
+#     print(cases_df[cases_df['Country_Region'] == i][['Admin2','Province_State','Country_Region']])
+#     print()
+#     print(j)
+#     print()
+#     print(cases_df[cases_df['Country_Region'] == j][['Admin2','Province_State','Country_Region']])
 
 # Bahamas, The only has 3 rows, while Bahamas has more.
 
@@ -337,6 +338,24 @@ for i,j in merge_countries:
 # Mainland China has 1517 rows while China has 19123
 
 # UK has 40 rows while United Kingdom has 8490
+# %% Renaming the above touples
+for old,new in merge_countries:
+    cases_df.loc[cases_df['Country_Region'] == old,'Country_Region'] = new
+    
+# %% Checking duplicates
+
+# dups = cases_df.duplicated(['Admin2','Province_State','Country_Region','date'],
+#                            keep=False)
+# dups_df = cases_df[dups]
+
+# %% Dropping the duplicates while keeping the highest values
+
+cases_df = cases_df.sort_values(
+    ['Confirmed','Deaths','Recovered']).drop_duplicates(
+        ['Admin2','Province_State','Country_Region','date'],keep='last')
+
+# test = cases_df[(cases_df['Province_State'] == 'District of Columbia') & (cases_df['date'] == '2020-03-22 00:00:00')]
+
 # %%
 
 # UK_data = cases_df[cases_df['Country_Region'] == 'UK']
@@ -347,22 +366,22 @@ for i,j in merge_countries:
 # Since UK rows are country level data, adding United Kingdom to its
 # "State" column so that it is interpreted as so.
 
-cases_df.loc[cases_df['Country_Region'] == 'UK','Province_State'] = 'United Kingdom'
+# cases_df.loc[cases_df['Country_Region'] == 'UK','Province_State'] = 'United Kingdom'
 
 # Renaming UK to United Kingdom
 
-cases_df['Country_Region'] = cases_df['Country_Region'].replace('UK','United Kingdom')
+# cases_df['Country_Region'] = cases_df['Country_Region'].replace('UK','United Kingdom')
 
 # Replacing UK with United Kindom in the States column 
 
-cases_df['Province_State'] = cases_df['Province_State'].replace('UK','United Kingdom')
+# cases_df['Province_State'] = cases_df['Province_State'].replace('UK','United Kingdom')
 
 # Now replacing the NAN values in United Kingdom's Povince_State with
 # United Kingdom as it is the same type of value.
 
-cases_df.loc[(cases_df['Province_State'].isna()) & 
-             (cases_df['Country_Region'] == 'United Kingdom'),
-             'Province_State'] = 'United Kingdom'
+# cases_df.loc[(cases_df['Province_State'].isna()) & 
+#              (cases_df['Country_Region'] == 'United Kingdom'),
+#              'Province_State'] = 'UK'
 
 # Country level sum stopped after June 2020 so if i want to proceed with a sum
 # ill have to do it myself
@@ -402,7 +421,7 @@ cases_df.loc[(cases_df['Province_State'].isna()) &
 
 # Renaming Mainland China to just China
 
-cases_df.loc[cases_df['Country_Region'] == 'Mainland China','Country_Region'] = 'China'
+# cases_df.loc[cases_df['Country_Region'] == 'Mainland China','Country_Region'] = 'China'
 
 # %% Removing duplicate rows from china
 
@@ -416,32 +435,60 @@ cases_df.loc[cases_df['Country_Region'] == 'Mainland China','Country_Region'] = 
 # china_dups = china_data[dups]
 
 # %%
-cases_df[cases_df['Country_Region'] == 'China'] = cases_df[cases_df['Country_Region'] == 'China'].drop_duplicates(
-    ['Province_State','Country_Region','date'])
+# cases_df[cases_df['Country_Region'] == 'China'] = cases_df[cases_df['Country_Region'] == 'China'].drop_duplicates(
+#     ['Province_State','Country_Region','date'])
 
 # %%
 
-bahamas_data = cases_df[cases_df['Country_Region'] == 'Bahamas']
-the_bahamas_data = cases_df[cases_df['Country_Region'] == 'Bahamas, The']
+# bahamas_data = cases_df[cases_df['Country_Region'] == 'Bahamas']
+# the_bahamas_data = cases_df[cases_df['Country_Region'] == 'Bahamas, The']
 
 # %%
 # Renaming Bahamas, The to simply Bahamas
 
-cases_df.loc[cases_df['Country_Region'] == 'Bahamas, The','Country_Region'] = 'Bahamas'
+# cases_df.loc[cases_df['Country_Region'] == 'Bahamas, The','Country_Region'] = 'Bahamas'
 
 # %%
 # bahamas_data = cases_df[cases_df['Country_Region'] == 'Bahamas']
 # the_bahamas_data = cases_df[cases_df['Country_Region'] == 'Bahamas, The']
 
+
 # %%
+# dups = cases_df[cases_df['Country_Region'] == 'Bahamas'].duplicated(['Province_State','Country_Region','date'])
 
+# bahamas_dups = bahamas_data[dups]
+# No dups
+# %%
+# 'Czechia' to 'Czech Republic' to
+# Czechia = cases_df.loc[cases_df['Country_Region'] == 'Czechia',:]
 
+# Czech_Republic = cases_df.loc[cases_df['Country_Region'] == 'Czech Republic',:]
+
+# %%
+# Renaming Czechia to Czech Republic
+# cases_df.loc[cases_df['Country_Region'] == 'Czechia','Country_Region'] = 'Czech Republic'
+
+# %%
+# Checking for dups
+# dups = cases_df[cases_df['Country_Region'] == 'Czech Republic'].duplicated(['Province_State','Country_Region','date'])
+# Czech_Republic = cases_df.loc[cases_df['Country_Region'] == 'Czech Republic',:]
+# Czech_Republic_dups = Czech_Republic[dups]
+# No dups
 
 # %% Checking for strings that are in both countries and province
+unique_province_states = set(cases_df['Province_State'])
+unique_country_regions = set(cases_df['Country_Region'])
 
 intersection = unique_province_states.intersection(unique_country_regions)
 
-# There are a couple of strings in both that need to be dealt with. 
+# There are a couple of strings in both that need to be dealt with.
+# %%
+for e in intersection:
+    print(e)
+    print()
+    print("Country Len: ",len(cases_df[cases_df['Country_Region'] == e]))
+    print("State Len: ",len(cases_df[cases_df['Province_State'] == e]))
+    print()
 
 # %% Exporting cleaned dataframe
 cases_df.to_csv(".\\cases_cleaned.csv")
