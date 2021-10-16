@@ -273,7 +273,7 @@ for col in cols_to_fix:
 
 # %% List of not real country regions within the dataset
 
-non_country_regions = ['Summer Olympics 2020']
+non_country_regions = ['Summer Olympics 2020', 'Cruise Ship']
 
 # %% List of unique province_state
 
@@ -297,6 +297,7 @@ merge_countries = [('Bahamas, The', 'Bahamas'),
                    ('Russian Federation', 'Russia'),
                    ('Korea, South','South Korea'),
                    ('Republic of Korea','South Korea'),
+                   ('Taipei and environs','Taiwan'), # WHO name Taiwan Taipei and environs
                    ('Taiwan*','Taiwan'),
                    ('Mainland China', 'China'),  # Maybe?
                    ('United Kingdom','UK')]
@@ -489,6 +490,81 @@ for e in intersection:
     print("Country Len: ",len(cases_df[cases_df['Country_Region'] == e]))
     print("State Len: ",len(cases_df[cases_df['Province_State'] == e]))
     print()
+
+# %%
+denmar_state = cases_df[cases_df['Province_State'] == 'Denmark']
+# Denmark as state also has denmark as country already
+denmark_country = cases_df[cases_df['Country_Region'] == 'Denmark']
+# This means that where Denmark is also a state, its the sum of all denmark
+# state values, similar to with UK. This seems to be a pattern throughout the
+# dataset
+
+   
+
+# %% Filtering only countries where there is an intersection (between state
+# value and country value) but also where they are not equal within the same
+# row (which indicates its not just a sum of every state in the country)
+
+
+# List of touples with "regions" to be turned to state with their respective
+# regions
+
+regions_to_state = []
+
+for e in intersection:
+    
+    rows_as_state = cases_df[(cases_df['Country_Region'] != e) &
+                                       (cases_df['Province_State'] == e)]
+    
+    rows_as_region = cases_df[cases_df['Country_Region'] == e]
+    
+    len_as_state = len(rows_as_state)
+    
+    len_as_region = len(rows_as_region)
+    
+    country = set(rows_as_state['Country_Region'])
+    
+    
+    if (len_as_state > 0) and (len_as_region > 0):
+        print(e)
+        print()
+        print("Len as state: ",len_as_state)
+        print()
+        print("Len as region: ", len_as_region)
+        print()
+        print("Supposed country: ", country)
+        print()
+        
+        #If the country set contains more than one then this wont work
+        if len(country) == 1:
+            
+            # If it appears more as a region than a state then turn to full
+            # region
+            if len_as_region > len_as_state:
+            
+                
+                
+            # If it appears more as state than region, then turn to full state
+            # with its corresponding region
+            else if len_as_region < len_as_state
+                regions_to_state.append((e,country))
+        
+print(regions_to_state)
+#%%
+
+reunion = cases_df[cases_df['Country_Region'] == 'Reunion']
+
+# %%
+
+
+
+# %%
+
+
+
+
+# %%
+# Fill lat and long nan values
 
 # %% Exporting cleaned dataframe
 cases_df.to_csv(".\\cases_cleaned.csv")
