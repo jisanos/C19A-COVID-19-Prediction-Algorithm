@@ -4,5 +4,5 @@ CCI_C-19_Policies
 .ipynb_checkpoints
 *.ipynb
 __pycache__
-*csv
+*.csv
 *.html
