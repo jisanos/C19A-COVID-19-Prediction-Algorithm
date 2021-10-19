@@ -273,7 +273,8 @@ for col in cols_to_fix:
 
 # %% List of not real country regions within the dataset
 
-non_country_regions = ['Summer Olympics 2020', 'Cruise Ship']
+non_country_regions = ['Summer Olympics 2020', 'Cruise Ship','Diamond Princess',
+                       ]
 
 # %% List of unique province_state
 
@@ -492,9 +493,9 @@ for e in intersection:
     print()
 
 # %%
-denmar_state = cases_df[cases_df['Province_State'] == 'Denmark']
+# denmar_state = cases_df[cases_df['Province_State'] == 'Denmark']
 # Denmark as state also has denmark as country already
-denmark_country = cases_df[cases_df['Country_Region'] == 'Denmark']
+# denmark_country = cases_df[cases_df['Country_Region'] == 'Denmark']
 # This means that where Denmark is also a state, its the sum of all denmark
 # state values, similar to with UK. This seems to be a pattern throughout the
 # dataset
@@ -510,61 +511,129 @@ denmark_country = cases_df[cases_df['Country_Region'] == 'Denmark']
 # regions
 
 regions_to_state = []
+exceptions = ['Georgia','Diamond Princess','Cruise Ship','Luxembourg']
+# There is a US state named georgia and a country as well
+# Diamond Princess is a british cruise ship
+# Luxembourg is a state in Belgium, but there is also a Luxembourg country
+regions_unsure = []
+
 
 for e in intersection:
     
-    rows_as_state = cases_df[(cases_df['Country_Region'] != e) &
-                                       (cases_df['Province_State'] == e)]
-    
-    rows_as_region = cases_df[cases_df['Country_Region'] == e]
-    
-    len_as_state = len(rows_as_state)
-    
-    len_as_region = len(rows_as_region)
-    
-    country = set(rows_as_state['Country_Region'])
-    
-    
-    if (len_as_state > 0) and (len_as_region > 0):
-        print(e)
-        print()
-        print("Len as state: ",len_as_state)
-        print()
-        print("Len as region: ", len_as_region)
-        print()
-        print("Supposed country: ", country)
-        print()
+    if e not in exceptions:
+        rows_as_state = cases_df[(cases_df['Country_Region'] != e) &
+                                           (cases_df['Province_State'] == e)]
         
-        #If the country set contains more than one then this wont work
-        if len(country) == 1:
+        rows_as_region = cases_df[cases_df['Country_Region'] == e]
+        
+        len_as_state = len(rows_as_state)
+        
+        len_as_region = len(rows_as_region)
+        
+        country = set(rows_as_state['Country_Region'])
+        
+        
+        if (len_as_state > 0) and (len_as_region > 0):
+            print(e)
+            print()
+            print("Len as state: ",len_as_state)
+            print()
+            print("Len as region: ", len_as_region)
+            print()
+            print("Supposed country: ", country)
+            print()
             
-            # If it appears more as a region than a state then turn to full
-            # region
-            if len_as_region > len_as_state:
-            
+            #If the country set contains more than one then this wont work
+            if len(country) == 1:
                 
+                # If it appears more as a region than a state then turn to full
+                # region
+                if len_as_region > len_as_state:
                 
-            # If it appears more as state than region, then turn to full state
-            # with its corresponding region
-            else if len_as_region < len_as_state
-                regions_to_state.append((e,country))
+                    regions_unsure.append((e,country))
+                    
+                # If it appears more as state than region, then turn to full state
+                # with its corresponding region
+                elif len_as_region < len_as_state:
+                    regions_to_state.append((e,country))
         
 print(regions_to_state)
-#%%
 
-reunion = cases_df[cases_df['Country_Region'] == 'Reunion']
+# %% Applying conversion of country to states fo the previously
+# collected states.
+for i,j in regions_to_state:
+    
+    country = list(j)[0] # Accessing first element of the set which is the country
+    
+    cases_df.loc[cases_df['Country_Region'] == i, 'Province_State'] = i
+    
+    cases_df.loc[cases_df['Country_Region'] == i, 'Country_Region'] = country
 
-# %%
+#%% removing dups again
+
+cases_df = cases_df.sort_values(
+    ['Confirmed','Deaths','Recovered']).drop_duplicates(
+        ['Admin2','Province_State','Country_Region','date'],keep='last')
+
+#%% Sorting dataframe by date
+
+cases_df = cases_df.sort_values('date').reset_index()
+
+
+#%% Forward fill nan cases,death,recoveries
+# we would need to iterate ber Admin2, then state, and then country to do this
+# propperly
+
+# we gotta take into consideration values that are unknonwn or unnassigned
+
+test =cases_df[cases_df['Admin2'].notna()].sort_values(
+    ['Admin2','Province_State','Country_Region','date'])
+
+test_nan_cases = test[test['Confirmed'].isna()]
+
+# There dont seem to be any County level missing values
+# %% Attempting the same only on a state level
+test =cases_df[cases_df['Admin2'].isna()].sort_values(
+    ['Province_State','Country_Region','date'])
+
+# There are some rows with missing confirmed cases
+
+# %% 
+
+# Unique set of state,country touple
+state_country = cases_df[cases_df['Admin2'].isna() & cases_df[
+    'Province_State'].notna()][['Province_State','Country_Region']].values
+
+state_country_set = set()
+
+[state_country_set.add((element[0],element[1])) for element in state_country]
+
+# for state,country in state_country
 
 
 
-# %%
+# %% Removing rows with NaN cases,deaths,recoveries
 
 
+
+# %% Create column with estimated daily counts
+
+
+
+# %% Create value (row) per country with Sum of all country cases,deaths,recoveries
+
+# %% Turn some of the US states from "County, State" to pure state
 
 
 # %%
 # Fill lat and long nan values
+rows_with_nan_lat_long = cases_df[(cases_df['Lat'].isna()) |
+                                  (cases_df['Long_'].isna())]
+
+
+
+# %% Take care of unnassigned values
+
 
 # %% Exporting cleaned dataframe
-cases_df.to_csv(".\\cases_cleaned.csv")
+#cases_df.to_csv(".\\cases_cleaned.csv")
