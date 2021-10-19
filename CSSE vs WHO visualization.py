@@ -10,7 +10,7 @@ import pandas as pd
 import glob
 import seaborn as sns
 import matplotlib.pyplot as plt
-import matplotlib.patches as mpatches
+
 
 
 #%%
@@ -27,50 +27,53 @@ Last_day = df.loc[(df['date'] == '2021-09-21')]
 
 print(Last_day)
 
+#%%
+#Top 10 results for death cases in countries
+
+Top_10 = Last_day.nlargest(10,'Deaths')
+
+print(Top_10)
+
+#Other countries
+
+Other_Countries = Last_day.nsmallest(3978,'Deaths')
+
+Other_Countries.head()
 #%% 
 #plotting bubble plot based on data
 
 #reason the y axis has exponential value on top is because the number is too big so 7 is actually 7M
 
-#the function commented below is to modify it manually but most data gets cut-off if decreased 
-sns.scatterplot(data=Last_day, x="Deaths", y="Confirmed", size=200, legend=False, sizes=(20, 2000))
+sns.scatterplot(data=Top_10, x="Deaths", y="Confirmed", size=200, legend=False, sizes=(20, 2000))
 
-#plt.ylim(0,7000000)
+x,y= Top_10['Deaths'],Top_10['Confirmed']
 
+for i, txt in enumerate(Top_10.Country_Region):
+    plt.annotate(txt,(Top_10.Deaths.iat[i],Top_10.Confirmed.iat[i]))
 
+#Trying to add Other countries label as one
+for i, txt in enumerate(Other_Countries.Country_Region):
+    plt.annotate(txt,(Other_Countries.Deaths.iat[i],Other_Countries.Confirmed.iat[i]))
 #%%
 
-#Trying to plot using another bubble plot but that the bubbles displays the countries
 
 #varaibles for plot
 
 
-plt.scatter(x = Last_day['Deaths'],
-            y = Last_day['Confirmed'],
-            s = Last_day['Recovered']/1000,
+plt.scatter(x = Top_10['Deaths'],
+            y = Top_10['Confirmed'],
+            s = Top_10['Recovered']/1000,
             alpha = 0.5)
 
+#Trying to add Other regions to same bubble chart
+plt.scatter(x = Other_Countries['Deaths'],
+           y = Other_Countries['Confirmed'],
+           s= Other_Countries['Recovered']/1000,
+           alpha = 0.5)
+
 #Title and labels
-plt.title('Country/Regions Bubble Chart')
+plt.title('Top 10 Country/Regions(Deaths) Bubble Chart')
 plt.xlabel('Deaths')
 plt.ylabel('Confirmed')
 
-#Bubble labels
 
-x,y= Last_day['Deaths'],Last_day['Confirmed']
-
-for i, txt in enumerate(Last_day['Country_Region']):
-    plt.annotate(txt,x[i],y[i])
-    
-#legend
-
-Country_list = list(Last_day['Country_Region'])
-
-legend =[]
-
-for i in range(0,len(Last_day.index)):
-    legend.append(mpatches.Patch(color = 255,
-                                 alpha = 0.5,
-                                 label = Country_list[i]))
-plt.legend(handles=1, loc=(1.05,0))
-    
