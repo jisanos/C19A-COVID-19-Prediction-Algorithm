@@ -39,6 +39,10 @@ print(Top_10)
 Other_Countries = Last_day.nsmallest(3978,'Deaths')
 
 Other_Countries.head()
+
+Other_Countries['Other_Countries'] = Other_Countries['Deaths'].mean()
+
+#Others['Country Region'] = 'Other Countries'
 #%% 
 #plotting bubble plot based on data
 
@@ -46,30 +50,17 @@ Other_Countries.head()
 
 sns.scatterplot(data=Top_10, x="Deaths", y="Confirmed", size=200, legend=False, sizes=(20, 2000))
 
+sns.scatterplot(data=Other_Countries, x="Other_Countries", y="Other_Countries", size=200, legend=False, sizes=(20, 2000))
+
 x,y= Top_10['Deaths'],Top_10['Confirmed']
 
 for i, txt in enumerate(Top_10.Country_Region):
     plt.annotate(txt,(Top_10.Deaths.iat[i],Top_10.Confirmed.iat[i]))
 
-#Trying to add Other countries label as one
+#Other Countries labels
 for i, txt in enumerate(Other_Countries.Country_Region):
-    plt.annotate(txt,(Other_Countries.Deaths.iat[i],Other_Countries.Confirmed.iat[i]))
+    plt.annotate('Other Countries',(Other_Countries.Other_Countries.iat[i],Other_Countries.Other_Countries.iat[i]))
 #%%
-
-
-#varaibles for plot
-
-
-plt.scatter(x = Top_10['Deaths'],
-            y = Top_10['Confirmed'],
-            s = Top_10['Recovered']/1000,
-            alpha = 0.5)
-
-#Trying to add Other regions to same bubble chart
-plt.scatter(x = Other_Countries['Deaths'],
-           y = Other_Countries['Confirmed'],
-           s= Other_Countries['Recovered']/1000,
-           alpha = 0.5)
 
 #Title and labels
 plt.title('Top 10 Country/Regions(Deaths) Bubble Chart')
