@@ -13,6 +13,8 @@ import glob
 import matplotlib.pyplot as plt
 import data_imports
 import numpy as np
+from threading import Thread
+
 
 
 # %%
@@ -602,23 +604,34 @@ cases_df = cases_df.sort_values('date').reset_index()
 
 # There are some rows with missing confirmed cases
 
-# %%  forward fill continuation
+# %%  forward filling
+
+
+state_country = cases_df[cases_df['Admin2'].isna() & cases_df[
+    'Province_State'].notna()][['Province_State','Country_Region']].values
 
 # Unique set of state,country touple
-# state_country = cases_df[cases_df['Admin2'].isna() & cases_df[
-#     'Province_State'].notna()][['Province_State','Country_Region']].values
+state_country_set = set()
 
-# state_country_set = set()
-
-# [state_country_set.add((element[0],element[1])) for element in state_country]
+[state_country_set.add((element[0],element[1])) for element in state_country]
 
 
 # This takes too long to execute.
-# for state,country in state_country_set:
-#     cases_df.loc[(cases_df[
-#         'Province_State'] == state) &
-#         (cases_df[
-#             'Country_Region'] == country),'Confirmed'].fillna(method='ffill')
+# i should attempt to multithread it
+def filler(state,country):
+    cases_df.loc[(cases_df[
+        'Province_State'] == state) &
+        (cases_df[
+            'Country_Region'] == country),'Confirmed'].fillna(method='ffill')
+
+for state,country in state_country_set:
+    print(state)
+    
+    Thread(target = filler, args = (state,country)).start()
+    
+
+# I should also attempt other methods of imputations that could be more useful
+
 
 
 # %% Removing rows with NaN cases,deaths,recoveries
@@ -626,6 +639,9 @@ cases_df = cases_df.sort_values('date').reset_index()
 
 
 # %% Create column with estimated daily counts
+
+
+
 
 # %%
 # Manually renaming Washington D.C. state to District of Columbia
@@ -712,4 +728,4 @@ rows_with_nan_lat_long = cases_df[(cases_df['Lat'].isna()) |
 
 
 # %% Exporting cleaned dataframe
-#cases_df.to_csv(".\\cases_cleaned.csv")
+cases_df.to_csv(".\\cases_cleaned.csv")
