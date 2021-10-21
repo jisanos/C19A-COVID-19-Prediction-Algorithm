@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 import data_imports
 import numpy as np
 from threading import Thread
-
+from concurrent.futures import ThreadPoolExecutor
 
 
 # %%
@@ -584,6 +584,7 @@ cases_df = cases_df.sort_values(
 #%% Sorting dataframe by date
 
 cases_df = cases_df.sort_values('date').reset_index()
+cases_df.drop('index',axis = 1,inplace=True)
 
 
 #%% Forward fill nan cases,death,recoveries
@@ -603,35 +604,6 @@ cases_df = cases_df.sort_values('date').reset_index()
 #     ['Province_State','Country_Region','date'])
 
 # There are some rows with missing confirmed cases
-
-# %%  forward filling
-
-
-state_country = cases_df[cases_df['Admin2'].isna() & cases_df[
-    'Province_State'].notna()][['Province_State','Country_Region']].values
-
-# Unique set of state,country touple
-state_country_set = set()
-
-[state_country_set.add((element[0],element[1])) for element in state_country]
-
-
-# This takes too long to execute.
-# i should attempt to multithread it
-def filler(state,country):
-    cases_df.loc[(cases_df[
-        'Province_State'] == state) &
-        (cases_df[
-            'Country_Region'] == country),'Confirmed'].fillna(method='ffill')
-
-for state,country in state_country_set:
-    print(state)
-    
-    Thread(target = filler, args = (state,country)).start()
-    
-
-# I should also attempt other methods of imputations that could be more useful
-
 
 
 # %% Removing rows with NaN cases,deaths,recoveries
@@ -714,6 +686,80 @@ for orig_val,county,state in county_state:
 
 # %% Create value (row) per country with Sum of all country cases,deaths,recoveries
 
+# %%  forward filling
+
+
+# state_country = cases_df[cases_df['Admin2'].isna() & cases_df[
+#     'Province_State'].notna()][['Province_State','Country_Region']].values
+
+# # Unique set of state,country touple
+# state_country_set = set()
+
+# [state_country_set.add((element[0],element[1])) for element in state_country]
+
+
+# # This takes too long to execute.
+# # i should attempt to multithread it
+# def filler(tpl):
+#     state,country = tpl
+#     print(state)
+    
+#     booleans = (cases_df['Province_State'] == state) & (cases_df['Country_Region'] == country)
+    
+#     cases_df.loc[booleans,'Confirmed'] = cases_df.loc[booleans,'Confirmed'].ffill().bfill()
+
+# # for state,country in state_country_set:
+# #     print(state)
+    
+# #     Thread(target = filler, args = (state,country)).start()
+
+# with ThreadPoolExecutor() as executor:
+#     executor.map(filler, list(state_country_set))
+    
+
+# # I should also attempt other methods of imputations that could be more useful
+
+# %% Setting NAN states that are qual to country in name
+
+
+
+
+# %%
+## Attempting groupby method (Which is a lot more efficient)
+
+def filler(x):
+    
+    # creating a series of the following
+    # county = x['Admin2']
+    # state = x['Province_State']
+    # country = x['Country_Region']
+
+    # # If state is NAN it means this is country level data
+    # if state.isna().any():
+    #     # print('state is na')
+    #     pass    
+    
+    # # If county is NAN it means this is state level data
+    # elif county.isna().any():
+        
+    #     # print('county is na')
+    #     pass
+    
+    x['Confirmed'] = x['Confirmed'].ffill().bfill()
+    x['Deaths'] = x['Deaths'].ffill().bfill()
+    x['Recovered'] = x['Recovered'].ffill().bfill()
+    x['Active'] = x['Active'].ffill().bfill()
+    x['Incident_Rate'] = x['Incident_Rate'].ffill().bfill()
+    x['Case_Fatality_Ratio'] = x['Case_Fatality_Ratio'].ffill().bfill()
+    
+    x['Lat'] = x['Lat'].ffill().bfill()
+    x['Long_'] = x['Long_'].ffill().bfill()
+    
+    
+    return x
+
+        
+cases_df = cases_df.groupby(['Admin2','Province_State','Country_Region'],dropna=False).apply(filler)
 
 
 
