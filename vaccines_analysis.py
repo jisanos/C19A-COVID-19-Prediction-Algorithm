@@ -13,6 +13,7 @@ import numpy as np
 
 # %%
 
+# Contains time series of vaccinations
 time_series_covid19_vaccine_global = pd.read_csv(
     ".\\CCI_C-19\\data_tables\\vaccine_data\\global_data\\"\
         "time_series_covid19_vaccine_global.csv")

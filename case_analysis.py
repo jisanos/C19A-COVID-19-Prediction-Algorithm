@@ -194,8 +194,7 @@ cases_df = cases_df.drop(
 
 # %% Filling Case_Fatality_Ratio nans with Case-Fatality_Ratio
 
-cases_df['Case_Fatality_Ratio'
-                            ] = cases_df[
+cases_df['Case_Fatality_Ratio'] = cases_df[
                                 'Case_Fatality_Ratio'].fillna(
                                     cases_df[
                                         'Case-Fatality_Ratio'])
@@ -213,8 +212,7 @@ cases_df['Case_Fatality_Ratio'
 # cases_df[cases_df['Incidence_Rate'].notna()]
 
 # %% Filling Incident_Rate nans with Incidence_Rate nans
-cases_df['Incident_Rate'
-                            ] = cases_df[
+cases_df['Incident_Rate'] = cases_df[
                                 'Incident_Rate'].fillna(
                                     cases_df[
                                         'Incidence_Rate'])
@@ -226,7 +224,8 @@ cases_df['Incident_Rate'
 
 # %% Dropping unnecesary columns
 
-unnecessary_cols = ['Last_Update', 'Combined_Key',
+unnecessary_cols = ['Last_Update',
+                    'Combined_Key',
                     'Last Update', 'Incidence_Rate', 'Case-Fatality_Ratio',
                     'Latitude', 'Longitude', 'Province/State', 'Country/Region',
                     'index'
@@ -275,6 +274,11 @@ for col in cols_to_fix:
 
 non_country_regions = ['Summer Olympics 2020', 'Cruise Ship','Diamond Princess',
                        ]
+# Removing them for consistency and cleanliness
+
+for element in non_country_regions:
+    cases_df = cases_df.drop(
+        cases_df[cases_df['Province_State'].str.contains(element)].index)
 
 # %% List of unique province_state
 
@@ -586,30 +590,35 @@ cases_df = cases_df.sort_values('date').reset_index()
 
 # we gotta take into consideration values that are unknonwn or unnassigned
 
-test =cases_df[cases_df['Admin2'].notna()].sort_values(
-    ['Admin2','Province_State','Country_Region','date'])
+# test =cases_df[cases_df['Admin2'].notna()].sort_values(
+#     ['Admin2','Province_State','Country_Region','date'])
 
-test_nan_cases = test[test['Confirmed'].isna()]
+# test_nan_cases = test[test['Confirmed'].isna()]
 
 # There dont seem to be any County level missing values
 # %% Attempting the same only on a state level
-test =cases_df[cases_df['Admin2'].isna()].sort_values(
-    ['Province_State','Country_Region','date'])
+# test =cases_df[cases_df['Admin2'].isna()].sort_values(
+#     ['Province_State','Country_Region','date'])
 
 # There are some rows with missing confirmed cases
 
-# %% 
+# %%  forward fill continuation
 
 # Unique set of state,country touple
-state_country = cases_df[cases_df['Admin2'].isna() & cases_df[
-    'Province_State'].notna()][['Province_State','Country_Region']].values
+# state_country = cases_df[cases_df['Admin2'].isna() & cases_df[
+#     'Province_State'].notna()][['Province_State','Country_Region']].values
 
-state_country_set = set()
+# state_country_set = set()
 
-[state_country_set.add((element[0],element[1])) for element in state_country]
+# [state_country_set.add((element[0],element[1])) for element in state_country]
 
-# for state,country in state_country
 
+# This takes too long to execute.
+# for state,country in state_country_set:
+#     cases_df.loc[(cases_df[
+#         'Province_State'] == state) &
+#         (cases_df[
+#             'Country_Region'] == country),'Confirmed'].fillna(method='ffill')
 
 
 # %% Removing rows with NaN cases,deaths,recoveries
@@ -618,11 +627,78 @@ state_country_set = set()
 
 # %% Create column with estimated daily counts
 
+# %%
+# Manually renaming Washington D.C. state to District of Columbia
+cases_df.loc[cases_df.Province_State.str.contains('D.C.'),'Admin2'] = 'District of Columbia'
 
+cases_df.loc[cases_df.Province_State.str.contains('D.C.'),'Province_State'] = 'District of Columbia'
+
+# %% Turn some of the US states from "County, State" to just state with county
+# as admin2
+#This is because there are some US states that have county merged in it thus
+#we either rename them and separate them by setting the county on the admin2
+#column
+
+# Splitting the values on comma
+us_states = cases_df[cases_df['Country_Region'] == 'US']['Province_State']
+
+# Getting only the ones that are in county,state format
+county_state = set()
+
+for element in us_states:
+    splt = element.split(',')
+    
+    if len(splt) > 1:
+        # 3 row touple containing the originalvalue,county,state
+        county_state.add((element,splt[0].strip(),splt[1].strip()))
+    
+
+# There are also some that are in the form of State,US that need to be dealt with
+
+state_country = set()
+
+[state_country.add((orig_val,county,state)) for orig_val,county,state in
+ county_state if (state == 'U.S.') | (state == 'US')]
+
+# Removing it from the county_state set
+county_state = county_state - state_country
+
+# There are some entries with (From Diamond Princess) which should be dealth with
+
+county_diamond_princess = set()
+
+[county_diamond_princess.add((orig_val,county,state)) for orig_val,county,state in
+ county_state if (state.lower().__contains__('diamond'))]
+
+county_state = county_state - county_diamond_princess
+
+# There are some entries with "Washington, D.C."
+
+for orig_val,county,state in county_state:
+    # Using the global dictionary for us states abbreviations we will
+    # rename the rows appropriately
+    cases_df.loc[cases_df.Province_State == orig_val,'Admin2'] = county
+    cases_df.loc[cases_df.Province_State == orig_val,
+                 'Province_State'] = data_imports.abbreviations_to_us_states[state]
+    
+    
+    
+    
+
+#%% Checking d.c. rows
+
+# wa_dc = cases_df[cases_df['Province_State'].str.contains('D.C.')]
+# dc = cases_df[cases_df['Province_State'].str.contains('District of Columbia')]
+# dc_county = cases_df[cases_df['Admin2'].str.contains('Washington') &
+#                      cases_df['Province_State'].str.contains('Virginia')]
+
+# The D.C. rows seem to be a pre of the District of Columbia rows
+
+# Washington County and Washington D.C. are different counties
 
 # %% Create value (row) per country with Sum of all country cases,deaths,recoveries
 
-# %% Turn some of the US states from "County, State" to pure state
+
 
 
 # %%
