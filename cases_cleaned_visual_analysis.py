@@ -36,7 +36,7 @@ cases_cleaned = cases_cleaned.head(800000)
 cases_cleaned['date'] = pd.to_datetime(cases_cleaned['date'], format='%Y/%m/%d')
 cases_cleaned.sort_values(by='date', inplace=True)
 #cases_cleaned['date'] = cases_cleaned['date'].sort_values(ascending=True)
-cases_cleaned['date'] = cases_cleaned['date'].dt.strftime('%d/%m/%Y')
+cases_cleaned['date'] = cases_cleaned['date'].dt.strftime('%Y/%m/%d')
 
 # using time series to filter data and sort it
 #cases_cleaned['date']= pd.to_datetime(cases_cleaned['date'])
@@ -72,9 +72,26 @@ for _, d in cases_cleaned_locations_NA_removed.groupby('date'):
    heat_info.append([[row['Lat'], row['Long_'], row['Confirmed2.0']] for _, row in d.iterrows()])
 
 
+
+
 #for _, d in cases_cleaned_locations_NA_removed.groupby('Confirmed'):
  #  heat_info.append([[row['Lat'], row['Long_']] for _, row in d.iterrows()])
-   
+  
+#%% Hector
+# Ref https://stackoverflow.com/questions/64325958/heatmapwithtime-plugin-in-folium
+
+from collections import defaultdict, OrderedDict
+
+heat_data = defaultdict(list)
+
+for _, d in cases_cleaned_locations_NA_removed.groupby('date'):
+    
+    for _, row in d.iterrows():
+        
+        heat_data[row['date']].append([row['Lat'], row['Long_'],row['Confirmed2.0']])
+
+heat_data = OrderedDict(sorted(heat_data.items(),key=lambda t:t[0]))
+
 
 #%%
 #heat_info = cases_cleaned_locations_NA_removed[['Lat','Long_','Confirmed']].values.tolist()
@@ -85,6 +102,9 @@ print(heat_info)
 covid_country_map = folium.Map(location=[cases_cleaned_locations_NA_removed["Lat"].mean(), 
                                         cases_cleaned_locations_NA_removed["Long_"].mean()], 
                                       zoom_start=4, control_scale=True,attr="Stadia.AlidadeSmoothDark")
+
+
+
 
 #heat_info = cases_cleaned_locations_NA_removed[['Lat','Long_','Confirmed']].values.tolist()
    
@@ -100,7 +120,17 @@ heat_info = [[[info["Lat"],info["Long_"]] for index,
 hm = plugins.HeatMapWithTime(heat_info, auto_play=True,max_opacity=0.8)
 hm.add_to(covid_country_map)
 
-covid_country_map.save("mymap.html") 
+covid_country_map.save("mymap.html")
+
+# %% Hector
+covid_country_map = folium.Map(location=[cases_cleaned_locations_NA_removed["Lat"].mean(), 
+                                        cases_cleaned_locations_NA_removed["Long_"].mean()], 
+                                      zoom_start=4, control_scale=True,attr="Stadia.AlidadeSmoothDark")
+
+hm = plugins.HeatMapWithTime(data = list(heat_data.values()),index=list(heat_data.keys()), auto_play=True,max_opacity=0.8)
+hm.add_to(covid_country_map)
+
+covid_country_map.save("mymap.html")
 # %%
 '''
  #Centering the map with the latitude and longitude mean values 
