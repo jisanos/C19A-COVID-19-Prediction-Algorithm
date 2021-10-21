@@ -46,10 +46,10 @@ cases_cleaned_Copy['date']= pd.to_datetime(cases_cleaned_Copy['date'])
 cases_cleaned_Copy = cases_cleaned_Copy[cases_cleaned_Copy["date"] == cases_cleaned_Copy['date'].max()]
 '''
 # %%
-cases_cleaned['Confirmed'] = cases_cleaned['Confirmed'] / cases_cleaned['Confirmed'].sum()
+cases_cleaned['Confirmed2.0'] = cases_cleaned['Confirmed'] / cases_cleaned['Confirmed'].max()
 # %%
 #Take away the unnessary columns and only use longitude, latitude and the countries for the map specifically
-cases_cleaned_locations = cases_cleaned[["Confirmed","date","Lat", "Long_"]]
+cases_cleaned_locations = cases_cleaned[["Confirmed2.0","date","Lat", "Long_"]]
 # %%
 #removing nan values and replacing them with 0 for the time being
 cases_cleaned_locations_NA_removed = cases_cleaned_locations.fillna(8)
@@ -58,8 +58,6 @@ cases_cleaned_locations_NA_removed = cases_cleaned_locations.fillna(8)
 print(cases_cleaned_locations_NA_removed.info())
 
 # %%
-cases_cleaned_locations_NA_removed['date'] = pd.to_datetime(cases_cleaned_locations_NA_removed['date'])
-cases_cleaned_locations_NA_removed.sort_values(by='Confirmed', inplace=True)
 heat_info = []
 
 '''
@@ -71,7 +69,7 @@ for date in cases_cleaned_locations_NA_removed['date'].sort_values().unique():
 '''
      
 for _, d in cases_cleaned_locations_NA_removed.groupby('date'):
-   heat_info.append([[row['Lat'], row['Long_'], row['Confirmed']] for _, row in d.iterrows()])
+   heat_info.append([[row['Lat'], row['Long_'], row['Confirmed2.0']] for _, row in d.iterrows()])
 
 
 #for _, d in cases_cleaned_locations_NA_removed.groupby('Confirmed'):
@@ -131,9 +129,7 @@ folium.TileLayer('cartodbdark_matter').add_to(covid_country_map)
 folium.LayerControl().add_to(covid_country_map) 
 
 
-# %%
-covid_country_map.save("mymap.html")   
-
+'''
 # %%
 cases_cleaned_Copy = pd.read_csv(file)
 #cases_cleaned_Copy = cases_cleaned_Copy.head(100000)
@@ -172,22 +168,21 @@ print(cases_cleaned_Copy.info())
 # %%
 cases_cleaned_Copy['date'] = pd.to_datetime(cases_cleaned_Copy['date'], format='%Y/%m/%d')
 cases_cleaned_Copy.sort_values(by='date', inplace=True)
-group_CSSE = cases_cleaned_Copy[['date','Confirmed']].groupby('date').sum().reset_index()
+group_CSSE = cases_cleaned_Copy[['date','Confirmed']].groupby(['date']).max().reset_index()
 
 group_CSSE['month'] = group_CSSE['date'].dt.month
 group_CSSE['year'] = group_CSSE['date'].dt.year
 group_CSSE['month'] = group_CSSE['month'].apply(lambda x: calendar.month_abbr[x])
 # %%
-group_CSSE = group_CSSE[['month','Confirmed','year']].groupby(['month','year']).sum().reset_index()
+group_CSSE = group_CSSE[['month','Confirmed','year']].groupby(['month','year']).max().reset_index()
 
 # %%
 group_CSSE = group_CSSE.pivot(index='month', columns='year', values='Confirmed')
 
 #%%
-sns.heatmap(group_CSSE)
+sns.heatmap(group_CSSE,linewidths=.5)
 
 # %%
-sns.heatmap(group_CSSE, fmt="f", annot=True, cmap='YlGnBu')
-# %%
-cases_cleaned_Copy.pivot(index='date', columns='Province_State', values='Confirmed')
+sns.heatmap(group_CSSE, fmt="f", annot=True, cmap='YlGnBu',linewidths=.5)
 
+'''
