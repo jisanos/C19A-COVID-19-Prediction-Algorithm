@@ -31,7 +31,7 @@ sns.set()
 ## open cases_cleaned.csv and store it in an dataframe and then filter the date to the newest date
 file = ".\\cases_cleaned.csv"
 cases_cleaned = pd.read_csv(file)
-cases_cleaned = cases_cleaned.head(800000)
+cases_cleaned = cases_cleaned.head(100)
 #%%
 cases_cleaned['date'] = pd.to_datetime(cases_cleaned['date'], format='%Y/%m/%d')
 cases_cleaned.sort_values(by='date', inplace=True)
@@ -159,7 +159,7 @@ folium.TileLayer('cartodbdark_matter').add_to(covid_country_map)
 folium.LayerControl().add_to(covid_country_map) 
 
 
-'''
+
 # %%
 cases_cleaned_Copy = pd.read_csv(file)
 #cases_cleaned_Copy = cases_cleaned_Copy.head(100000)
@@ -209,10 +209,14 @@ group_CSSE = group_CSSE[['month','Confirmed','year']].groupby(['month','year']).
 # %%
 group_CSSE = group_CSSE.pivot(index='month', columns='year', values='Confirmed')
 
+# %%
+monthsOrdered = ['Jan', 'Feb', 'Mar', 'Apr','May','Jun', 'Jul', 'Aug','Sep', 'Oct', 'Nov', 'Dec']
+group_CSSE.index = pd.CategoricalIndex(group_CSSE.index, categories=monthsOrdered, ordered=True)
+group_CSSE = group_CSSE.sort_index()
 #%%
 sns.heatmap(group_CSSE,linewidths=.5)
 
 # %%
 sns.heatmap(group_CSSE, fmt="f", annot=True, cmap='YlGnBu',linewidths=.5)
 
-'''
+
