@@ -164,7 +164,7 @@ folium.LayerControl().add_to(covid_country_map)
 cases_cleaned_Copy = pd.read_csv(file)
 #cases_cleaned_Copy = cases_cleaned_Copy.head(100000)
 # %%
-
+sns.jointplot(data=cases_cleaned_Copy, x="Confirmed", y="Deaths", kind="reg")
 # %%
 group_CSSE = cases_cleaned_Copy[['Province_State','Deaths']].groupby('Province_State').sum().reset_index().sort_values("Deaths",ascending=False)
 #group_CSSE.head(5).plot(kind='bar',x='Province_State',y='Deaths',color='red',title = 'States with more deaths',rot=0)
