@@ -13,17 +13,18 @@ import glob
 import matplotlib.pyplot as plt
 import data_imports
 import numpy as np
-from threading import Thread
-from concurrent.futures import ThreadPoolExecutor
+from apply_parallel import applyParallel
 
 
-# %%
+
+# %% Importing data
 
 cases_df = data_imports.csse_covid_19_daily_reports()
 
-# Droppin all NaN rows
+# Droppin all full NaN rows
 cases_df.dropna(how='all', inplace=True)
 cases_df.reset_index(inplace=True)
+cases_df.drop('index',axis = 1,inplace=True)
 
 # Setting datatypes
 cases_df['date'] = cases_df['date'].astype(
@@ -31,17 +32,29 @@ cases_df['date'] = cases_df['date'].astype(
 
 cases_df = cases_df.convert_dtypes()
 
+# %% defining function that will remove dups and reset index for later use
+def remove_dups_and_reset_index(df):
+    
+
+    df = df.sort_values(
+        ['Confirmed','Deaths','Recovered']).drop_duplicates(
+            ['Admin2','Province_State','Country_Region','date'],keep='last')
+
+
+    df = df.sort_values('date').reset_index(drop = True)
+    
+    return df
 # %%
 
 # Checking for nan values in Combined_Key
 
-rows_without_combined_key = cases_df[
-    cases_df['Combined_Key'].isnull()]
+# rows_without_combined_key = cases_df[
+#     cases_df['Combined_Key'].isnull()]
 
 # %% Df of rows without regions
 
-rows_with_no_regions = cases_df[
-    cases_df['Country_Region'].isnull()]
+# rows_with_no_regions = cases_df[
+#     cases_df['Country_Region'].isnull()]
 
 # %%
 
@@ -144,21 +157,21 @@ cases_df['Long_'] = cases_df[
 
 # %% List of counties with no Lat or Long
 
-counties_without_coordinates = set(cases_df[
-    (cases_df['Lat'].isnull()) |
-    (cases_df['Long_'].isnull())]['Admin2'])
+# counties_without_coordinates = set(cases_df[
+#     (cases_df['Lat'].isnull()) |
+#     (cases_df['Long_'].isnull())]['Admin2'])
 # %% df with rows that have no county
 
-rows_without_county = cases_df[
-    cases_df['Admin2'].isnull()]
+# rows_without_county = cases_df[
+#     cases_df['Admin2'].isnull()]
 
 # %% List of unique province_state
 
-unique_province_states = set(cases_df['Province_State'])
+# unique_province_states = set(cases_df['Province_State'])
 
 # %% List of unique Country_Region
 
-unique_country_regions = set(cases_df['Country_Region'])
+# unique_country_regions = set(cases_df['Country_Region'])
 
 
 # Noticed hat Puerto Rico is set as country as well as State within us country
@@ -229,8 +242,7 @@ cases_df['Incident_Rate'] = cases_df[
 unnecessary_cols = ['Last_Update',
                     'Combined_Key',
                     'Last Update', 'Incidence_Rate', 'Case-Fatality_Ratio',
-                    'Latitude', 'Longitude', 'Province/State', 'Country/Region',
-                    'index'
+                    'Latitude', 'Longitude', 'Province/State', 'Country/Region'
                     ]
 
 cases_df.drop(unnecessary_cols, axis='columns',
@@ -270,8 +282,13 @@ cols_to_fix = ['Confirmed', 'Deaths', 'Recovered', 'Active', 'Incident_Rate',
                'Case_Fatality_Ratio']
 
 for col in cols_to_fix:
+
     cases_df[col] = cases_df[col].abs()
 
+
+# %% checking if all values are positive
+#print((cases_df['Confirmed'].values < 0).any())
+    
 # %% List of not real country regions within the dataset
 
 non_country_regions = ['Summer Olympics 2020', 'Cruise Ship','Diamond Princess',
@@ -358,9 +375,11 @@ for old,new in merge_countries:
 
 # %% Dropping the duplicates while keeping the highest values
 
-cases_df = cases_df.sort_values(
-    ['Confirmed','Deaths','Recovered']).drop_duplicates(
-        ['Admin2','Province_State','Country_Region','date'],keep='last')
+# cases_df = cases_df.sort_values(
+#     ['Confirmed','Deaths','Recovered']).drop_duplicates(
+#         ['Admin2','Province_State','Country_Region','date'],keep='last')
+
+cases_df = remove_dups_and_reset_index(cases_df)
 
 # test = cases_df[(cases_df['Province_State'] == 'District of Columbia') & (cases_df['date'] == '2020-03-22 00:00:00')]
 
@@ -491,12 +510,12 @@ intersection = unique_province_states.intersection(unique_country_regions)
 
 # There are a couple of strings in both that need to be dealt with.
 # %%
-for e in intersection:
-    print(e)
-    print()
-    print("Country Len: ",len(cases_df[cases_df['Country_Region'] == e]))
-    print("State Len: ",len(cases_df[cases_df['Province_State'] == e]))
-    print()
+# for e in intersection:
+#     print(e)
+#     print()
+#     print("Country Len: ",len(cases_df[cases_df['Country_Region'] == e]))
+#     print("State Len: ",len(cases_df[cases_df['Province_State'] == e]))
+#     print()
 
 # %%
 # denmar_state = cases_df[cases_df['Province_State'] == 'Denmark']
@@ -540,14 +559,14 @@ for e in intersection:
         
         
         if (len_as_state > 0) and (len_as_region > 0):
-            print(e)
-            print()
-            print("Len as state: ",len_as_state)
-            print()
-            print("Len as region: ", len_as_region)
-            print()
-            print("Supposed country: ", country)
-            print()
+            # print(e)
+            # print()
+            # print("Len as state: ",len_as_state)
+            # print()
+            # print("Len as region: ", len_as_region)
+            # print()
+            # print("Supposed country: ", country)
+            # print()
             
             #If the country set contains more than one then this wont work
             if len(country) == 1:
@@ -575,16 +594,9 @@ for i,j in regions_to_state:
     
     cases_df.loc[cases_df['Country_Region'] == i, 'Country_Region'] = country
 
-#%% removing dups again
+#%% removing dups again and Sorting dataframe by date
 
-cases_df = cases_df.sort_values(
-    ['Confirmed','Deaths','Recovered']).drop_duplicates(
-        ['Admin2','Province_State','Country_Region','date'],keep='last')
-
-#%% Sorting dataframe by date
-
-cases_df = cases_df.sort_values('date').reset_index()
-cases_df.drop('index',axis = 1,inplace=True)
+cases_df = remove_dups_and_reset_index(cases_df)
 
 
 #%% Forward fill nan cases,death,recoveries
@@ -667,12 +679,15 @@ for orig_val,county,state in county_state:
     # rename the rows appropriately
     cases_df.loc[cases_df.Province_State == orig_val,'Admin2'] = county
     cases_df.loc[cases_df.Province_State == orig_val,
-                 'Province_State'] = data_imports.abbreviations_to_us_states[state]
-    
-    
-    
+                  'Province_State'] = data_imports.abbreviations_to_us_states[state]
     
 
+    
+# THis block took about 1 min to execute which means it needs to be imrpved
+    
+breakpoint()
+#%% removing dups again and reseting index
+cases_df = remove_dups_and_reset_index(cases_df)
 #%% Checking d.c. rows
 
 # wa_dc = cases_df[cases_df['Province_State'].str.contains('D.C.')]
@@ -684,7 +699,7 @@ for orig_val,county,state in county_state:
 
 # Washington County and Washington D.C. are different counties
 
-# %% Create value (row) per country with Sum of all country cases,deaths,recoveries
+
 
 # %%  forward filling
 
@@ -721,11 +736,60 @@ for orig_val,county,state in county_state:
 
 # %% Setting NAN states that are qual to country in name
 
+# def remove_eq_state(x):
+    
+#     # Checking if state is nan
+#     if pd.isna(x['Province_State']):
+#         pass
+#     # If they are equal then we will set the state value as NA
+#     elif x['Province_State'] == x['Country_Region']:
+#         x['Province_State'] = np.nan
+        
+#     return x
+    
+# cases_df.apply(remove_eq_state,axis = 1)
+# This method takes too long as it iterates through every row
+
+
+# %% Replaces counties that are equal to state with NaN
+
+tmp1 = set(cases_df['Admin2'])
+tmp2 = set(cases_df['Province_State'])
+
+
+county_in_state = tmp1.intersection(tmp2)
+
+for val in county_in_state:
+    cases_df.loc[(cases_df['Admin2'] == val) & 
+                 (cases_df['Province_State'] == val ), 'Admin2'] = np.nan
+
+#%% removing dups again and reseting index
+
+cases_df = remove_dups_and_reset_index(cases_df)
+
+# %% Same as before but with states to country
 
 
 
+tmp1 = set(cases_df['Province_State'])
+tmp2 = set(cases_df['Country_Region'])
+
+state_in_country = tmp1.intersection(tmp2)
+
+# Now filtering only these values where they are equal on both. THis is
+# important because some of them such aas luxembourg are a state in a diff.
+# country as well as there is a country named luxembourg itself so we don't
+# want to mess with values like that.
+
+for val in state_in_country:
+    cases_df.loc[(cases_df['Province_State'] == val) &
+                 (cases_df['Country_Region'] == val),'Province_State'] = np.nan
+
+#%% removing dups again and reseting index
+
+cases_df = remove_dups_and_reset_index(cases_df)
 # %%
-## Attempting groupby method (Which is a lot more efficient)
+## Attempting groupby method (Which is a lot more efficient) to fill NaNs
 
 def filler(x):
     
@@ -749,29 +813,405 @@ def filler(x):
     x['Deaths'] = x['Deaths'].ffill().bfill()
     x['Recovered'] = x['Recovered'].ffill().bfill()
     x['Active'] = x['Active'].ffill().bfill()
+    x['Lat'] = x['Lat'].ffill().bfill()
+    x['Long_'] = x['Long_'].ffill().bfill()
+    
+    # These should be filled differently, not by bfill or ffill
     x['Incident_Rate'] = x['Incident_Rate'].ffill().bfill()
     x['Case_Fatality_Ratio'] = x['Case_Fatality_Ratio'].ffill().bfill()
     
-    x['Lat'] = x['Lat'].ffill().bfill()
-    x['Long_'] = x['Long_'].ffill().bfill()
+
     
     
     return x
 
         
-cases_df = cases_df.groupby(['Admin2','Province_State','Country_Region'],dropna=False).apply(filler)
+cases_df = cases_df.groupby(['Admin2','Province_State','Country_Region'
+                             ],dropna=False).apply(filler)
 
+
+
+
+
+#%% removing dups again and Sorting dataframe by date again
+
+cases_df = remove_dups_and_reset_index(cases_df)
+# %% Create a column "New_Cases" with only the total cases on that date
+
+def date_cases(x):
+    # This method assumes that you are providing the grouped dataframes by date
+    # x = x.reset_index(drop = True)
+    
+    # This will create new column by substracting confirmed with its shifted
+    # self. Any value that is NA will be the first value which does not have
+    # any prior value to substract with, thus filling these with 0 make no 
+    # difference.
+
+    x['New_Confirmed'] = x['Confirmed'].sub(x['Confirmed'].shift().fillna(0)).abs()
+    
+    # Since there is the chance of there being negative values due to inconsistent,
+    # cumulative data, we will just take their absolute value and
+    # then make a new cumulative sum
+    x['Confirmed'] = x['New_Confirmed'].cumsum()
+    
+    
+    # Doing the same with deaths and recoveries, but only if they are not
+    # all NaNs.
+    if x['Deaths'].notna().all():
+        x['New_Deaths'] = x['Deaths'].sub(x['Deaths'].shift().fillna(0)).abs()
+        x['Deaths'] = x['New_Deaths'].cumsum()
+        
+    if x['Recovered'].notna().all():
+        x['New_Recovered'] = x['Recovered'].sub(x['Recovered'].shift().fillna(0)).abs()
+        x['Recovered'] = x['New_Recovered'].cumsum()
+        
+        
+    return x
+    
+    #Some vlaues will be negative, and in those cases
+    
+    
+    # lenght = len(x['New_Confirmed'])
+    
+    # for i in range(1,lenght):
+    #     x['New_Confirmed'][i] = x['New_Confirmed'][i] - x['New_Confirmed'][i-1]
+    
+    
+    
+    # cases = np.array(x['Confirmed'])
+    
+    # new_cases = np.array([])
+        
+    # length = len(cases)
+    
+    # for i in range(0, length):
+        
+    #     if i == 0: #First iteration contains no previous values so we skip it
+            
+    #         new_cases = np.append(new_cases, cases[i])
+            
+    #     else: #After the first iteration we start doing the substraction
+    #         new_val = cases[i] - cases[i - 1]
+            
+    #         #If the subtraction is a negative value, add the amount to all folloing
+    #         #values in cases as well to maintain consistency.
+    #         # This is a nuance that can be dealt in other ways to get
+    #         # different results
+    #         if new_val < 0:
+    #             for j in range(i, length):
+    #                 cases[j] = cases[j] + abs(new_val)
+                    
+                    
+    #             new_cases = np.append(new_cases, 0)
+            
+    #         # If the new value is bigger than the cumulative case value,
+    #         # we need to deal with it.
+    #         # This is left here for troubleshooting purposes, but all
+    #         # values were already converted to positive earlier in the
+    #         # cleaning process.
+    #         elif new_val > cases[i]:
+                
+    #             print(cases[i], new_val)
+                
+    #             new_cases = np.append(new_cases, new_val)
+            
+    #         else:
+    #             new_cases = np.append(new_cases, new_val)
+                     
+    
+    
+    
+    
+    # x['New_Cases'] = pd.Series(new_cases)
+    #x['Confirmed'] = pd.Series(cases)
+    
+    
+    
+    
+    
+
+cases_df = cases_df.groupby(['Admin2','Province_State','Country_Region'
+                              ],dropna=False).apply(date_cases)
 
 
 # %%
-# Fill lat and long nan values
-rows_with_nan_lat_long = cases_df[(cases_df['Lat'].isna()) |
-                                  (cases_df['Long_'].isna())]
-
-
+cases_df = remove_dups_and_reset_index(cases_df)
 
 # %% Take care of unnassigned values
 
 
+# %% Create value (row) per state containing the sum of all counties per date
+
+# state_country = set()
+
+
+# for state,country in cases_df[['Province_State','Country_Region']].values:
+     
+#      if pd.isnull(state):
+#          pass
+#      else:
+#          state_country.add((state,country))
+
+def applyParallel(grouped_df, func):
+    
+    retLst = Parallel(n_jobs = 4)(delayed(func)(group) for name,group in grouped_df)
+    
+    return pd.concat(retLst)
+
+tmp_df = pd.DataFrame(data = None,columns = cases_df.columns)
+
+def sum_of_counties(group):
+    if len(group) == 1:
+        pass
+    else:
+        new_entry = pd.DataFrame(group.iloc[[-1]])
+        
+        new_entry['Admin2'] = np.nan
+        new_entry['New_Confirmed'] = sum(group['New_Confirmed'])
+        new_entry['New_Deaths'] = sum(group['New_Deaths'])
+        new_entry['New_Recovered'] = sum(group['New_Recovered'])
+        new_entry['Confirmed'] = 0
+        new_entry['Deaths'] = 0
+        new_entry['Recovered'] = 0
+        new_entry['Incident_Rate'] = np.mean(group['Incident_Rate'])
+        new_entry['Case_Fatality_Ratio'] = np.mean(group['Case_Fatality_Ratio'])
+        
+        print(new_entry)
+        
+        tmp_df = tmp_df.append(new_entry, ignore_index=True)
+        
+
+
+
+grouped = cases_df.groupby(['date','Admin2','Province_State','Country_Region'])
+
+applyParallel(grouped, sum_of_counties)
+
+
+
+# with ProcessPoolExecutor() as executor:
+#     executor.map(sum_of_counties,grouped.items())
+
+# for name, group in grouped:
+    
+#     pool = mp.Pool(processes = 6)
+    
+    
+    
+        
+
+        
+        
+
+
+
+# for day in pd.date_range(min(cases_df['date']), max(cases_df['date'])):
+#     print(day)
+    
+#     for state,country in state_country:
+#         # Looping through these specific sets of state,country
+#         vals = cases_df[(cases_df['Province_State'] == state) &
+#                         (cases_df['Country_Region'] == country) &
+#                         (cases_df['Admin2'].notna()) & 
+#                         (cases_df['date'] == day)]
+#         #Check if vals is not empty before proceeding
+#         if not vals.empty:
+        
+#             new = vals.iloc[-1]
+            
+#             new['Admin2'] = np.nan
+#             new['New_Confirmed'] = sum(vals['New_Confirmed'])
+#             new['New_Deaths'] = sum(vals['New_Deaths'])
+#             new['New_Recovered'] = sum(vals['New_Recovered'])
+#             new['Confirmed'] = 0
+#             new['Deaths'] = 0
+#             new['Recovered'] = 0
+#             new['Incident_Rate'] = np.mean(vals['Incident_Rate'])
+#             new['Case_Fatality_Ratio'] = np.mean(vals['Case_Fatality_Ratio'])
+            
+#             print(new)
+            
+#             tmp_df.append(new, ignore_index = True)
+    
+    
+
+    
+
+#tmp_df = cases_df.groupby(['date'],dropna=False).apply(total_per_date_county)
+# Still takes about 5 minutes to execute, but requires less memory overhead
+    
+
+# def total_per_date_county(x):
+#     # This method is assuming that the data is sorted by date
+#     #x = x.reset_index(drop = True)
+
+
+#     if len(x) == 1:
+#         return x
+#     else:
+        
+#         new = x.iloc[-1]
+#         new['Admin2'] = np.nan
+#         new['New_Confirmed'] = sum(x['New_Confirmed'])
+#         new['New_Deaths'] = sum(x['New_Deaths'])
+#         new['New_Recovered'] = sum(x['New_Recovered'])
+#         new['Confirmed'] = 0
+#         new['Deaths'] = 0
+#         new['Recovered'] = 0
+        
+#         print(new)
+        
+#         x.append(new)
+        
+#         return x
+    
+    
+
+    
+#     #Block takes too long to execute
+    
+# tmp_df = cases_df.groupby(['date','Province_State','Country_Region'
+#                               ],dropna=False).apply(total_per_date_county)
+# %% Appending new values to cases df
+
+cases_df = cases_df.append(tmp_df, ignore_index=True)
+
+# %%
+cases_df = remove_dups_and_reset_index(cases_df)
+# %% Now doing the same, but with the sum of all states per date
+
+
+
+tmp_df = pd.DataFrame(data = None,columns = cases_df.columns)
+
+grouped = cases_df.groupby(['date','Province_State','Country_Region'])
+
+for name, group in grouped:
+    if len(group) == 1:
+        pass
+    else:
+        new_entry = pd.DataFrame(group.iloc[[-1]])
+        
+        new_entry['Admin2'] = np.nan
+        new_entry['Province_State'] = np.nan
+        new_entry['New_Confirmed'] = sum(group['New_Confirmed'])
+        new_entry['New_Deaths'] = sum(group['New_Deaths'])
+        new_entry['New_Recovered'] = sum(group['New_Recovered'])
+        new_entry['Confirmed'] = 0
+        new_entry['Deaths'] = 0
+        new_entry['Recovered'] = 0
+        new_entry['Incident_Rate'] = np.mean(group['Incident_Rate'])
+        new_entry['Case_Fatality_Ratio'] = np.mean(group['Case_Fatality_Ratio'])
+        
+        print(new_entry)
+        
+        tmp_df = tmp_df.append(new_entry, ignore_index=True)
+
+
+
+# countries = set(cases_df['Country_Region'].values)
+
+
+# def total_per_date_state(x):
+    
+    
+#     for country in countries:
+#         # Looping through only on these specific countries.
+#         # We only want nan counties since we will be summing the previous
+#         # state data
+#         vals = x[(x['Province_State'].notna()) &
+#                  (x['Country_Region'] == country) &
+#                  (x['Admin2'].isna())]
+        
+        
+#         #Check if vals is not empty before proceeding
+#         if not vals.empty:
+            
+#             new = vals.iloc[-1]
+            
+#             new['Admin2'] = np.nan
+#             new['Province_State'] = np.nan
+#             new['New_Confirmed'] = sum(vals['New_Confirmed'])
+#             new['New_Deaths'] = sum(vals['New_Deaths'])
+#             new['New_Recovered'] = sum(vals['New_Recovered'])
+#             new['Confirmed'] = 0
+#             new['Deaths'] = 0
+#             new['Recovered'] = 0
+#             new['Incident_Rate'] = np.mean(vals['Incident_Rate'])
+#             new['Case_Fatality_Ratio'] = np.mean(vals['Case_Fatality_Ratio'])
+#             print(new)
+#             x.append(new, ignore_index = True)
+    
+    
+#     return x
+    
+
+# tmp_df = cases_df.groupby(['date'],dropna=False).apply(total_per_date_state)
+
+
+# def total_per_date_state(x):
+#     # This method is assuming that the data is sorted by date
+#     x = x.reset_index(drop = True)
+
+    
+#     # if len(x) == 1:
+#     #     return x
+    
+#     # else:
+        
+#     #     new = x.iloc[-1]
+#     #     new['Admin2'] = np.nan
+#     #     new['Province_State'] = np.nan
+#     #     new['New_Confirmed'] = sum(x['New_Confirmed'])
+#     #     new['New_Deaths'] = sum(x['New_Deaths'])
+#     #     new['New_Recovered'] = sum(x['New_Recovered'])
+#     #     new['Confirmed'] = 0
+#     #     new['Deaths'] = 0
+#     #     new['Recovered'] = 0
+        
+#     #     x.append(new)
+        
+#     #     return x
+    
+#     print(x)
+
+    
+    
+    
+# tmp_df = cases_df.groupby(['date','Country_Region'
+#                               ],dropna=False).apply(total_per_date_state)
+
+# %% Appending new values to cases df
+
+cases_df = cases_df.append(tmp_df, ignore_index=True)
+
+# %%
+cases_df = remove_dups_and_reset_index(cases_df)
+
+# %% Now doing a cumulative sum of these newly creatied entries
+
+def cum_sum(x):
+    
+    x['Confirmed'] = x['New_Confirmed'].cumsum()
+    
+    
+    # Doing the same with deaths and recoveries, but only if they are not
+    # all NaNs.
+    if x['Deaths'].notna().all():
+        
+        x['Deaths'] = x['New_Deaths'].cumsum()
+        
+    if x['Recovered'].notna().all():
+        
+        x['Recovered'] = x['New_Recovered'].cumsum()
+        
+    
+
+cases_df = cases_df.groupby(['Admin2','Province_State','Country_Region'
+                              ],dropna=False).apply(cum_sum)
+
+
 # %% Exporting cleaned dataframe
-cases_df.to_csv(".\\cases_cleaned.csv")
+# cases_df.to_csv(".\\cases_cleaned.csv")
+
+
