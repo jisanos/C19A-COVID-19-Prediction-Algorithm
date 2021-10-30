@@ -787,16 +787,21 @@ cases_df = remove_dups_and_reset_index(cases_df)
 
 # %% Replaces counties that are equal to state with NaN
 
-tmp1 = set(cases_df['Admin2'])
-tmp2 = set(cases_df['Province_State'])
+# tmp1 = set(cases_df['Admin2'])
+# tmp2 = set(cases_df['Province_State'])
 
 
-county_in_state = tmp1.intersection(tmp2)
+# county_in_state = tmp1.intersection(tmp2)
 
-for val in county_in_state:
-    cases_df.loc[(cases_df['Admin2'] == val) & 
-                 (cases_df['Province_State'] == val ), 'Admin2'] = np.nan
+# for val in county_in_state:
+#     cases_df.loc[(cases_df['Admin2'] == val) & 
+#                  (cases_df['Province_State'] == val ), 'Admin2'] = np.nan
+# %% Vectorizing previous block for even better performance
 
+filter_equal = (cases_df['Admin2'] == cases_df['Province_State'])
+
+
+cases_df.loc[filter_equal,'Admin2'] = np.nan
 #%% removing dups again and reseting index
 
 cases_df = remove_dups_and_reset_index(cases_df)
@@ -805,19 +810,25 @@ cases_df = remove_dups_and_reset_index(cases_df)
 
 
 
-tmp1 = set(cases_df['Province_State'])
-tmp2 = set(cases_df['Country_Region'])
+# tmp1 = set(cases_df['Province_State'])
+# tmp2 = set(cases_df['Country_Region'])
 
-state_in_country = tmp1.intersection(tmp2)
+# state_in_country = tmp1.intersection(tmp2)
 
-# Now filtering only these values where they are equal on both. THis is
-# important because some of them such aas luxembourg are a state in a diff.
-# country as well as there is a country named luxembourg itself so we don't
-# want to mess with values like that.
+# # Now filtering only these values where they are equal on both. THis is
+# # important because some of them such aas luxembourg are a state in a diff.
+# # country as well as there is a country named luxembourg itself so we don't
+# # want to mess with values like that.
 
-for val in state_in_country:
-    cases_df.loc[(cases_df['Province_State'] == val) &
-                 (cases_df['Country_Region'] == val),'Province_State'] = np.nan
+# for val in state_in_country:
+#     cases_df.loc[(cases_df['Province_State'] == val) &
+#                  (cases_df['Country_Region'] == val),'Province_State'] = np.nan
+
+# %% Also vecorizing previous block for better performance
+
+filter_equal = (cases_df['Province_State'] == cases_df['Country_Region'])
+
+cases_df.loc[filter_equal,'Province_State'] = np.nan
 
 #%% removing dups again and reseting index
 
@@ -859,11 +870,12 @@ def filler(x):
     
     return x
 
-        
+
+start_time = time.time()
 cases_df = cases_df.groupby(['Admin2','Province_State','Country_Region'
                              ],dropna=False).apply(filler)
 
-
+print(time.time() - start_time)
 
 
 
@@ -986,40 +998,33 @@ cases_df = remove_dups_and_reset_index(cases_df)
 #      else:
 #          state_country.add((state,country))
 
-def applyParallel(grouped_df, func):
+
+
+def sum_of_counties(x):
     
-    retLst = Parallel(n_jobs = 4)(delayed(func)(group) for name,group in grouped_df)
+    new_entry = pd.DataFrame(x.iloc[[-1]])
     
-    return pd.concat(retLst)
+    new_entry['Admin2'] = np.nan
+    new_entry['New_Confirmed'] = np.sum(x['New_Confirmed'])
+    new_entry['New_Deaths'] = np.sum(x['New_Deaths'])
+    new_entry['New_Recovered'] = np.sum(x['New_Recovered'])
+    new_entry['Confirmed'] = 0
+    new_entry['Deaths'] = 0
+    new_entry['Recovered'] = 0
+    new_entry['Incident_Rate'] = np.mean(x['Incident_Rate'])
+    new_entry['Case_Fatality_Ratio'] = np.mean(x['Case_Fatality_Ratio'])
+            
+    return new_entry
 
-tmp_df = pd.DataFrame(data = None,columns = cases_df.columns)
+filter_out_na_counties = (cases_df['Admin2'].notna())
 
-def sum_of_counties(group):
-    if len(group) == 1:
-        pass
-    else:
-        new_entry = pd.DataFrame(group.iloc[[-1]])
-        
-        new_entry['Admin2'] = np.nan
-        new_entry['New_Confirmed'] = sum(group['New_Confirmed'])
-        new_entry['New_Deaths'] = sum(group['New_Deaths'])
-        new_entry['New_Recovered'] = sum(group['New_Recovered'])
-        new_entry['Confirmed'] = 0
-        new_entry['Deaths'] = 0
-        new_entry['Recovered'] = 0
-        new_entry['Incident_Rate'] = np.mean(group['Incident_Rate'])
-        new_entry['Case_Fatality_Ratio'] = np.mean(group['Case_Fatality_Ratio'])
-        
-        print(new_entry)
-        
-        tmp_df = tmp_df.append(new_entry, ignore_index=True)
-        
+start_time = time.time()
 
+new_entries = cases_df.loc[filter_out_na_counties, :].groupby(['date','Province_State','Country_Region'
+                                ]).apply(sum_of_counties)
 
+print(time.time() - start_time)
 
-grouped = cases_df.groupby(['date','Admin2','Province_State','Country_Region'])
-
-applyParallel(grouped, sum_of_counties)
 
 
 
@@ -1108,7 +1113,7 @@ applyParallel(grouped, sum_of_counties)
 #                               ],dropna=False).apply(total_per_date_county)
 # %% Appending new values to cases df
 
-cases_df = cases_df.append(tmp_df, ignore_index=True)
+cases_df = cases_df.append(new_entries, ignore_index=True)
 
 # %%
 cases_df = remove_dups_and_reset_index(cases_df)
@@ -1116,32 +1121,34 @@ cases_df = remove_dups_and_reset_index(cases_df)
 
 
 
-tmp_df = pd.DataFrame(data = None,columns = cases_df.columns)
 
-grouped = cases_df.groupby(['date','Province_State','Country_Region'])
+def sum_of_states(x):
+    
+    new_entry = pd.DataFrame(x.iloc[[-1]])
+    
+    new_entry['Admin2'] = np.nan
+    new_entry['Province_State'] = np.nan
+    new_entry['New_Confirmed'] = np.sum(x['New_Confirmed'])
+    new_entry['New_Deaths'] = np.sum(x['New_Deaths'])
+    new_entry['New_Recovered'] = np.sum(x['New_Recovered'])
+    new_entry['Confirmed'] = 0
+    new_entry['Deaths'] = 0
+    new_entry['Recovered'] = 0
+    new_entry['Incident_Rate'] = np.mean(x['Incident_Rate'])
+    new_entry['Case_Fatality_Ratio'] = np.mean(x['Case_Fatality_Ratio'])
+            
+    return new_entry
 
-for name, group in grouped:
-    if len(group) == 1:
-        pass
-    else:
-        new_entry = pd.DataFrame(group.iloc[[-1]])
-        
-        new_entry['Admin2'] = np.nan
-        new_entry['Province_State'] = np.nan
-        new_entry['New_Confirmed'] = sum(group['New_Confirmed'])
-        new_entry['New_Deaths'] = sum(group['New_Deaths'])
-        new_entry['New_Recovered'] = sum(group['New_Recovered'])
-        new_entry['Confirmed'] = 0
-        new_entry['Deaths'] = 0
-        new_entry['Recovered'] = 0
-        new_entry['Incident_Rate'] = np.mean(group['Incident_Rate'])
-        new_entry['Case_Fatality_Ratio'] = np.mean(group['Case_Fatality_Ratio'])
-        
-        print(new_entry)
-        
-        tmp_df = tmp_df.append(new_entry, ignore_index=True)
+filter_out_na_counties = (cases_df['Admin2'].notna())
+filter_out_na_states = (cases_df['Province_State'].notna())
+all_filters = filter_out_na_counties & filter_out_na_states
 
+start_time = time.time()
 
+new_entries = cases_df.loc[all_filters, :].groupby(['date','Country_Region'
+                                ]).apply(sum_of_states)
+
+print(time.time() - start_time)
 
 # countries = set(cases_df['Country_Region'].values)
 
@@ -1217,7 +1224,7 @@ for name, group in grouped:
 
 # %% Appending new values to cases df
 
-cases_df = cases_df.append(tmp_df, ignore_index=True)
+cases_df = cases_df.append(new_entries, ignore_index=True)
 
 # %%
 cases_df = remove_dups_and_reset_index(cases_df)
@@ -1225,6 +1232,8 @@ cases_df = remove_dups_and_reset_index(cases_df)
 # %% Now doing a cumulative sum of these newly creatied entries
 
 def cum_sum(x):
+    
+    
     
     x['Confirmed'] = x['New_Confirmed'].cumsum()
     
@@ -1239,11 +1248,16 @@ def cum_sum(x):
         
         x['Recovered'] = x['New_Recovered'].cumsum()
         
+    return x
     
-
-cases_df = cases_df.groupby(['Admin2','Province_State','Country_Region'
+start_time = time.time()
+cases_df = cases_df.groupby(['Province_State','Country_Region'
                               ],dropna=False).apply(cum_sum)
 
+print(time.time() - start_time)
+
+# %%
+cases_df = remove_dups_and_reset_index(cases_df)
 
 # %% Exporting cleaned dataframe
 # cases_df.to_csv(".\\cases_cleaned.csv")
