@@ -13,7 +13,10 @@ import glob
 import matplotlib.pyplot as plt
 import data_imports
 import numpy as np
+from joblib import Parallel, delayed
+import multiprocessing
 from apply_parallel import applyParallel
+import time
 
 
 
@@ -639,53 +642,84 @@ cases_df.loc[cases_df.Province_State.str.contains('D.C.'),'Province_State'] = 'D
 #we either rename them and separate them by setting the county on the admin2
 #column
 
-# Splitting the values on comma
-us_states = cases_df[cases_df['Country_Region'] == 'US']['Province_State']
+# # Splitting the values on comma
+# us_states = cases_df[cases_df['Country_Region'] == 'US']['Province_State']
 
-# Getting only the ones that are in county,state format
-county_state = set()
+# # Getting only the ones that are in county,state format
+# county_state = set()
 
-for element in us_states:
-    splt = element.split(',')
+# for element in us_states:
+#     splt = element.split(',')
     
-    if len(splt) > 1:
-        # 3 row touple containing the originalvalue,county,state
-        county_state.add((element,splt[0].strip(),splt[1].strip()))
-    
-
-# There are also some that are in the form of State,US that need to be dealt with
-
-state_country = set()
-
-[state_country.add((orig_val,county,state)) for orig_val,county,state in
- county_state if (state == 'U.S.') | (state == 'US')]
-
-# Removing it from the county_state set
-county_state = county_state - state_country
-
-# There are some entries with (From Diamond Princess) which should be dealth with
-
-county_diamond_princess = set()
-
-[county_diamond_princess.add((orig_val,county,state)) for orig_val,county,state in
- county_state if (state.lower().__contains__('diamond'))]
-
-county_state = county_state - county_diamond_princess
-
-# There are some entries with "Washington, D.C."
-
-for orig_val,county,state in county_state:
-    # Using the global dictionary for us states abbreviations we will
-    # rename the rows appropriately
-    cases_df.loc[cases_df.Province_State == orig_val,'Admin2'] = county
-    cases_df.loc[cases_df.Province_State == orig_val,
-                  'Province_State'] = data_imports.abbreviations_to_us_states[state]
+#     if len(splt) > 1:
+#         # 3 row touple containing the originalvalue,county,state
+#         county_state.add((element,splt[0].strip(),splt[1].strip()))
     
 
+# # There are also some that are in the form of State,US that need to be dealt with
+
+# state_country = set()
+
+# [state_country.add((orig_val,county,state)) for orig_val,county,state in
+#  county_state if (state == 'U.S.') | (state == 'US')]
+
+# # Removing it from the county_state set
+# county_state = county_state - state_country
+
+# # There are some entries with (From Diamond Princess) which should be dealth with
+
+# county_diamond_princess = set()
+
+# [county_diamond_princess.add((orig_val,county,state)) for orig_val,county,state in
+#  county_state if (state.lower().__contains__('diamond'))]
+
+# county_state = county_state - county_diamond_princess
+
+# # There are some entries with "Washington, D.C."
+# start_time = time.time()
+# for orig_val,county,state in county_state:
+#     # Using the global dictionary for us states abbreviations we will
+#     # rename the rows appropriately
+#     cases_df.loc[cases_df.Province_State == orig_val,'Admin2'] = county
+#     cases_df.loc[cases_df.Province_State == orig_val,
+#                   'Province_State'] = data_imports.abbreviations_to_us_states[state]
     
-# THis block took about 1 min to execute which means it needs to be imrpved
+# print(time.time() - start_time) 
+# # Block takes around 1 min to execute. Optimizing further is ideal, but hard.
+
+
+# %% Second approach to the block before, more vectorized
+start_time = time.time()
+filter_in_us = (cases_df['Country_Region'] == 'US') #only us states
+filter_in_split = (cases_df['Province_State'].str.contains(',')) #only values that have commas in it
+filter_out_diamond_princes = np.invert(cases_df['Province_State'].str.lower().str.contains('diamond')) # To ignore diamond princess entries
+filter_out_states_with_US = np.invert(cases_df['Province_State'].str.contains('US') | 
+                              cases_df['Province_State'].str.contains('U.S.'))
+
+filter_all = filter_in_us & filter_in_split & filter_out_diamond_princes & filter_out_states_with_US
+
+def reformat_county_state(x):
     
-breakpoint()
+    # Splittin on comman and extracting county and state
+    splt = x['Province_State'].str.split(',').values
+    county = splt[0][0].strip()
+    state = splt[0][1].strip()
+    state = data_imports.abbreviations_to_us_states[state]
+    print(state)
+    
+    x['Province_State'] = state
+    x['Admin2'] = county
+    
+    return x
+
+cases_df.loc[filter_all,:] = cases_df.loc[filter_all,:].groupby('Province_State').apply(reformat_county_state)
+
+
+
+print(time.time() - start_time)
+
+#Completes roughly the same as our previos block in less than 5 seconds
+
 #%% removing dups again and reseting index
 cases_df = remove_dups_and_reset_index(cases_df)
 #%% Checking d.c. rows
