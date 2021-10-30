@@ -9,13 +9,8 @@ This script will serve as a more in depth analysis of the covid test/cases data
 # %%
 
 import pandas as pd
-import glob
-import matplotlib.pyplot as plt
 import data_imports
 import numpy as np
-from joblib import Parallel, delayed
-import multiprocessing
-from apply_parallel import applyParallel
 import time
 
 
@@ -1260,6 +1255,6 @@ print(time.time() - start_time)
 cases_df = remove_dups_and_reset_index(cases_df)
 
 # %% Exporting cleaned dataframe
-# cases_df.to_csv(".\\cases_cleaned.csv")
+cases_df.to_csv(".\\cases_cleaned.csv")
 
 
