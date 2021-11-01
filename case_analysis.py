@@ -978,6 +978,11 @@ cases_df = cases_df.groupby(['Admin2','Province_State','Country_Region'
 # %%
 cases_df = remove_dups_and_reset_index(cases_df)
 
+
+# %% exporting a version without the additional entries
+cases_df.to_csv(".\\cases_cleaned_normal.csv")
+
+
 # %% Take care of unnassigned values
 
 
@@ -1255,6 +1260,6 @@ print(time.time() - start_time)
 cases_df = remove_dups_and_reset_index(cases_df)
 
 # %% Exporting cleaned dataframe
-cases_df.to_csv(".\\cases_cleaned.csv")
+cases_df.to_csv(".\\cases_cleaned_categorizable.csv")
 
 
