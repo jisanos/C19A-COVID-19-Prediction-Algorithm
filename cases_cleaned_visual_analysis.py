@@ -167,10 +167,15 @@ cases_cleaned_Copy = pd.read_csv(file)
 print(cases_cleaned_Copy.info())
 # %%
 group_CSSE = cases_cleaned_Copy[['Confirmed','Deaths','Province_State']].groupby('Province_State').max().reset_index().sort_values("Deaths",ascending=False)
+
+# %%
+
 # %%
 filtering = cases_cleaned_Copy[cases_cleaned_Copy['Province_State'].isin(['Sao Paulo','Maharashtra','England','Lima'])]
 # %%
 sns.violinplot(x='Province_State', y='Deaths', data = filtering)
+#%%
+
 # %%
 group_CSSE = cases_cleaned_Copy[['Confirmed','Deaths','Province_State']].groupby('Province_State').max().reset_index().sort_values("Deaths",ascending=False)
 # %%
@@ -204,7 +209,10 @@ group_CSSE = cases_cleaned_Copy[['Country_Region','Deaths']].groupby('Country_Re
 sns.barplot(x='Country_Region', y='Deaths', data = group_CSSE.head(5)).set_title('Regions with more deaths')
 plt.show()
 print(cases_cleaned_Copy.head(5))
-
+# %%
+group_CSSE = cases_cleaned_Copy[['Country_Region','Deaths']].groupby('Country_Region').sum().reset_index().sort_values("Deaths",ascending=False)
+group_CSSE = group_CSSE.set_index('Country_Region')
+group_CSSE.head(5).plot.pie(y='Deaths', figsize=(6, 10))
 # %%
 print(cases_cleaned_Copy.info())
 # %%
