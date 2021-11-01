@@ -1139,9 +1139,9 @@ def sum_of_states(x):
             
     return new_entry
 
-filter_out_na_counties = (cases_df['Admin2'].notna())
+filter_out_non_na_counties = (cases_df['Admin2'].isna())
 filter_out_na_states = (cases_df['Province_State'].notna())
-all_filters = filter_out_na_counties & filter_out_na_states
+all_filters = filter_out_non_na_counties & filter_out_na_states
 
 start_time = time.time()
 
@@ -1261,5 +1261,6 @@ cases_df = remove_dups_and_reset_index(cases_df)
 
 # %% Exporting cleaned dataframe
 cases_df.to_csv(".\\cases_cleaned_categorizable.csv")
+
 
 
