@@ -326,6 +326,8 @@ wordcloud = WordCloud(width=1600, height=1600, collocations=False,
 plt.figure(figsize=(20, 20))
 plt.imshow(wordcloud)
 
+# %%
+policies_df.to_csv('.\\policies_cleaned.csv')
 
 # %%
 # Splitting into train,val,test

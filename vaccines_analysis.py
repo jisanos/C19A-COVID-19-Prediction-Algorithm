@@ -222,7 +222,6 @@ vax_df = vax_df.drop(drop, axis=1)
 # %% Resetting index
 
 vax_df.reset_index(inplace=True, drop = True)
-
 #%% Assigning propper datatypes
 
 # vax_df = vax_df.convert_dtypes()
@@ -251,6 +250,26 @@ str_cols = ['Province_State', 'Vaccine_Type', 'Country_Region']
 
 for col in str_cols:
     vax_df[col] = vax_df[col].str.strip()
+
+# %%Rename some countries
+
+merge_countries = [('Bahamas, The', 'Bahamas'),
+                   ('Czech Republic', 'Czechia'),
+                   ('Gambia, The', 'Gambia'),
+                   ('Hong Kong SAR','Hong Kong'),
+                   ('Iran (Islamic Republic of)', 'Iran'),
+                   ('Macao SAR', 'Macau'),
+                   ('Russian Federation', 'Russia'),
+                   ('Korea, South','South Korea'),
+                   ('Republic of Korea','South Korea'),
+                   ('Taipei and environs','Taiwan'), # WHO name Taiwan Taipei and environs
+                   ('Taiwan*','Taiwan'),
+                   ('Mainland China', 'China'),  # Maybe?
+                   ('United Kingdom','UK')]
+
+for old,new in merge_countries:
+    vax_df.loc[vax_df['Country_Region'] == old,'Country_Region'] = new
+
 
 # %%
 
@@ -310,17 +329,24 @@ vax_df = vax_df.groupby(['Province_State','Country_Region','Vaccine_Type'],dropn
 def date_cases(x):
         
     
-    # x['New_Doses_admin'] = x.Doses_admin.sub(x.Doses_admin.shift().fillna(0)).abs()
+    x['New_Doses_admin'] = x.Doses_admin.sub(x.Doses_admin.shift().fillna(0)).abs()
     
-    # x['Doses_admin'] = x['New_Doses_admin'].cumsum()
+    x['Doses_admin'] = x['New_Doses_admin'].cumsum()
+    
+    x['New_Stage_One_Doses'] = x.Stage_One_Doses.sub(x.Stage_One_Doses.shift().fillna(0)).abs()
+    
+    x['Stage_One_Doses'] = x['New_Stage_One_Doses'].cumsum()
+    
+    x['New_Stage_Two_Doses'] = x.Stage_Two_Doses.sub(x.Stage_Two_Doses.shift().fillna(0)).abs()
+    
+    x['Stage_Two_Doses'] = x['New_Stage_Two_Doses'].cumsum()
     
     return x
     
 
-new_df = vax_df = vax_df.groupby(['Province_State','Country_Region','Vaccine_Type'],dropna=False).apply(date_cases)
+vax_df = vax_df.groupby(['Province_State','Country_Region','Vaccine_Type'],dropna=False).apply(date_cases)
 
 
 # %%
 
-test_df = vax_df[(new_df['Province_State'] == 'American Samoa') &
-                 (new_df['Vaccine_Type'] == 'All')]
+vax_df.to_csv('.\\vax_cleaned.csv')
