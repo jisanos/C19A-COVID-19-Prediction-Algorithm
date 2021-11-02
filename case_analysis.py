@@ -28,8 +28,29 @@ cases_df.drop('index',axis = 1,inplace=True)
 cases_df['date'] = cases_df['date'].astype(
     'datetime64[ns]')
 
-cases_df = cases_df.convert_dtypes()
+# cases_df = cases_df.convert_dtypes()
 
+#Assigning datatypes
+dtypes = {'Lat':'float64',
+          'Long_':'float64',
+          'Confirmed':'float64',
+          'Deaths':'float64',
+          'Recovered':'float64',
+          'Active':'float64',
+          'Incident_Rate':'float64',
+          #'Case_Fatality_Ratio':'float64', is dealt with later
+          'Latitude':'float64',
+          'Longitude':'float64',
+          'Incidence_Rate':'float64',
+          'Case-Fatality_Ratio':'float64',
+          'Admin2':'string',
+          'Province_State':'string',
+          'Country_Region':'string',
+          'Province/State':'string',
+          'Country/Region':'string',
+          'Province_State':'string',}
+
+cases_df = cases_df.astype(dtypes)
 # %% defining function that will remove dups and reset index for later use
 def remove_dups_and_reset_index(df):
     
@@ -272,7 +293,7 @@ cases_df['Case_Fatality_Ratio'
 
 cases_df['Case_Fatality_Ratio'] = pd.to_numeric(cases_df['Case_Fatality_Ratio'])
 
-cases_df['Case_Fatality_Ratio'] = cases_df['Case_Fatality_Ratio'].astype("Float64")
+cases_df['Case_Fatality_Ratio'] = cases_df['Case_Fatality_Ratio'].astype("float64")
 
 # %% Fixing negative values
 
@@ -849,19 +870,39 @@ def filler(x):
     #     # print('county is na')
     #     pass
     
-    x['Confirmed'] = x['Confirmed'].ffill().bfill()
-    x['Deaths'] = x['Deaths'].ffill().bfill()
-    x['Recovered'] = x['Recovered'].ffill().bfill()
-    x['Active'] = x['Active'].ffill().bfill()
+    # #Normal Ffill and bfill method
+    # x['Confirmed'] = x['Confirmed'].ffill().bfill()
+    # x['Deaths'] = x['Deaths'].ffill().bfill()
+    # x['Recovered'] = x['Recovered'].ffill().bfill()
+    # x['Active'] = x['Active'].ffill().bfill()
     x['Lat'] = x['Lat'].ffill().bfill()
     x['Long_'] = x['Long_'].ffill().bfill()
     
-    # These should be filled differently, not by bfill or ffill
-    x['Incident_Rate'] = x['Incident_Rate'].ffill().bfill()
-    x['Case_Fatality_Ratio'] = x['Case_Fatality_Ratio'].ffill().bfill()
+    # # These should be filled differently, not by bfill or ffill
+    # x['Incident_Rate'] = x['Incident_Rate'].ffill().bfill()
+    # x['Case_Fatality_Ratio'] = x['Case_Fatality_Ratio'].ffill().bfill()
     
-
+    # Doing interpolation method
     
+    first_index = x.head(1).index
+    
+    x.loc[first_index,'Confirmed'] = 0
+    x.loc[first_index,'Deaths'] = 0
+    x.loc[first_index,'Recovered'] = 0
+    # x.loc[first_index,'Active'] = 0
+    
+    x['Confirmed'] = x['Confirmed'].interpolate().round()
+    x['Deaths'] = x['Deaths'].interpolate().round()
+    x['Recovered'] = x['Recovered'].interpolate().round()
+    
+    
+    #According to the README, incident reate is cases per 100k persons
+    #case fatality ratio is number of recorded deaths * 100/number of confirmed cases
+    #Active is total cases - total recovered - total deaths
+    
+        
+    x['Case_Fatality_Ratio'] = x['Deaths'] * 100 / x['Confirmed']
+    # Incident rate should be calculated after "New values" are made
     
     return x
 
@@ -906,7 +947,10 @@ def date_cases(x):
         x['New_Recovered'] = x['Recovered'].sub(x['Recovered'].shift().fillna(0)).abs()
         x['Recovered'] = x['New_Recovered'].cumsum()
         
-        
+    
+    
+    
+    
     return x
     
     #Some vlaues will be negative, and in those cases
