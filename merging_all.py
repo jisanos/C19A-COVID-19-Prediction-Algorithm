@@ -51,7 +51,9 @@ vax_df.drop(cols_to_drop,inplace=True,axis=1)
 
 #%%
 cols_to_merge_on = ['date','Province_State','Country_Region']
-merge = cases_df.merge(vax_df,how='outer',on = cols_to_merge_on)
+merge_glob = cases_df.merge(vax_df,how='outer',on = cols_to_merge_on)
+
+
 
 # %% Only keeping important columns from policies
 policies_df = policies_df[['date', 'State', 'policy', 'word_count']]
@@ -64,6 +66,19 @@ policies_df = policies_df.rename(columns=rename)
 # %%Setting date to datetime on policies
 #policies_df['date'] = policies_df['date'].astype('datetime64[ns]')
 
+# %% Selecting only US data
+merge_us = merge_glob.loc[merge_glob['Country_Region'] == 'US'].copy()
+
 #%% Merging policies
 cols_to_merge_on = ['date','Province_State']
-merge = merge.merge(policies_df,how='outer',on=cols_to_merge_on)
+merge_us = merge_us.merge(policies_df,how='outer',on=cols_to_merge_on)
+
+# %% Forward filling policies
+
+
+merge_us['policy'] = merge_us.groupby(['Province_State','Country_Region'])['policy'].apply( lambda x: x.ffill())
+
+# %% Exporting
+
+merge_glob.to_csv('.\\merged_global.csv')
+merge_us.to_csv('.\\merged_US.csv')
