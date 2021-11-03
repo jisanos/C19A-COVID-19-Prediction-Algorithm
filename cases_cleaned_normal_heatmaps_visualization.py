@@ -122,6 +122,7 @@ cases_cleaned['date'] = pd.to_datetime(cases_cleaned['date'], format='%Y/%m/%d')
 cases_cleaned.sort_values(by='date', inplace=True)
 group_CSSE = cases_cleaned[['date','Confirmed']].groupby(['date']).max().reset_index()
 
+# %%
 # creating columns of but with month,year seperately 
 group_CSSE['month'] = group_CSSE['date'].dt.month
 group_CSSE['year'] = group_CSSE['date'].dt.year
