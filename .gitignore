@@ -3,6 +3,9 @@ CCI_C-19
 CCI_C-19_Policies
 .ipynb_checkpoints
 *.ipynb
+.ipynb
 __pycache__
 *.csv
+.csv
 *.html
+.html
