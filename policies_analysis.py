@@ -27,24 +27,14 @@ from wordcloud import WordCloud
 
 # Importing, merging, and creating a column containing the state of policies.
 
+import data_imports
+
 # %%
-policies_path = ".\\CCI_C-19_Policies\\data_tables\\policy_data\\"\
-    "table_data\\Current\\"
-policies_files = glob.glob(policies_path + "*.csv")
 
-content = []  # store contents from files
-
-for filepath in policies_files:
-
-    df = pd.read_csv(filepath, index_col=None)
-    # Stripping the string to store the name of the file to a State column
-    # State column should be the second column
-    df.insert(1, "State", filepath.replace(
-        policies_path, "").replace("_policy.csv", ""))
-    content.append(df)
+policies_df = data_imports.policy_data_current()
 
 
-policies_df = pd.concat(content)
+policies_df['date'] = policies_df['date'].astype('datetime64[ns]')
 
 # %%
 # Getting all unique values from the columns after "policy" columns in the

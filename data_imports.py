@@ -38,21 +38,23 @@ def csse_covid_19_daily_reports_us():
 
 
 def policy_data_current():
-    path = ".\\CCI_C-19_Policies\\data_tables\\policy_data\\table_data\\Current\\"
-    policies_files = glob.glob(path + "*.csv")
-    
+    policies_path = ".\\CCI_C-19_Policies\\data_tables\\policy_data\\"\
+        "table_data\\Current\\"
+    policies_files = glob.glob(policies_path + "*.csv")
+
     content = []  # store contents from files
-    
+
     for filepath in policies_files:
-    
+
         df = pd.read_csv(filepath, index_col=None)
         # Stripping the string to store the name of the file to a State column
         # State column should be the second column
         df.insert(1, "State", filepath.replace(
-            path, "").replace("_policy.csv", ""))
+            policies_path, "").replace("_policy.csv", ""))
         content.append(df)
-        
-    return pd.concat(content,ignore_index=True)
+
+
+    return pd.concat(content)
 
 
 
