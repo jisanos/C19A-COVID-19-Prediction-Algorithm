@@ -708,8 +708,8 @@ cases_df.loc[cases_df.Province_State.str.contains('D.C.'),'Province_State'] = 'D
 start_time = time.time()
 filter_in_us = (cases_df['Country_Region'] == 'US') #only us states
 filter_in_split = (cases_df['Province_State'].str.contains(',')) #only values that have commas in it
-filter_out_diamond_princes = np.invert(cases_df['Province_State'].str.lower().str.contains('diamond')) # To ignore diamond princess entries
-filter_out_states_with_US = np.invert(cases_df['Province_State'].str.contains('US') | 
+filter_out_diamond_princes = np.logical_not(cases_df['Province_State'].str.lower().str.contains('diamond')) # To ignore diamond princess entries
+filter_out_states_with_US = np.logical_not(cases_df['Province_State'].str.contains('US') | 
                               cases_df['Province_State'].str.contains('U.S.'))
 
 filter_all = filter_in_us & filter_in_split & filter_out_diamond_princes & filter_out_states_with_US

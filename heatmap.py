@@ -77,6 +77,7 @@ cases_cleaned = cases_cleaned[cases_cleaned['Lat'].notna() & cases_cleaned['Long
 # %% Interpolating missing dates data
 # min_date = cases_cleaned.date.min()
 # max_date = cases_cleaned.date.max()
+# from https://stackoverflow.com/questions/30056399/interpolate-and-fill-pandas-dataframe-with-datetime-index
 
 def fill_missing_dates(x):
     

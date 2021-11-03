@@ -94,35 +94,43 @@ not_really_states = ["Long Term Care (LTC) Program",
 
 # I believe Unknown and Unassigned can be merged as one
 
-# %%
+#%% Make sure all numbers are positive
+abs_cols = ['Doses_alloc', 'Doses_shipped', 'Doses_admin', 'Stage_One_Doses',
+            'Stage_Two_Doses']
 
-# Merging all rows that are unnassigned and unknown to a single one
+for col in abs_cols:
+    vaccine_data_us_timeline[col] = vaccine_data_us_timeline[col].abs()
 
-# unknown_and_unnassigned = vaccine_data_us_timeline[
-#     (vaccine_data_us_timeline["Vaccine_Type"] == 'Unassigned') | 
-#     (vaccine_data_us_timeline["Vaccine_Type"] == 'Unknown')]
+# %% Merging cols with unnassigned and unknown
 
-# # Dropping the unknown and unnassigned from the main dataframe
-# vaccine_data_us_timeline.drop(index = unknown_and_unnassigned.index, inplace = True)
 
-# Doing a common sum of values of Unknown and unnassigned on equal 
-# country, state, and date
-
-# unknown_and_unnassigned.groupby(['Province_State','Date',
-#                                  'Country_Region','FIPS','Lat','Long_',
-#                                  ])
-
-#Filtering in all with Unnasigned value
-filter_in = (vaccine_data_us_timeline["Vaccine_Type"].str.lower().str.contains('unassigned'))
-
+filter_in_unnassigned = (vaccine_data_us_timeline["Vaccine_Type"].str.lower().str.contains('unassigned'))
+filter_in_unknown = (vaccine_data_us_timeline["Vaccine_Type"].str.lower().str.contains('unknown'))
+filter_all = (filter_in_unnassigned | filter_in_unknown)
 # Reassigning the filtered ones to Unknown
-vaccine_data_us_timeline.loc[filter_in, 'Vaccine_Type'] = 'Unknown'
+vaccine_data_us_timeline.loc[filter_all, 'Vaccine_Type'] = 'Unknown'
 # This will possibly create duplicate entries that we can handle by merging them
 # with a sum
 
-dups = vaccine_data_us_timeline[vaccine_data_us_timeline.duplicated(['Date','Province_State','Country_Region','Vaccine_Type'])]
+dups = vaccine_data_us_timeline[vaccine_data_us_timeline.duplicated(['Date','Province_State','Country_Region','Vaccine_Type'],keep=False )]
+# There are some duplicates afte the renaming, we will take care of them by doing a sum
+# %%
 
-# There dont seem to be any duplicates after the renaming.
+# Cols to transform
+cols = ['Doses_alloc', 'Doses_shipped', 'Doses_admin', 'Stage_One_Doses',
+            'Stage_Two_Doses']
+
+# Cols to groupby
+subset = ['Date','Province_State','Country_Region','Vaccine_Type']
+    
+vaccine_data_us_timeline[cols] = vaccine_data_us_timeline.groupby(subset)[cols].transform('sum')
+
+vaccine_data_us_timeline = vaccine_data_us_timeline.drop_duplicates(subset=subset)
+
+# %% Check if dups remain 
+
+dups = vaccine_data_us_timeline[vaccine_data_us_timeline.duplicated(subset,keep=False )]
+# No dups remain after the transform
 
 # %%
 
