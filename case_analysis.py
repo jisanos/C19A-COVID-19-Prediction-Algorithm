@@ -12,7 +12,7 @@ import pandas as pd
 import data_imports
 import numpy as np
 import time
-
+from geopy.geocoders import Nominatim
 
 
 # %% Importing data
@@ -1027,8 +1027,49 @@ cases_df = cases_df.groupby(['Admin2','Province_State','Country_Region'
 cases_df = remove_dups_and_reset_index(cases_df)
 
 
+# %% Finding latitude and longitude to locations that contain 0,0 or nans
 
 
+filter_zeros = ((cases_df['Lat'] == 0) | (cases_df['Long_'] == 0) |
+                  (cases_df['Lat'].isna()) | (cases_df['Long_'].isna()))
+
+cases_zeros = cases_df.loc[filter_zeros,:]
+
+
+locator = Nominatim(user_agent="http")
+
+def find_loc(x):
+    
+    #Getting state and country values
+    state = list(set(x['Province_State']))[0]
+    country = list(set(x['Country_Region']))[0]
+    
+    # Combining them to a single string
+    country_state = str(state) + ", " + str(country)
+    print(country_state)
+    # Getting their location
+    location = locator.geocode(country_state)
+    print(location)
+    # Assigning their location
+    if location != None:
+        x['Lat'] = location.latitude
+        x['Long_'] = location.longitude
+    
+    return x
+
+cases_zeros = cases_zeros.groupby(['Province_State','Country_Region'],
+                                 dropna=False).apply(find_loc)
+
+
+
+# %%
+cases_df = cases_df[np.logical_not(filter_zeros)] #Removing old entries
+
+# appending new entries
+cases_df = cases_df.append(cases_zeros,ignore_index = True)
+
+# %%
+cases_df = remove_dups_and_reset_index(cases_df)
 # %% exporting a version without the additional entries
 cases_df.to_csv(".\\cases_cleaned_normal.csv")
 
