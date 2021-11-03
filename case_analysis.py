@@ -875,8 +875,8 @@ def filler(x):
     # x['Deaths'] = x['Deaths'].ffill().bfill()
     # x['Recovered'] = x['Recovered'].ffill().bfill()
     # x['Active'] = x['Active'].ffill().bfill()
-    x['Lat'] = x['Lat'].ffill().bfill()
-    x['Long_'] = x['Long_'].ffill().bfill()
+    # x['Lat'] = x['Lat'].ffill().bfill()
+    # x['Long_'] = x['Long_'].ffill().bfill()
     
     # # These should be filled differently, not by bfill or ffill
     # x['Incident_Rate'] = x['Incident_Rate'].ffill().bfill()
@@ -903,6 +903,10 @@ def filler(x):
         
     x['Case_Fatality_Ratio'] = x['Deaths'] * 100 / x['Confirmed']
     # Incident rate should be calculated after "New values" are made
+    
+    # Setting lat and long values with their means for consistency.
+    x['Lat'] = x['Lat'].mean()
+    x['Long_'] = x['Long_'].mean()
     
     return x
 
@@ -1021,6 +1025,8 @@ cases_df = cases_df.groupby(['Admin2','Province_State','Country_Region'
 
 # %%
 cases_df = remove_dups_and_reset_index(cases_df)
+
+
 
 
 # %% exporting a version without the additional entries
@@ -1272,6 +1278,8 @@ cases_df = cases_df.append(new_entries, ignore_index=True)
 
 # %%
 cases_df = remove_dups_and_reset_index(cases_df)
+
+
 
 # %% Now doing a cumulative sum of these newly creatied entries
 
