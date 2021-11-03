@@ -41,7 +41,7 @@ def synthetic(num = None, seed = None):
             "Country_Region": random.choice(usRegion),
             "Confirmed": np.random.randint(30),
             "Deaths": np.random.randint(23),
-            
+            "date": fake.date_between(start_date="+1y",end_date="+2y")
             }
         
         for x in range(num)
@@ -52,5 +52,7 @@ def synthetic(num = None, seed = None):
 
 # %%
 syntheticDataFrame = pd.DataFrame(synthetic(num = 50, seed = 0))
+
+
 
 
