@@ -178,3 +178,10 @@ plt.show()
 sns.lineplot(data = us_country, x = 'date', y = 'Stage_Two_Doses',hue='Vaccine_Type')
 plt.xticks(rotation = 45)
 plt.show()
+
+# %%
+
+sns.lmplot(x='Doses_admin',y='New_Confirmed',data = us_country_all_vax)
+
+# %%
+sns.lmplot(x='Doses_admin',y='New_Deaths',data = us_country_all_vax)
