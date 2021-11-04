@@ -15,7 +15,7 @@ import numpy as np
 def remove_dups_reset_index(df):
     sort_cols = ['Doses_admin','Stage_One_Doses','Stage_Two_Doses','Doses_alloc','Doses_shipped']
     
-    dup_cols = ['Province_State','Country_Region','Date']
+    dup_cols = ['Province_State','Country_Region','Date','Vaccine_Type']
     
     df = df.sort_values(sort_cols).drop_duplicates(dup_cols,keep='last')
     
@@ -116,33 +116,48 @@ for col in abs_cols:
 # %% Merging cols with unnassigned and unknown
 
 
-filter_in_unnassigned = (vaccine_data_us_timeline["Vaccine_Type"].str.lower().str.contains('unassigned'))
-filter_in_unknown = (vaccine_data_us_timeline["Vaccine_Type"].str.lower().str.contains('unknown'))
-filter_all = (filter_in_unnassigned | filter_in_unknown)
-# Reassigning the filtered ones to Unknown
-vaccine_data_us_timeline.loc[filter_all, 'Vaccine_Type'] = 'Unknown'
-# This will possibly create duplicate entries that we can handle by merging them
-# with a sum
+# filter_in_unnassigned = (vaccine_data_us_timeline["Vaccine_Type"].str.lower().str.contains('unassigned'))
+# filter_in_unknown = (vaccine_data_us_timeline["Vaccine_Type"].str.lower().str.contains('unknown'))
+# filter_all = (filter_in_unnassigned | filter_in_unknown)
+# # Reassigning the filtered ones to Unknown
+# vaccine_data_us_timeline.loc[filter_all, 'Vaccine_Type'] = 'Unknown'
+# # This will possibly create duplicate entries that we can handle by merging them
+# # with a sum
 
-dups = vaccine_data_us_timeline[vaccine_data_us_timeline.duplicated(['Date','Province_State','Country_Region','Vaccine_Type'],keep=False )]
-# There are some duplicates afte the renaming, we will take care of them by doing a sum
-# %%
+# dups = vaccine_data_us_timeline[vaccine_data_us_timeline.duplicated(['Date','Province_State','Country_Region','Vaccine_Type'],keep=False )]
+# # There are some duplicates afte the renaming, we will take care of them by doing a sum
+# # %%
 
-# Cols to transform
-cols = ['Doses_alloc', 'Doses_shipped', 'Doses_admin', 'Stage_One_Doses',
-            'Stage_Two_Doses']
+# # Cols to transform
+# cols = ['Doses_alloc', 'Doses_shipped', 'Doses_admin', 'Stage_One_Doses',
+#             'Stage_Two_Doses']
 
-# Cols to groupby
-subset = ['Date','Province_State','Country_Region','Vaccine_Type']
+# # Cols to groupby
+# subset = ['Date','Province_State','Country_Region','Vaccine_Type']
     
-vaccine_data_us_timeline[cols] = vaccine_data_us_timeline.groupby(subset)[cols].transform('sum')
+# vaccine_data_us_timeline[cols] = vaccine_data_us_timeline.groupby(subset)[cols].transform('sum')
 
-vaccine_data_us_timeline = vaccine_data_us_timeline.drop_duplicates(subset=subset)
+# vaccine_data_us_timeline = vaccine_data_us_timeline.drop_duplicates(subset=subset)
 
-# %% Check if dups remain 
+# # %% Check if dups remain 
 
-dups = vaccine_data_us_timeline[vaccine_data_us_timeline.duplicated(subset,keep=False )]
+# dups = vaccine_data_us_timeline[vaccine_data_us_timeline.duplicated(subset,keep=False )]
 # No dups remain after the transform
+
+# This cause weird plot values thus removing
+
+# %% Removing unnasigned values since it is inconsistent
+
+filter_out_unnassigned = np.logical_not(
+    vaccine_data_us_timeline['Vaccine_Type'].str.lower().str.contains('unassigned'))
+
+vaccine_data_us_timeline = vaccine_data_us_timeline[filter_out_unnassigned]
+
+# %% Renaming lowercase unknown with Camelcase Unknown
+
+filter_in_unknown = vaccine_data_us_timeline['Vaccine_Type'].str.lower().str.contains('unknown')
+
+vaccine_data_us_timeline.loc[filter_in_unknown,'Vaccine_Type'] = 'Unknown'
 
 # %%
 

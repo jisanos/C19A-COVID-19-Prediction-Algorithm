@@ -13,10 +13,14 @@ as checking best modeling/algorithm for the data.
 import pandas as pd
 import numpy as np
 import seaborn as sns
+import matplotlib.dates as mdates
+import matplotlib.pyplot as plt
 
 # %% Importing csv and separating between state only and country only
 
-us_df = pd.read_csv('.\\merged_US.csv')
+us_df = pd.read_csv('.\\merged_US.csv', index_col=0)
+
+us_df['date']= us_df['date'].astype('datetime64[ns]')
 
 state_filter = us_df['Province_State'].notna()
 
@@ -34,22 +38,143 @@ vax_filter = ((us_country['Vaccine_Type'] == 'All') | us_country['Vaccine_Type']
 
 us_country_all_vax = us_country[vax_filter].copy()
 
-# %%
+# %% Setting year format
 
+years = mdates.YearLocator()
+months = mdates.MonthLocator()
+years_fmt = mdates.DateFormatter('%Y-%m')
+# %% cumulative Cases and Death unscaled
 sns.lineplot(data = us_country_all_vax,x='date',y='Confirmed')
 sns.lineplot(data = us_country_all_vax,x='date',y='Deaths')
-# %% Plotting cumulative
+plt.xticks(rotation = 45)
+plt.show()
+# %% cumulative Cases and Death scaled
+fig, ax1 = plt.subplots(figsize=(8,5))
 
-sns.lineplot(data = us_country_all_vax,x='date',y='Confirmed')
+ax1.set_ylabel('Cumulative Confirmed',color='blue')
 
-#%%
-sns.lineplot(data = us_country_all_vax,x='date',y='Deaths')
+sns.lineplot(data = us_country_all_vax,x='date',y='Confirmed',color='blue')
+
+ax2 = ax1.twinx() #Instantiate second axe sharing the same x axis
+
+ax2.set_ylabel('Cumulative Deaths',color='red')
+sns.lineplot(data = us_country_all_vax,x='date',y='Deaths',color='red')
+
+
+
+plt.xticks(rotation = 45)
+plt.show()
+
+# # %% Plotting cumulative
+# # fig, axes = plt.subplots(figsize=(8,5))
+# sns.lineplot(data = us_country_all_vax,x='date',y='Confirmed')
+# # axes.xaxis.set_major_locator(months)
+# # axes.xaxis.set_major_formatter(years_fmt)
+# # axes.xaxis.set_minor_locator(years)
+# plt.xticks(rotation = 45)
+# plt.show()
+# #%%
+# sns.lineplot(data = us_country_all_vax,x='date',y='Deaths')
+# plt.xticks(rotation = 45)
+# plt.show()
+
+# %% daily cases and death unscaled
+sns.lineplot(data = us_country_all_vax,x='date',y='New_Confirmed',color='blue')
+sns.lineplot(data = us_country_all_vax,x='date',y='New_Deaths',color='red')
+plt.xticks(rotation = 45)
+plt.show()
+
+# %% daily cases and death scaled
+
+fig, ax1 = plt.subplots(figsize=(8,5))
+
+ax1.set_ylabel('Daily Confirmed',color='blue')
+
+sns.lineplot(data = us_country_all_vax,x='date',y='New_Confirmed',color='blue')
+
+ax2 = ax1.twinx()
+
+ax2.set_ylabel('Daily Deaths',color='red')
+
+sns.lineplot(data = us_country_all_vax,x='date',y='New_Deaths',color='red')
+plt.xticks(rotation = 45)
+plt.show()
+
+# # %% Plotting daily
+
+# sns.lineplot(data = us_country_all_vax,x='date',y='New_Confirmed')
+# plt.xticks(rotation = 45)
+# plt.show()
+# # %%
+# sns.lineplot(data = us_country_all_vax,x='date',y='New_Deaths')
+# plt.xticks(rotation = 45)
+# plt.show()
+# %%cumulative cases and vaccines
+
+fig, ax1 = plt.subplots(figsize=(8,5))
+
+ax1.set_ylabel('Cumulative Confirmed',color='blue')
+
+sns.lineplot(data = us_country_all_vax,x='date',y='Confirmed',color='blue')
+
+ax2 = ax1.twinx() #Instantiate second axe sharing the same x axis
+
+ax2.set_ylabel('Cumulative Doses',color='purple')
+sns.lineplot(data = us_country_all_vax,x='date',y='Doses_admin',color='purple')
+
+
+
+plt.xticks(rotation = 45)
+plt.show()
+
+# %%cumulative deaths and vaccines
+
+fig, ax1 = plt.subplots(figsize=(8,5))
+
+ax1.set_ylabel('Cumulative Deaths',color='red')
+
+sns.lineplot(data = us_country_all_vax,x='date',y='Deaths',color='red')
+
+ax2 = ax1.twinx() #Instantiate second axe sharing the same x axis
+
+ax2.set_ylabel('Cumulative Doses',color='purple')
+sns.lineplot(data = us_country_all_vax,x='date',y='Doses_admin',color='purple')
+
+
+
+plt.xticks(rotation = 45)
+plt.show()
 
 # %%
-sns.lineplot(data = us_country_all_vax,x='date',y='New_Confirmed')
-sns.lineplot(data = us_country_all_vax,x='date',y='New_Deaths')
-# %% Plotting daily
+sns.lineplot(data = us_country, x = 'date', y = 'New_Doses_admin',hue='Vaccine_Type')
+plt.xticks(rotation = 45)
+plt.show()
 
-sns.lineplot(data = us_country_all_vax,x='date',y='New_Confirmed')
+# %% daily cases and vaccines
+fig, ax1 = plt.subplots(figsize=(8,5))
+
+ax1.set_ylabel('Daily Confirmed',color='blue')
+
+sns.lineplot(data = us_country_all_vax,x='date',y='New_Confirmed',color='blue')
+
+ax2 = ax1.twinx()
+
+ax2.set_ylabel('Daily Vaccines',color='purple')
+
+sns.lineplot(data = us_country_all_vax,x='date',y='New_Doses_admin',color='purple')
+plt.xticks(rotation = 45)
+plt.show()
+
+
 # %%
-sns.lineplot(data = us_country_all_vax,x='date',y='New_Deaths')
+sns.lineplot(data = us_country, x = 'date', y = 'Doses_admin',hue='Vaccine_Type')
+plt.xticks(rotation = 45)
+plt.show()
+# %%
+sns.lineplot(data = us_country, x = 'date', y = 'Stage_One_Doses',hue='Vaccine_Type')
+plt.xticks(rotation = 45)
+plt.show()
+# %%
+sns.lineplot(data = us_country, x = 'date', y = 'Stage_Two_Doses',hue='Vaccine_Type')
+plt.xticks(rotation = 45)
+plt.show()
