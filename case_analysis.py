@@ -38,7 +38,7 @@ dtypes = {'Lat':'float64',
           'Recovered':'float64',
           'Active':'float64',
           'Incident_Rate':'float64',
-          #'Case_Fatality_Ratio':'float64', is dealt with later
+          'Case_Fatality_Ratio':'float64', #is dealt with later
           'Latitude':'float64',
           'Longitude':'float64',
           'Incidence_Rate':'float64',
@@ -285,9 +285,10 @@ for col in cols_to_strip:
 # There are some #DIV/0! in the cells which doesnt allow it to become float
 # Removing these should work
 
-cases_df['Case_Fatality_Ratio'
-                            ] = cases_df[
-                                'Case_Fatality_Ratio'].str.replace('#DIV/0!', '')
+# cases_df['Case_Fatality_Ratio'
+#                             ] = cases_df[
+#                                 'Case_Fatality_Ratio'].str.replace('#DIV/0!', '')
+# Issue seems to be resolved in the branch
 
 # %% Turning to float type
 
@@ -1215,7 +1216,9 @@ cases_df = remove_dups_and_reset_index(cases_df)
 
 def sum_of_states(x):
     
-    new_entry = pd.DataFrame(x.iloc[[-1]])
+    last_index = x.tail(1).index
+    
+    new_entry = pd.DataFrame(x.loc[last_index,:])
     
     new_entry['Admin2'] = np.nan
     new_entry['Province_State'] = np.nan

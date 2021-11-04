@@ -110,11 +110,11 @@ cases_cleaned['date'] = cases_cleaned['date'].dt.strftime('%Y/%m/%d')
 
 # %%Getting only US data
 filter_us = cases_cleaned['Country_Region'] == 'US'
-cases_cleaned_us = cases_cleaned.loc[filter_us,:]
+cases_cleaned_us = cases_cleaned.loc[filter_us,:].copy()
 
 # %% Getting only PR data
 filter_pr = cases_cleaned['Province_State'] == 'Puerto Rico'
-cases_cleaned_pr = cases_cleaned.loc[filter_pr,:]
+cases_cleaned_pr = cases_cleaned.loc[filter_pr,:].copy()
 # %% creating weights
 cases_cleaned['Weight'] = cases_cleaned['Confirmed'] / cases_cleaned['Confirmed'].max()
 
@@ -145,7 +145,7 @@ for row in cases_cleaned.itertuples():
 heat_data = OrderedDict(sorted(heat_data.items(),key=lambda t:t[0]))
 
 # Export the heatmap
-covid_country_map = folium.Map(zoom_start=3, control_scale=True,attr="Stadia.AlidadeSmoothDark")
+covid_country_map = folium.Map(location=[0,0],zoom_start=3, control_scale=True,attr="Stadia.AlidadeSmoothDark")
 
 hm = plugins.HeatMapWithTime(data = list(heat_data.values()),index=list(heat_data.keys()),
                              auto_play=True,max_speed=60,max_opacity=1)
@@ -154,7 +154,7 @@ hm.add_to(covid_country_map)
 covid_country_map.save("global_spread.html")
 
 webbrowser.open("global_spread.html")
-# %%
+# %% US heatmap
 heat_data = defaultdict(list)
 
 for row in cases_cleaned_us.itertuples():
@@ -174,7 +174,7 @@ hm.add_to(covid_country_map)
 covid_country_map.save("us_spread.html")
 
 webbrowser.open("us_spread.html")
-# %%
+# %% PR Heatmap
 heat_data = defaultdict(list)
 
 for row in cases_cleaned_pr.itertuples():

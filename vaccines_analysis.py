@@ -8,8 +8,20 @@ Script will work as a more thorough analysis of the vaccination data
 """
 # %%
 import pandas as pd
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 import numpy as np
+
+# %%
+def remove_dups_reset_index(df):
+    sort_cols = ['Doses_admin','Stage_One_Doses','Stage_Two_Doses','Doses_alloc','Doses_shipped']
+    
+    dup_cols = ['Province_State','Country_Region','Date']
+    
+    df = df.sort_values(sort_cols).drop_duplicates(dup_cols,keep='last')
+    
+    df = df.sort_values('Date').reset_index(drop=True)
+    
+    return df
 
 # %%
 
@@ -334,27 +346,97 @@ vax_df = vax_df.groupby(['Province_State','Country_Region','Vaccine_Type'],dropn
 
 # %% Creating column with new vaccines only, instead of cummulative
 
+current_cols = ['Doses_admin','Stage_One_Doses','Stage_Two_Doses','Doses_alloc','Doses_shipped']
+
+new_cols = ["New_"+element for element in current_cols]
+
 def date_cases(x):
-        
     
-    x['New_Doses_admin'] = x.Doses_admin.sub(x.Doses_admin.shift().fillna(0)).abs()
+    # cols = [('Doses_admin','New_Doses_admin'),
+    #         ('Stage_One_Doses','New_Stage_One_Doses'),
+    #         ('Stage_Two_Doses', 'New_Stage_Two_Doses' ),
+    #         ('Doses_alloc','New_Doses_alloc'),
+    #         ('Doses_shipped','New_Doses_shipped')]
+
     
-    x['Doses_admin'] = x['New_Doses_admin'].cumsum()
+    x[new_cols] = x[current_cols].sub(x[current_cols].shift().fillna(0)).abs()
     
-    x['New_Stage_One_Doses'] = x.Stage_One_Doses.sub(x.Stage_One_Doses.shift().fillna(0)).abs()
+    x[current_cols] = x[new_cols].cumsum()
     
-    x['Stage_One_Doses'] = x['New_Stage_One_Doses'].cumsum()
+    # x['New_Doses_admin'] = x.Doses_admin.sub(x.Doses_admin.shift().fillna(0)).abs()
     
-    x['New_Stage_Two_Doses'] = x.Stage_Two_Doses.sub(x.Stage_Two_Doses.shift().fillna(0)).abs()
+    # x['Doses_admin'] = x['New_Doses_admin'].cumsum()
     
-    x['Stage_Two_Doses'] = x['New_Stage_Two_Doses'].cumsum()
+    # x['New_Stage_One_Doses'] = x.Stage_One_Doses.sub(x.Stage_One_Doses.shift().fillna(0)).abs()
+    
+    # x['Stage_One_Doses'] = x['New_Stage_One_Doses'].cumsum()
+    
+    # x['New_Stage_Two_Doses'] = x.Stage_Two_Doses.sub(x.Stage_Two_Doses.shift().fillna(0)).abs()
+    
+    # x['Stage_Two_Doses'] = x['New_Stage_Two_Doses'].cumsum()
+    
+    
     
     return x
     
+group_cols = ['Province_State','Country_Region','Vaccine_Type']
 
-vax_df = vax_df.groupby(['Province_State','Country_Region','Vaccine_Type'],dropna=False).apply(date_cases)
+vax_df = vax_df.groupby(group_cols,dropna=False).apply(date_cases)
+
+# %% Creating new entries for country level data (sum of all states)
+
+cols_to_zero = current_cols
+
+cols_to_sum = new_cols
+
+def sum_of_states(x):
+        
+    last_index = x.tail(1).index
+    
+    new_entry = pd.DataFrame(x.loc[last_index,:])
+    
+    new_entry['Province_State'] = np.nan
+        
+    
+    new_entry[cols_to_sum] = x[cols_to_sum].sum()
+            
+    
+    new_entry[cols_to_zero] = 0
+        
+    return new_entry
+
+filter_out_na_states = vax_df['Province_State'].notna()
+
+group_cols = ['Date','Country_Region','Vaccine_Type']
+
+new_entries = vax_df.loc[filter_out_na_states,:].groupby(group_cols).apply(sum_of_states)
+
+# %% Resetting index of new entries
+
+new_entries = new_entries.reset_index(drop=True).sort_values(['Date']).reset_index(drop=True)
+
+# %% Doing cumulative sum of the new entries
+cols_with_result = current_cols
+cols_to_sum = new_cols
+
+def cum_sum(x):
+    
+    x[cols_with_result] = x[cols_to_sum].cumsum()
+    
+    return x
 
 
-# %%
 
-vax_df.to_csv('.\\vax_cleaned.csv')
+group_cols = ['Country_Region','Vaccine_Type']
+
+new_entries = new_entries.groupby(group_cols).apply(cum_sum)
+
+# %% Appending new entries to df
+vax_cat_df = vax_df.copy()
+
+vax_cat_df = vax_cat_df.append(new_entries, ignore_index=True)
+
+vax_cat_df = remove_dups_reset_index(vax_cat_df)
+# %% Exporting 
+vax_df.to_csv('.\\vax_cleaned_normal.csv')
+vax_cat_df.to_csv('.\\vax_cleaned_categorizable.csv')

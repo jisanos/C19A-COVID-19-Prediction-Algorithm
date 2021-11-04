@@ -12,7 +12,7 @@ import numpy as np
 
 
 #%%
-vax_df = pd.read_csv('.\\vax_cleaned.csv', index_col=0)
+vax_df = pd.read_csv('.\\vax_cleaned_categorizable.csv', index_col=0)
 
 cases_df = pd.read_csv('.\\cases_cleaned_categorizable.csv', index_col=0)
 
@@ -26,9 +26,8 @@ filter_in_nan_counties = ( cases_df['Admin2'].isna() )
 
 cases_df = cases_df.loc[filter_in_nan_counties,:]
 
-# Dropping the county column
-cols_to_drop = ['Admin2','FIPS','Recovered','Active','Incident_Rate',
-                'Case_Fatality_Ratio',]
+# Dropping some columns
+cols_to_drop = ['Admin2','FIPS']
 
 cases_df.drop(cols_to_drop, inplace=True, axis=1)
 
@@ -45,7 +44,7 @@ rename = {'Date':'date'}
 vax_df = vax_df.rename(columns = rename)
 
 # Dropping FIPS
-cols_to_drop = ['FIPS','UID','Doses_shipped','Doses_admin']
+cols_to_drop = ['FIPS','UID']
 
 vax_df.drop(cols_to_drop,inplace=True,axis=1)
 

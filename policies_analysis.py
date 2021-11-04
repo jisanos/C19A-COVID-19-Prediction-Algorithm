@@ -8,19 +8,19 @@ data
 """
 # %%
 import pandas as pd
-import glob
+# import glob
 import numpy as np
 import matplotlib.pyplot as plt
-import re
+# import re
 import nltk
 
 # nltk.download('stopwords')
 from nltk.corpus import stopwords
-from nltk.stem.porter import PorterStemmer
-from nltk.tokenize import RegexpTokenizer
-from nltk.stem.snowball import SnowballStemmer
+# from nltk.stem.porter import PorterStemmer
+# from nltk.tokenize import RegexpTokenizer
+# from nltk.stem.snowball import SnowballStemmer
 # nltk.download('wordnet')
-from nltk.stem.wordnet import WordNetLemmatizer
+# from nltk.stem.wordnet import WordNetLemmatizer
 import seaborn as sns
 from wordcloud import WordCloud
 # import snowballstemmer
