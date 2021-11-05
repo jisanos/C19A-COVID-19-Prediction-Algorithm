@@ -185,3 +185,19 @@ sns.lmplot(x='Doses_admin',y='New_Confirmed',data = us_country_all_vax)
 
 # %%
 sns.lmplot(x='Doses_admin',y='New_Deaths',data = us_country_all_vax)
+
+# %%
+sns.lmplot(x='New_Confirmed',y='New_Deaths',data = us_country_all_vax)
+# %%
+
+keys = us_state_all_vax.columns[27:]
+
+# %%
+for key in keys:
+    sns.lmplot(x=key,y = 'New_Confirmed',data = us_state_all_vax[us_state_all_vax[key] > 0])
+
+# %%
+
+sns.lmplot(x='mask',y = 'New_Confirmed',data = us_state_all_vax[us_state_all_vax['mask'] > 0])
+# %%
+sns.lineplot(data= us_state_all_vax, x='date',y='covid')

@@ -8,27 +8,30 @@ data
 """
 # %%
 import pandas as pd
-# import glob
 import numpy as np
 import matplotlib.pyplot as plt
-# import re
+import re
 import nltk
 
-# nltk.download('stopwords')
 from nltk.corpus import stopwords
 # from nltk.stem.porter import PorterStemmer
 # from nltk.tokenize import RegexpTokenizer
 # from nltk.stem.snowball import SnowballStemmer
-# nltk.download('wordnet')
 # from nltk.stem.wordnet import WordNetLemmatizer
 import seaborn as sns
 from wordcloud import WordCloud
+import gensim
+from gensim.models import Word2Vec, Doc2Vec
+from gensim.models.doc2vec import TaggedDocument
 # import snowballstemmer
 
-# Importing, merging, and creating a column containing the state of policies.
+from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
 
 import data_imports
+# %% Downloads of stopwords and wordnet
+# nltk.download('stopwords')
 
+# nltk.download('wordnet')
 # %%
 
 policies_df = data_imports.policy_data_current()
@@ -114,35 +117,49 @@ for col in cols:
 policies_df = policies_df.groupby(["date", "State"]).agg(dic).reset_index()
 
 
-# %%
-# policies_df
+
 
 
 # %%
 # Merging the combined data from before.
-# This will make it so that if all are nans then just leave nan
-# but if there is a Y then replace with Y
+# This will make it so that if all are nans then place 0
+# but if there is a Y then replace with 1
+# this binary approach will make it usable when model
+# def reducto(df):
+#     dic = {}
 
-def reducto(df):
-    dic = {}
+#     cols = list(df.columns)[3:]  # Only the columns 4th and forward
 
-    cols = list(df.columns)[3:]  # Only the columns 4th and forward
+#     for col in cols:
+#         for val in df[col]:
+#             val = val.strip()  # Remove any whitespaces
+#             split = val.split(',')  # Split on comma
+#             if len(split) > 1:
+#                 if "Y" in split:
+#                     dic[col] = 'Y'
+#                 else:
+#                     dic[col] = np.nan
+#     return pd.Series(dic, index=cols, dtype=object)
+    
 
-    for col in cols:
-        for val in df[col]:
-            val = val.strip()  # Remove any whitespaces
-            split = val.split(',')  # Split on comma
-            if len(split) > 1:
-                if "Y" in split:
-                    dic[col] = "Y"
-                else:
-                    dic[col] = np.nan
-    return pd.Series(dic, index=cols, dtype=object)
+    
 
+# policies_df = policies_df.groupby(
+#     ["date", "State", "policy"]).apply(reducto).reset_index()
 
-policies_df = policies_df.groupby(
-    ["date", "State", "policy"]).apply(reducto).reset_index()
+# %%Vectorized method of previous block, more efficient
 
+cols = list(policies_df.columns)[3:]  # Only the columns 4th and forward
+
+for col in cols:
+
+    policies_df[col] = policies_df[col].str.strip()
+    
+    filter_Y = policies_df[col].str.lower().str.contains('y')
+    
+    policies_df.loc[filter_Y, col] = 1
+    
+    policies_df.loc[np.logical_not(filter_Y), col] = 0
 
 # %%
 # Counting most common words, inspired by
@@ -190,8 +207,8 @@ tokenizer = nltk.WordPunctTokenizer()
 
 
 def rem_dup(x):
-    # replace(",","").replace(".","").replace(";","")#removing commas,periods,
-    # semicolons
+    #removing commas,periods,semicolons
+
     x = x.strip(",.;")
 
     # words = x.split(' ') #splitting words by space
@@ -244,25 +261,27 @@ def pointless(x):
 policies_df['policy'] = policies_df['policy'].apply(pointless)
 
 
-# %%
-# Removing special characters from words (hashtags, numbers etc.)
+# %% Removing special characters from words (hashtags, numbers etc.)
 
-# def remove_special(x):
-#     words = str(x).split(" ")
-#     stripped = []
 
-#     for word in words:
-# #         print(word)
-# #         print(re.sub(r'[^A-Za-z]+','',word))
+def remove_special(x):
+    words = str(x).split(" ")
+    stripped = []
 
-#         if word != (re.sub(r'[^A-Za-z]+','',word)):
-#             print(word)
-#             print(re.sub(r'[^A-Za-z]+','',word))
-#         #stripped.append(re.sub(r'A-Za-z]+','',word))
+    for word in words:
+        
+        subed_word = re.sub(r'[^A-Za-z]+','',word)
+        
+        if word != (subed_word):
+            print(word)
+            print(subed_word)
+        stripped.append(subed_word)
+        
+    return ' '.join(stripped)
 
-# policies_df['policy'].apply(remove_special)
+policies_df['policy'] = policies_df['policy'].apply(remove_special)
 
-# Not applying because the changes might be too altering.
+
 
 
 # %%
@@ -316,14 +335,90 @@ wordcloud = WordCloud(width=1600, height=1600, collocations=False,
 plt.figure(figsize=(20, 20))
 plt.imshow(wordcloud)
 
+# %% Begining vectorization of words
+
+# card_docs = [TaggedDocument(doc.split(' '),[i])
+#              for i, doc in enumerate(policies_df.policy)]
+
+# model = Doc2Vec(vector_size=64, min_count=1,epochs=20, window= 2, workers=6)
+
+# model.build_vocab(card_docs)
+
+# model.train(card_docs, total_examples=model.corpus_count, epochs=model.epochs)
+# # %%
+# card2vec = [model.infer_vector((policies_df['policy'][i].split(' ')))
+#             for i in range(0, len(policies_df['policy']))]
+
+
+# # %%
+
+# corpus = [] # Contains list of cells in policy column
+
+# [corpus.append(doc.split(" ")) for doc in policies_df.policy]
+
+# model = Word2Vec(corpus)
+
+# X = list(model.wv.index_to_key)
+
+# # %%
+# print(model.wv.most_similar('death'))
+
+# # %%
+
+# model = Word2Vec(corpus, min_count=1, vector_size=300, workers=6)
+# print(model.wv.similarity('death','vaccine'))
+# print(model.wv.doesnt_match('covid'))
+# print(model.wv.most_similar('distancing'))
+# %%
+
+corpus = list(policies_df.policy)
+
+
+
+#countvectorizer = CountVectorizer(analyzer='word',stop_words='english')
+
+tfidfvectorizer = TfidfVectorizer(analyzer='word',stop_words='english',min_df = 8)
+
+#count_wm = countvectorizer.fit_transform(corpus)
+tfidf_wm = tfidfvectorizer.fit_transform(corpus)
+
+#count_tokens = countvectorizer.get_feature_names_out()
+
+tfidf_tokens = tfidfvectorizer.get_feature_names_out()
+
+# Renaming some of the tokens
+tfidf_tokens[tfidf_tokens == 'date'] = 'DATE'
+tfidf_tokens[tfidf_tokens == 'policy'] = 'POLICY'
+
+#print(count_tokens,tfidf_tokens)
+
+#df_countvect = pd.DataFrame(data =count_wm.toarray(),columns=count_tokens)
+
+df_tfidfvect = pd.DataFrame(data =tfidf_wm.toarray(),columns=tfidf_tokens)
+
+# %% Word 2 vec
+
+# corpus = [doc.split(" ") for doc in policies_df.policy]
+
+# model = Word2Vec(corpus, min_count=1, vector_size=4)
+
+# model.save('model.bin')
+
+# model = gensim.models.KeyedVectors.load_word2vec_format('model.bin',binary=True)
+
+# %%
+
+# policies_df[tfidf_tokens] = df_tfidfvect
+policies_df = pd.concat([policies_df,df_tfidfvect], axis=1)
+
 # %%
 policies_df.to_csv('.\\policies_cleaned.csv')
 
 # %%
 # Splitting into train,val,test
 
-# %% [markdown]
-# #### Policies Dictionary
+# %% Policies Dictionary
+# 
 #
 # No column dictionary was provided in the repository for these.
 #

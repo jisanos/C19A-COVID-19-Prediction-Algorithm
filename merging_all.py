@@ -55,7 +55,7 @@ merge_glob = cases_df.merge(vax_df,how='outer',on = cols_to_merge_on)
 
 
 # %% Only keeping important columns from policies
-policies_df = policies_df[['date', 'State', 'policy', 'word_count']]
+# policies_df = policies_df[['date', 'State', 'policy', 'word_count']]
 
 # %% renaming state column
 rename = {'State':'Province_State'}
