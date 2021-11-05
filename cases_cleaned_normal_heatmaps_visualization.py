@@ -22,6 +22,10 @@ cases_cleaned = pd.read_csv(".\\cases_cleaned_categorizable.csv")
 cases_cleaned = cases_cleaned[cases_cleaned['Country_Region'].notna() & 
               cases_cleaned['Province_State'].isna() &
               cases_cleaned['Admin2'].isna()]
+
+#taking out the unknown
+cases_cleaned = cases_cleaned[cases_cleaned['Province_State'] != 'Unknown']
+cases_cleaned = cases_cleaned[cases_cleaned['Country_Region'] != 'Unknown']
 # %%
 
 #turning the data to datatime and then sorting it by date and groupby with date and 
