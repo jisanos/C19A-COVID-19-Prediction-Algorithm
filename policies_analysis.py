@@ -218,8 +218,9 @@ def rem_dup(x):
     stripped_words = [word.strip() for word in words]
 
     # This will only keep unique words/remove duplicate words
-    unique_words = set(stripped_words)
-
+    # unique_words = set(stripped_words)
+    unique_words = stripped_words # Disabled to test with dups
+    
     # Turning the list back to a string
     unique_words_str = " ".join(unique_words)
 
@@ -275,7 +276,12 @@ def remove_special(x):
         if word != (subed_word):
             print(word)
             print(subed_word)
-        stripped.append(subed_word)
+        
+        # Making sure the word has a nelght before appending
+        if len(subed_word) == 0:
+            pass
+        else:
+            stripped.append(subed_word)
         
     return ' '.join(stripped)
 

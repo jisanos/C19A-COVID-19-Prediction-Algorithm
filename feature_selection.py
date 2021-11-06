@@ -193,9 +193,18 @@ sns.lmplot(x='New_Confirmed',y='New_Deaths',data = us_country_all_vax)
 keys = us_state_all_vax.columns[27:]
 
 # %%
-for key in keys:
+for key in keys[:40]:
     sns.lmplot(x=key,y = 'New_Confirmed',data = us_state_all_vax[us_state_all_vax[key] > 0])
+    plt.plot()
 
+# %%
+corr = pd.DataFrame()
+for key in keys:
+    data = pd.DataFrame(us_state_all_vax[[key]].corrwith(
+        us_state_all_vax['New_Confirmed'] / us_state_all_vax['New_Confirmed'].max()))
+    corr = corr.append(data)
+
+corr.sort_values(by=0, inplace=True,ascending=False)
 # %%
 
 sns.lmplot(x='mask',y = 'New_Confirmed',data = us_state_all_vax[us_state_all_vax['mask'] > 0])
