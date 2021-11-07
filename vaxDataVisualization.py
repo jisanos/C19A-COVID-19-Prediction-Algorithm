@@ -27,9 +27,26 @@ vax_cleaned_categorizable= vax_cleaned_categorizable[vax_cleaned_categorizable["
 #Filtering cases cleaned categorizable for only country region uses
 CountryUsesOnly = vax_cleaned_categorizable[vax_cleaned_categorizable['Country_Region'].notna() & 
               vax_cleaned_categorizable['Province_State'].isna()]
+#taking out the unknown
+CountryUsesOnly = CountryUsesOnly[CountryUsesOnly['Province_State'] != 'Unknown']
+CountryUsesOnly = CountryUsesOnly[CountryUsesOnly['Country_Region'] != 'Unknown']
 #%%
+# %%
+# group by country region
+group_CSSE = CountryUsesOnly[['Country_Region','Stage_One_Doses']].sort_values('Stage_One_Doses',ascending=False)
 
+#a bar plot to show the top 5 first dosis of countries
+sns.set(rc = {'figure.figsize':(8,8)})
+sns.barplot(x='Country_Region', y='Stage_One_Doses', data = group_CSSE.head(5)).set_title('Top 5 country regions with where people have taken the first dosis the most')
+plt.show()
+# %%
+# group by country region
+group_CSSE = CountryUsesOnly[['Country_Region','Stage_Two_Doses']].sort_values('Stage_Two_Doses',ascending=False)
 
+#a bar plot to show the top 5 second dosis of countries
+sns.set(rc = {'figure.figsize':(9,9)})
+sns.barplot(x='Country_Region', y='Stage_Two_Doses', data = group_CSSE.head(10)).set_title('Top 5 country regions with where people have taken the second dosis the most')
+plt.show()
 # %%
 # group by country region
 group_CSSE = CountryUsesOnly[['Country_Region','Doses_admin']].sort_values("Doses_admin",ascending=False)
