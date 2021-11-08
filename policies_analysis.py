@@ -411,11 +411,16 @@ df_tfidfvect = pd.DataFrame(data =tfidf_wm.toarray(),columns=tfidf_tokens)
 # model.save('model.bin')
 
 # model = gensim.models.KeyedVectors.load_word2vec_format('model.bin',binary=True)
-
+# %% Check what state has the most policies
+test = policies_df.groupby('State')['word_count'].sum().sort_values()
 # %%
 
 # policies_df[tfidf_tokens] = df_tfidfvect
 policies_df = pd.concat([policies_df,df_tfidfvect], axis=1)
+# New York has the highest word count folloder by connnecticut and colorado.
+# This means they are the top contenders for using tfidf for training.
+
+# %% Redo the tfidf but per state
 
 # %%
 policies_df.to_csv('.\\policies_cleaned.csv')
