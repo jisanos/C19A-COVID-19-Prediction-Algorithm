@@ -48,6 +48,7 @@ plt.suptitle("Province state regarding the correlation of confirmed cases and de
 # bar plot regarding the top 5 death cases when it comes to province state
 #group_CSSE = ProvinceUsesOnly[['Province_State','Deaths']].groupby('Province_State').max().reset_index().sort_values('Deaths',ascending=False)
 group_CSSE = ProvinceUsesOnly[['Province_State','Deaths']].sort_values('Deaths',ascending=False)
+#sns.set(rc = {'figure.figsize':(15,15)})
 sns.barplot(x='Province_State', y='Deaths', data = group_CSSE.head(5)).set_title('Top 5 province states with most deaths')
 plt.show()
 # %%
