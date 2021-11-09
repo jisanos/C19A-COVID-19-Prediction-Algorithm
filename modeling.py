@@ -9,11 +9,22 @@ Script will serve to test and model various algos.
 
 import pandas as pd
 import numpy as np
-from sklearn.model_selection import train_test_split
-from sklearn.ensemble import RandomForestRegressor
 import seaborn as sns
 import matplotlib.pyplot as plt
-from sklearn.metrics import mean_squared_error
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import (RandomForestRegressor,RandomForestClassifier, 
+                              BaggingClassifier, AdaBoostClassifier,
+                              GradientBoostingRegressor)
+from sklearn.linear_model import LinearRegression, Ridge
+from sklearn.tree import DecisionTreeClassifier, ExtraTreeClassifier
+from sklearn.svm import SVC
+from sklearn.metrics import (mean_squared_error, mean_absolute_error,
+                             mean_absolute_percentage_error)
+from sklearn.neighbors import KNeighborsRegressor, RadiusNeighborsClassifier
+from sklearn.naive_bayes import GaussianNB
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis, QuadraticDiscriminantAnalysis
+
+
 
 # %% Importing csv and separating between state only and country only
 
@@ -63,12 +74,11 @@ def test_plotter(name, prediction, X_test, y_test):
     plt.show()
 
 # %% Functions for modeling and testing various algorithms
-def model_tester(model, data, state, extra_cols_drop = []):
+def model_tester(model, train_df, test_df, state, title, extra_cols_drop = []):
     
-    # Selecting the state
-    data = data[data['Province_State'] == state].copy().fillna(0)
-    # Splitting into train test
-    train_df,test_df = train_test_split(data, test_size=0.3, train_size=0.7)
+
+    
+    
     train_df = train_df.sort_values('date').set_index('date')
     test_df = test_df.sort_values('date').set_index('date')
     
@@ -94,12 +104,116 @@ def model_tester(model, data, state, extra_cols_drop = []):
     model.fit(X_train, y_train)
     
     
-    train_plotter(state, model.predict(X_train), X_train, y_train)
     
-    test_plotter(state, model.predict(X_test),X_test, y_test)
+    train_plotter(state+" "+title, model.predict(X_train), X_train, y_train)
+    
+    test_plotter(state+" "+title, model.predict(X_test),X_test, y_test)
+    print()
+    print(state+" "+title)
+    print("Metrics on whole prediction:")
+    print("Root Mean Sqrt Err: ",mean_squared_error(y_test, model.predict(X_test), squared = False))
+    #print("Mean Abs Err",mean_absolute_error(y_test, model.predict(X_test)))
+    #print("Mean Abs % Err", mean_absolute_percentage_error(y_test, model.predict(X_test)))
+    
+    lenght = len(y_test)
+    half = int(round(lenght / 2)) + 20
+    print("Metrics on only half prediction (2021 - ...):")
+    print("Root Mean Sqrt Err: ",mean_squared_error(np.array(y_test)[half:], model.predict(X_test)[half:], squared = False))
+    #print("Mean Abs Err",mean_absolute_error(y_test[half:], model.predict(X_test)[half:]))
+    #print("Mean Abs % Err", mean_absolute_percentage_error(y_test[half:], model.predict(X_test)[half:]))
 
-# %%
+# %% 
+
+extra = ['Doses_alloc','Doses_shipped','New_Doses_alloc','New_Doses_shipped',
+                 'New_Stage_One_Doses','New_Stage_Two_Doses','Doses_admin','New_Doses_admin',
+                 'Stage_One_Doses','Stage_Two_Doses',
+                 
+                 'Restrict/Close','Opening (State)','Deferring to County',
+                 'Testing','Education','Health/Medical','Emergency Level',
+                 'Transportation','Budget','Social Distancing', 'Other','Vaccine','Opening (County)']
+
+tfidf_cols = us_state_all_vax.columns[25:]
+
+state = 'New York'
+
+# %% Train test data
+
+
+
+# Selecting the state
+data = us_state_all_vax[us_state_all_vax['Province_State'] == state].copy().fillna(0)
+# Splitting into train test
+train_df,test_df = train_test_split(data, test_size=0.3, train_size=0.7)
+
+# %% Random Forest Regressor
 
 rfr = RandomForestRegressor(n_estimators = 1000)
 
-model_tester(rfr, us_state_all_vax, 'New York')
+model_tester(rfr, train_df,test_df, state,"Random Forest Regressor",tfidf_cols)
+
+
+
+# %% Linear Regression
+lr = LinearRegression()
+
+model_tester(lr, train_df,test_df, state,"Linear Regression",tfidf_cols)
+
+# %% Decision Tree Classifier
+
+dtc = DecisionTreeClassifier()
+
+model_tester(dtc, train_df,test_df, state,"Decision Tree Classifier",tfidf_cols)
+
+# This one has a small tendency to improve with the TFIDF columns
+
+# %% Support vector machine
+svc = SVC()
+
+model_tester(svc, train_df,test_df, state,"Support Vector Machine",tfidf_cols)
+
+
+
+# %% Random Forest Classifier
+
+# rfc = RandomForestClassifier(max_depth = 2)
+
+# model_tester(rfc, train_df,test_df, state,"Random Forest Classifier")
+
+# %% KNeighbors Regressor
+
+# knr = KNeighborsRegressor(n_neighbors = 8)
+
+# model_tester(knr, train_df,test_df, state,"KNeighbors Regressor",tfidf_cols)
+
+# %% Ridge Regression
+
+ridge = Ridge(alpha=1.0, random_state=241)
+
+model_tester(ridge, train_df,test_df, state,"Ridge Regression",tfidf_cols)
+# %% Naive Bayes GaussianNB
+
+gnb = GaussianNB()
+
+model_tester(gnb, train_df,test_df, state,"Naive Bayes GaussianNB",tfidf_cols)
+
+# %% Extra Tree Classifier
+
+etc = ExtraTreeClassifier()
+
+model_tester(etc, train_df,test_df, state,"Extra Tree Classifier",tfidf_cols)
+# %% Bagging Classifier
+
+# bc = BaggingClassifier()
+
+# model_tester(bc, train_df,test_df, state,"Bagging Classifier")
+# %% Ada Boost Classifier
+
+# abc = AdaBoostClassifier()
+
+# model_tester(abc, train_df,test_df, state,"Ada Boost Classifier")
+
+# %% Gradient Boosting Regressor
+gbr = GradientBoostingRegressor()
+
+model_tester(gbr, train_df,test_df, state,"Gradient Boosting Regressor",tfidf_cols)
+

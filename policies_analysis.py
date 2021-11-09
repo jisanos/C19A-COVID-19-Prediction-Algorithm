@@ -23,6 +23,7 @@ from wordcloud import WordCloud
 import gensim
 from gensim.models import Word2Vec, Doc2Vec
 from gensim.models.doc2vec import TaggedDocument
+from sklearn.decomposition import PCA
 # import snowballstemmer
 
 from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
@@ -340,7 +341,7 @@ wordcloud = WordCloud(width=1600, height=1600, collocations=False,
                       background_color='black').generate(" ".join(total_words))
 plt.figure(figsize=(20, 20))
 plt.imshow(wordcloud)
-
+plt.show()
 # %% Begining vectorization of words
 
 # card_docs = [TaggedDocument(doc.split(' '),[i])
@@ -375,32 +376,32 @@ plt.imshow(wordcloud)
 # print(model.wv.similarity('death','vaccine'))
 # print(model.wv.doesnt_match('covid'))
 # print(model.wv.most_similar('distancing'))
-# %%
+# %% TFIDF
 
-corpus = list(policies_df.policy)
+# corpus = list(policies_df.policy)
 
 
 
-#countvectorizer = CountVectorizer(analyzer='word',stop_words='english')
+# #countvectorizer = CountVectorizer(analyzer='word',stop_words='english')
 
-tfidfvectorizer = TfidfVectorizer(analyzer='word',stop_words='english',min_df = 8)
+# tfidfvectorizer = TfidfVectorizer(analyzer='word',stop_words='english',min_df = 8)
 
-#count_wm = countvectorizer.fit_transform(corpus)
-tfidf_wm = tfidfvectorizer.fit_transform(corpus)
+# #count_wm = countvectorizer.fit_transform(corpus)
+# tfidf_wm = tfidfvectorizer.fit_transform(corpus)
 
-#count_tokens = countvectorizer.get_feature_names_out()
+# #count_tokens = countvectorizer.get_feature_names_out()
 
-tfidf_tokens = tfidfvectorizer.get_feature_names_out()
+# tfidf_tokens = tfidfvectorizer.get_feature_names_out()
 
-# Renaming some of the tokens
-tfidf_tokens[tfidf_tokens == 'date'] = 'DATE'
-tfidf_tokens[tfidf_tokens == 'policy'] = 'POLICY'
+# # Renaming some of the tokens
+# tfidf_tokens[tfidf_tokens == 'date'] = 'DATE'
+# tfidf_tokens[tfidf_tokens == 'policy'] = 'POLICY'
 
-#print(count_tokens,tfidf_tokens)
+# #print(count_tokens,tfidf_tokens)
 
-#df_countvect = pd.DataFrame(data =count_wm.toarray(),columns=count_tokens)
+# #df_countvect = pd.DataFrame(data =count_wm.toarray(),columns=count_tokens)
 
-df_tfidfvect = pd.DataFrame(data =tfidf_wm.toarray(),columns=tfidf_tokens)
+# df_tfidfvect = pd.DataFrame(data =tfidf_wm.toarray(),columns=tfidf_tokens)
 
 # %% Word 2 vec
 
@@ -412,21 +413,83 @@ df_tfidfvect = pd.DataFrame(data =tfidf_wm.toarray(),columns=tfidf_tokens)
 
 # model = gensim.models.KeyedVectors.load_word2vec_format('model.bin',binary=True)
 # %% Check what state has the most policies
-test = policies_df.groupby('State')['word_count'].sum().sort_values()
-# %%
-
-# policies_df[tfidf_tokens] = df_tfidfvect
-policies_df = pd.concat([policies_df,df_tfidfvect], axis=1)
+# test = policies_df.groupby('State')['word_count'].sum().sort_values()
 # New York has the highest word count folloder by connnecticut and colorado.
 # This means they are the top contenders for using tfidf for training.
 
-# %% Redo the tfidf but per state
+# %% Normalizing values
+
+# %% Doing a PCA to reduce to 3 components
+
+# pca = PCA() 
+# principal_components = pca.fit_transform(df_tfidfvect)
+
+# %%
+
+# sns.lineplot(x=np.arange(1,len(pca.explained_variance_ratio_)+1),
+#              y=np.cumsum(pca.explained_variance_ratio_))
+# plt.title('PCA of TFIDF data (Total info held after X amount of components)')
+# plt.ylabel('Explained Variance Sum')
+# plt.xlabel('Principal Components')
+# plt.plot()
+
+# %% TFIDF per state
+
+def to_tfidf(x):
+    
+    x = x.reset_index(drop=True)
+    
+    corpus = x.policy
+    
+    # countvectorizer = CountVectorizer(analyzer='word',stop_words='english', min_df = 8)
+    tfidfvectorizer = TfidfVectorizer(analyzer='word',stop_words='english',min_df = 8)
+    
+    
+    # count_wm = countvectorizer.fit_transform(corpus)
+    tfidf_wm = tfidfvectorizer.fit_transform(corpus)
+
+    
+    # count_tokens = countvectorizer.get_feature_names_out()
+    tfidf_tokens = tfidfvectorizer.get_feature_names_out()
+
+    # # Renaming some of the tokens
+    
+    # count_tokens[count_tokens == 'date'] = 'DATE'
+    # count_tokens[count_tokens == 'policy'] = 'POLICY'
+    
+    tfidf_tokens[tfidf_tokens == 'date'] = 'DATE'
+    tfidf_tokens[tfidf_tokens == 'policy'] = 'POLICY'
+    
+    
+    # df_countvect = pd.DataFrame(data =count_wm.toarray(),columns=count_tokens)
+    
+    tfidf_df= pd.DataFrame(data = tfidf_wm.toarray(),columns = tfidf_tokens)
+    
+    # new_x = pd.concat([x,df_countvect],axis=1)
+    new_x = pd.concat([x,tfidf_df],axis=1)
+    
+    
+    
+    return new_x
+
+policies_df = policies_df.groupby('State').apply(to_tfidf).reset_index(drop=True)
+
+
+# %% Concattenating
+
+# policies_df[tfidf_tokens] = df_tfidfvect
+
+
+
+# policies_df = pd.concat([policies_df,df_tfidfvect], axis=1)
+# policies_df = pd.concat([policies_df, pd.DataFrame(principal_components)], axis = 1)
+
+
+
 
 # %%
 policies_df.to_csv('.\\policies_cleaned.csv')
 
-# %%
-# Splitting into train,val,test
 
 # %% Policies Dictionary
 # 
