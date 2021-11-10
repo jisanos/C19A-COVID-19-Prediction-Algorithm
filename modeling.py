@@ -19,7 +19,8 @@ from sklearn.linear_model import LinearRegression, Ridge
 from sklearn.tree import DecisionTreeClassifier, ExtraTreeClassifier
 from sklearn.svm import SVC
 from sklearn.metrics import (mean_squared_error, mean_absolute_error,
-                             mean_absolute_percentage_error)
+                             mean_absolute_percentage_error,
+                             r2_score)
 from sklearn.neighbors import KNeighborsRegressor, RadiusNeighborsClassifier
 from sklearn.naive_bayes import GaussianNB
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis, QuadraticDiscriminantAnalysis
@@ -104,23 +105,35 @@ def model_tester(model, train_df, test_df, state, title, extra_cols_drop = []):
     model.fit(X_train, y_train)
     
     
+    y_train_pred = model.predict(X_train)
+    y_test_pred = model.predict(X_test)
     
-    train_plotter(state+" "+title, model.predict(X_train), X_train, y_train)
+    # y_test_pred_df = pd.DataFrame(y_test_pred)
     
-    test_plotter(state+" "+title, model.predict(X_test),X_test, y_test)
+    
+    # # Checking if cumulative data translates to good daily data
+    # new_conf_pred = y_test_pred_df[0].sub(y_test_pred_df[0].shift().fillna(0)).abs()
+    
+    # test_plotter(state+" "+title, new_conf_pred, y_test, test_df['New_Confirmed'])
+    
+    train_plotter(state+" "+title, y_train_pred, X_train, y_train)
+    test_plotter(state+" "+title, y_test_pred,X_test, y_test)
+    
     print()
     print(state+" "+title)
     print("Metrics on whole prediction:")
-    print("Root Mean Sqrt Err: ",mean_squared_error(y_test, model.predict(X_test), squared = False))
-    #print("Mean Abs Err",mean_absolute_error(y_test, model.predict(X_test)))
-    #print("Mean Abs % Err", mean_absolute_percentage_error(y_test, model.predict(X_test)))
+    print("Root Mean Sqrt Err: ",mean_squared_error(y_test, y_test_pred, squared = False))
+    print("R2 Score: ", r2_score(y_test, y_test_pred))
     
-    lenght = len(y_test)
-    half = int(round(lenght / 2)) + 20
+    X_test_with_vax = X_test[X_test['Doses_admin'] > 0] # Selecting only when vaccines started to be administered
+    
+    
+    
+    lenght = len(X_test_with_vax)
+    
     print("Metrics on only half prediction (2021 - ...):")
-    print("Root Mean Sqrt Err: ",mean_squared_error(np.array(y_test)[half:], model.predict(X_test)[half:], squared = False))
-    #print("Mean Abs Err",mean_absolute_error(y_test[half:], model.predict(X_test)[half:]))
-    #print("Mean Abs % Err", mean_absolute_percentage_error(y_test[half:], model.predict(X_test)[half:]))
+    print("Root Mean Sqrt Err: ",mean_squared_error(np.array(y_test)[lenght:], y_test_pred[lenght:], squared = False))
+    print("R2 Score: ", r2_score(np.array(y_test)[lenght:], y_test_pred[lenght:]))
 
 # %% 
 
@@ -154,9 +167,9 @@ model_tester(rfr, train_df,test_df, state,"Random Forest Regressor",tfidf_cols)
 
 
 # %% Linear Regression
-lr = LinearRegression()
+# lr = LinearRegression()
 
-model_tester(lr, train_df,test_df, state,"Linear Regression",tfidf_cols)
+# model_tester(lr, train_df,test_df, state,"Linear Regression",tfidf_cols)
 
 # %% Decision Tree Classifier
 
@@ -167,9 +180,9 @@ model_tester(dtc, train_df,test_df, state,"Decision Tree Classifier",tfidf_cols)
 # This one has a small tendency to improve with the TFIDF columns
 
 # %% Support vector machine
-svc = SVC()
+# svc = SVC()
 
-model_tester(svc, train_df,test_df, state,"Support Vector Machine",tfidf_cols)
+# model_tester(svc, train_df,test_df, state,"Support Vector Machine",tfidf_cols)
 
 
 
@@ -187,9 +200,9 @@ model_tester(svc, train_df,test_df, state,"Support Vector Machine",tfidf_cols)
 
 # %% Ridge Regression
 
-ridge = Ridge(alpha=1.0, random_state=241)
+# ridge = Ridge(alpha=1.0, random_state=241)
 
-model_tester(ridge, train_df,test_df, state,"Ridge Regression",tfidf_cols)
+# model_tester(ridge, train_df,test_df, state,"Ridge Regression",tfidf_cols)
 # %% Naive Bayes GaussianNB
 
 gnb = GaussianNB()
