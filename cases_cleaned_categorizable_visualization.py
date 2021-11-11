@@ -51,6 +51,16 @@ group_CSSE = ProvinceUsesOnly[['Province_State','Deaths']].sort_values('Deaths',
 #sns.set(rc = {'figure.figsize':(15,15)})
 sns.barplot(x='Province_State', y='Deaths', data = group_CSSE.head(5)).set_title('Top 5 province states with most deaths')
 plt.show()
+
+# %%
+# group by country region
+group_CSSE = ProvinceUsesOnly[['Province_State','Deaths']].sort_values('Deaths',ascending=False)
+
+#plot a pie chart regarding the top 5 deaths of countries
+group_CSSE = group_CSSE.set_index('Province_State')
+group_CSSE.head(10).plot.pie(y='Deaths', figsize=(12, 9),autopct='%1.1f%%',legend=None)
+plt.title("Top 10 death cases by Province State", bbox={'facecolor':'0.8', 'pad':5})
+
 # %%
 
 # group by province state but in order of the highest confirmed cases
@@ -58,6 +68,24 @@ group_CSSE = ProvinceUsesOnly[['Province_State','Confirmed']].sort_values('Confi
 #bar plot regarding the top 5 total confirmed cases when it comes to province state
 sns.barplot(x='Province_State', y='Confirmed', data = group_CSSE.head(5)).set_title('Top 5 province states with most confirmed')
 plt.show()
+
+# %%
+# group by country region
+group_CSSE = ProvinceUsesOnly[['Province_State','Deaths']].sort_values('Deaths',ascending=False)
+
+#plot a pie chart regarding the top 5 deaths of countries
+group_CSSE = group_CSSE.set_index('Province_State')
+group_CSSE.head(10).plot.pie(y='Deaths', figsize=(12, 9),autopct='%1.1f%%',legend=None)
+plt.title("Top 10 death cases by Province State", bbox={'facecolor':'0.8', 'pad':5})
+
+# %%
+# group by country region
+group_CSSE = ProvinceUsesOnly[['Province_State','Confirmed']].sort_values('Confirmed',ascending=False)
+
+#plot a pie chart regarding the top 5 deaths of countries
+group_CSSE = group_CSSE.set_index('Province_State')
+group_CSSE.head(10).plot.pie(y='Confirmed', figsize=(11, 11),autopct='%1.1f%%',legend=None)
+plt.title("Top 10 confirmed cases by Province State", bbox={'facecolor':'0.8', 'pad':5})
 
 # %%
 
@@ -113,7 +141,7 @@ group_CSSE = CountryUsesOnly[['Country_Region','Deaths']].sort_values("Deaths",a
 #plot a pie chart regarding the top 5 deaths of countries
 group_CSSE = group_CSSE.set_index('Country_Region')
 group_CSSE.head(10).plot.pie(y='Deaths', figsize=(12, 9),autopct='%1.1f%%',legend=None)
-plt.title("Death cases by country region", bbox={'facecolor':'0.8', 'pad':5})
+plt.title("Top 10 death cases by country region", bbox={'facecolor':'0.8', 'pad':5})
 # %%
 # group by country region
 group_CSSE = CountryUsesOnly[['Country_Region','Confirmed']].sort_values("Confirmed",ascending=False)
@@ -139,8 +167,35 @@ ProvinceUsesOnlyForUs = ProvinceUsesOnly[ProvinceUsesOnly['Country_Region'] == '
 #US states most deaths only
 group_CSSE = ProvinceUsesOnlyForUs[['Province_State','Deaths']].sort_values('Deaths',ascending=False)
 #bar plot regarding the top 5 total confirmed cases when it comes to province state
-sns.barplot(x='Province_State', y='Deaths', data = group_CSSE.head(5)).set_title('Top 5 US States with most deaths')
+sns.barplot(x='Province_State', y='Deaths', data = group_CSSE.head(5)).set_title(
+    'Top 5 US States with most deaths')
 plt.show()
+
+# %%
+#US states most deaths only
+group_CSSE = ProvinceUsesOnlyForUs[['Province_State','Confirmed']].sort_values('Confirmed',ascending=False)
+#bar plot regarding the top 5 total confirmed cases when it comes to province state
+sns.barplot(x='Province_State', y='Confirmed', data = group_CSSE.head(5)).set_title('Top 5 US States with most confirmed cases')
+plt.show()
+
+# %%
+# group by country region
+group_CSSE = ProvinceUsesOnlyForUs[['Province_State','Confirmed']].sort_values('Confirmed',ascending=False)
+
+#plot a pie chart regarding the top 5 deaths of countries
+group_CSSE = group_CSSE.set_index('Province_State')
+group_CSSE.head(10).plot.pie(y='Confirmed', figsize=(12, 9),autopct='%1.1f%%',legend=None)
+plt.title("Top 10 US confirmed cases by Province State", bbox={'facecolor':'0.8', 'pad':5})
+
+
+# %%
+# group by country region
+group_CSSE = ProvinceUsesOnlyForUs[['Province_State','Deaths']].sort_values('Deaths',ascending=False)
+
+#plot a pie chart regarding the top 5 deaths of countries
+group_CSSE = group_CSSE.set_index('Province_State')
+group_CSSE.head(10).plot.pie(y='Deaths', figsize=(12, 9),autopct='%1.1f%%',legend=None)
+plt.title("Top 10 US death cases by Province State", bbox={'facecolor':'0.8', 'pad':5})
 
 # %%
 #Filtering cases cleaned categorizable for only province state uses

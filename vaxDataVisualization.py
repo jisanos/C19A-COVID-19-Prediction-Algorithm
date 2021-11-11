@@ -24,19 +24,27 @@ vax_cleaned_categorizable['Date']= pd.to_datetime(vax_cleaned_categorizable['Dat
 vax_cleaned_categorizable= vax_cleaned_categorizable[vax_cleaned_categorizable["Date"] == vax_cleaned_categorizable['Date'].max()]
 
 # %%
+'''
 #Filtering cases cleaned categorizable for only country region uses
 CountryUsesOnly = vax_cleaned_categorizable[vax_cleaned_categorizable['Country_Region'].notna() & 
               vax_cleaned_categorizable['Province_State'].isna()]
 #taking out the unknown
 CountryUsesOnly = CountryUsesOnly[CountryUsesOnly['Province_State'] != 'Unknown']
 CountryUsesOnly = CountryUsesOnly[CountryUsesOnly['Country_Region'] != 'Unknown']
-#%%
+'''
+# %%
+#Filtering cases cleaned categorizable for only country region uses
+CountryUsesOnly = vax_cleaned_categorizable[vax_cleaned_categorizable['Country_Region'].notna() & 
+              vax_cleaned_categorizable['Province_State'].isna()]
+#taking out the unknown
+CountryUsesOnly = CountryUsesOnly[CountryUsesOnly['Province_State'] != 'Unknown']
+CountryUsesOnly = CountryUsesOnly[CountryUsesOnly['Country_Region'] != 'Unknown']
 # %%
 # group by country region
 group_CSSE = CountryUsesOnly[['Country_Region','Stage_One_Doses']].sort_values('Stage_One_Doses',ascending=False)
 
-#a bar plot to show the top 5 first dosis of countries
-sns.set(rc = {'figure.figsize':(8,8)})
+#a bar plot to show the top 5 second dosis of countries
+sns.set(rc = {'figure.figsize':(9,9)})
 sns.barplot(x='Country_Region', y='Stage_One_Doses', data = group_CSSE.head(5)).set_title('Top 5 country regions with where people have taken the first dosis the most')
 plt.show()
 # %%
@@ -45,8 +53,30 @@ group_CSSE = CountryUsesOnly[['Country_Region','Stage_Two_Doses']].sort_values('
 
 #a bar plot to show the top 5 second dosis of countries
 sns.set(rc = {'figure.figsize':(9,9)})
-sns.barplot(x='Country_Region', y='Stage_Two_Doses', data = group_CSSE.head(10)).set_title('Top 5 country regions with where people have taken the second dosis the most')
+sns.barplot(x='Country_Region', y='Stage_Two_Doses', data = group_CSSE.head(5)).set_title('Top 5 country regions with where people have taken the second dosis the most')
 plt.show()
+
+# %%
+# group by country region
+group_CSSE = CountryUsesOnly[['Country_Region','Stage_One_Doses']].sort_values('Stage_One_Doses',ascending=False)
+
+#plot a pie chart regarding the top 5 deaths of countries
+group_CSSE = group_CSSE.set_index('Country_Region')
+group_CSSE.head(10).plot.pie(y='Stage_One_Doses', figsize=(10, 10),autopct='%1.1f%%',legend=None,shadow=True, startangle=140)
+plt.title('Top 10 country regions with where people have taken the first dosis the most', bbox={'facecolor':'0.8', 'pad':5})
+plt.show()
+
+# %%
+# %%
+# group by country region
+group_CSSE = CountryUsesOnly[['Country_Region','Stage_Two_Doses']].sort_values('Stage_Two_Doses',ascending=False)
+
+#plot a pie chart regarding the top 5 deaths of countries
+group_CSSE = group_CSSE.set_index('Country_Region')
+group_CSSE.head(10).plot.pie(y='Stage_Two_Doses', figsize=(10, 10),autopct='%1.1f%%',legend=None,shadow=True, startangle=140)
+plt.title('Top 10 country regions with where people have taken the second dosis the most', bbox={'facecolor':'0.8', 'pad':5})
+plt.show()
+
 # %%
 # group by country region
 group_CSSE = CountryUsesOnly[['Country_Region','Doses_admin']].sort_values("Doses_admin",ascending=False)
@@ -54,9 +84,17 @@ group_CSSE = CountryUsesOnly[['Country_Region','Doses_admin']].sort_values("Dose
 #plot a pie chart regarding the top 5 deaths of countries
 group_CSSE = group_CSSE.set_index('Country_Region')
 group_CSSE.head(10).plot.pie(y='Doses_admin', figsize=(10, 10),autopct='%1.1f%%',legend=None,shadow=True, startangle=140)
-plt.title("Doses of admin by country region", bbox={'facecolor':'0.8', 'pad':5})
+plt.title("Top 10 doses of admin by country region", bbox={'facecolor':'0.8', 'pad':5})
 plt.show()
 
+# %%
+# group by country region
+group_CSSE = CountryUsesOnly[['Country_Region','Doses_admin']].sort_values('Doses_admin',ascending=False)
+
+#a bar plot to show the top 5 second dosis of countries
+sns.set(rc = {'figure.figsize':(9,9)})
+sns.barplot(x='Country_Region', y='Doses_admin', data = group_CSSE.head(5)).set_title("Top 5 doses of admin by country region")
+plt.show()
 
 # %%
 '''
@@ -68,8 +106,10 @@ CountryUsesOnly_without_date_filter = vax_cleaned_categorizable_Without_Date_Fil
 # %%
 #filtering out the unknown values
 vax_cleaned_categorizable_Without_Date_Filter = vax_cleaned_categorizable_Without_Date_Filter[
-    vax_cleaned_categorizable_Without_Date_Filter['Country_Region'] != 'Unknown' & 
-              vax_cleaned_categorizable_Without_Date_Filter['Province_State'] != 'Unknown']
+    vax_cleaned_categorizable_Without_Date_Filter['Country_Region'] != 'Unknown']
+
+vax_cleaned_categorizable_Without_Date_Filter = vax_cleaned_categorizable_Without_Date_Filter[
+    vax_cleaned_categorizable_Without_Date_Filter['Province_State'] != 'Unknown']
 # %%
 #turning the data to datatime and then sorting it by date and groupby with date and 
 #confirm to find the max value of each date
@@ -140,3 +180,48 @@ sns.heatmap(group_CSSE, fmt="d", annot=True, cmap='YlGnBu',linewidths=.5)
 
 # %%
 
+# %%
+#Filtering cases cleaned categorizable for only province state uses
+ProvinceUsesOnly = vax_cleaned_categorizable[vax_cleaned_categorizable['Country_Region'].notna() & 
+              vax_cleaned_categorizable['Province_State'].notna()
+              ]
+
+#taking out the unknown
+ProvinceUsesOnly = ProvinceUsesOnly[ProvinceUsesOnly['Province_State'] != 'Unknown']
+ProvinceUsesOnly = ProvinceUsesOnly[ProvinceUsesOnly['Country_Region'] != 'Unknown']
+
+# %%
+#Filtering cases cleaned categorizable for only province state uses but for US states
+ProvinceUsesOnlyForUs = ProvinceUsesOnly[ProvinceUsesOnly['Country_Region'] == 'US']
+
+# %%
+#US states most deaths only
+group_CSSE = ProvinceUsesOnlyForUs[['Province_State','Stage_One_Doses']].sort_values('Stage_One_Doses',ascending=False)
+#bar plot regarding the top 5 total confirmed cases when it comes to province state
+sns.barplot(x='Province_State', y='Stage_One_Doses', data = group_CSSE.head(5)).set_title('Top 5 US province state with where people have taken the first dosis the most')
+plt.show()
+# %%
+# group by country region
+group_CSSE =  ProvinceUsesOnlyForUs[['Province_State','Stage_One_Doses']].sort_values('Stage_One_Doses',ascending=False)
+
+#plot a pie chart regarding the top 5 deaths of countries
+group_CSSE = group_CSSE.set_index('Province_State')
+group_CSSE.head(10).plot.pie(y='Stage_One_Doses', figsize=(13, 13),autopct='%1.1f%%',legend=None,shadow=True, startangle=140)
+plt.title('Top 10 US province state with where people have taken the first dosis the most', bbox={'facecolor':'0.8', 'pad':5})
+plt.show()
+# %%
+#US states most deaths only
+group_CSSE = ProvinceUsesOnlyForUs[['Province_State','Stage_Two_Doses']].sort_values('Stage_Two_Doses',ascending=False)
+#bar plot regarding the top 5 total confirmed cases when it comes to province state
+sns.barplot(x='Province_State', y='Stage_Two_Doses', data = group_CSSE.head(5)).set_title('Top 5 US province state with where people have taken the second dosis the most')
+plt.show()
+
+# %%
+# group by country region
+group_CSSE =  ProvinceUsesOnlyForUs[['Province_State','Stage_Two_Doses']].sort_values('Stage_Two_Doses',ascending=False)
+
+#plot a pie chart regarding the top 5 deaths of countries
+group_CSSE = group_CSSE.set_index('Province_State')
+group_CSSE.head(10).plot.pie(y='Stage_Two_Doses', figsize=(13, 13),autopct='%1.1f%%',legend=None,shadow=True, startangle=140)
+plt.title('Top 10 US province state with where people have taken the second dosis the most', bbox={'facecolor':'0.8', 'pad':5})
+plt.show()
