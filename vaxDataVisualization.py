@@ -45,7 +45,7 @@ group_CSSE = CountryUsesOnly[['Country_Region','Stage_One_Doses']].sort_values('
 
 #a bar plot to show the top 5 second dosis of countries
 sns.set(rc = {'figure.figsize':(9,9)})
-sns.barplot(x='Country_Region', y='Stage_One_Doses', data = group_CSSE.head(5)).set_title('Top 5 country regions with where people have taken the first dosis the most')
+sns.barplot(x='Country_Region', y='Stage_One_Doses', data = group_CSSE.head(5)).set_title('Top 5 country with where people have taken the first dosis the most')
 plt.show()
 # %%
 # group by country region
@@ -53,7 +53,7 @@ group_CSSE = CountryUsesOnly[['Country_Region','Stage_Two_Doses']].sort_values('
 
 #a bar plot to show the top 5 second dosis of countries
 sns.set(rc = {'figure.figsize':(9,9)})
-sns.barplot(x='Country_Region', y='Stage_Two_Doses', data = group_CSSE.head(5)).set_title('Top 5 country regions with where people have taken the second dosis the most')
+sns.barplot(x='Country_Region', y='Stage_Two_Doses', data = group_CSSE.head(5)).set_title('Top 5 country with where people have taken the second dosis the most')
 plt.show()
 
 # %%
@@ -63,7 +63,7 @@ group_CSSE = CountryUsesOnly[['Country_Region','Stage_One_Doses']].sort_values('
 #plot a pie chart regarding the top 5 deaths of countries
 group_CSSE = group_CSSE.set_index('Country_Region')
 group_CSSE.head(10).plot.pie(y='Stage_One_Doses', figsize=(10, 10),autopct='%1.1f%%',legend=None,shadow=True, startangle=140)
-plt.title('Top 10 country regions with where people have taken the first dosis the most', bbox={'facecolor':'0.8', 'pad':5})
+plt.title('Top 10 country with where people have taken the first dosis the most', bbox={'facecolor':'0.8', 'pad':5})
 plt.show()
 
 # %%
@@ -74,7 +74,7 @@ group_CSSE = CountryUsesOnly[['Country_Region','Stage_Two_Doses']].sort_values('
 #plot a pie chart regarding the top 5 deaths of countries
 group_CSSE = group_CSSE.set_index('Country_Region')
 group_CSSE.head(10).plot.pie(y='Stage_Two_Doses', figsize=(10, 10),autopct='%1.1f%%',legend=None,shadow=True, startangle=140)
-plt.title('Top 10 country regions with where people have taken the second dosis the most', bbox={'facecolor':'0.8', 'pad':5})
+plt.title('Top 10 country with where people have taken the second dosis the most', bbox={'facecolor':'0.8', 'pad':5})
 plt.show()
 
 # %%
@@ -84,7 +84,7 @@ group_CSSE = CountryUsesOnly[['Country_Region','Doses_admin']].sort_values("Dose
 #plot a pie chart regarding the top 5 deaths of countries
 group_CSSE = group_CSSE.set_index('Country_Region')
 group_CSSE.head(10).plot.pie(y='Doses_admin', figsize=(10, 10),autopct='%1.1f%%',legend=None,shadow=True, startangle=140)
-plt.title("Top 10 doses of admin by country region", bbox={'facecolor':'0.8', 'pad':5})
+plt.title("Top 10 number of doses of admin per country", bbox={'facecolor':'0.8', 'pad':5})
 plt.show()
 
 # %%
@@ -93,7 +93,7 @@ group_CSSE = CountryUsesOnly[['Country_Region','Doses_admin']].sort_values('Dose
 
 #a bar plot to show the top 5 second dosis of countries
 sns.set(rc = {'figure.figsize':(9,9)})
-sns.barplot(x='Country_Region', y='Doses_admin', data = group_CSSE.head(5)).set_title("Top 5 doses of admin by country region")
+sns.barplot(x='Country_Region', y='Doses_admin', data = group_CSSE.head(5)).set_title("Top 5 number of doses of admin per country")
 plt.show()
 
 # %%
@@ -137,7 +137,7 @@ group_CSSE['month/year'] = pd.CategoricalIndex(group_CSSE['month/year'], categor
 group_CSSE.sort_values(by='month/year', inplace=True)
 # %%
 ax = sns.barplot(y='month/year', x='New_Doses_alloc', hue="Vaccine_Type", data=group_CSSE)
-
+plt.title('Yearly and monthly doses of allocation for each vaccine type')
 # %%
 
 #turning the data to datatime and then sorting it by date and groupby with date and 

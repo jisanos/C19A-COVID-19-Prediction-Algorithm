@@ -10,7 +10,7 @@ Created on Tue Nov  2 15:26:31 2021
 import pandas as pd
 import seaborn as sns
 import calendar
-
+import matplotlib.pyplot as plt
 #set the plot's theme to something more beautiful
 sns.set()
 # %%
@@ -64,7 +64,8 @@ print(group_CSSE.info())
 # %%
 #plot heatmap and show numbers
 sns.heatmap(group_CSSE, fmt="d", annot=True, cmap='YlGnBu',linewidths=.5)
-
+# adding a title to it
+plt.title('Yearly and monthly confirmed global cases')
 #%%
 print(group_CSSE.info())
 # %%
