@@ -128,9 +128,7 @@ cases_df['Province_State'] = cases_df[
 
 # intersection_2 = index_state_A.intersection(index_state_B)
 
-# %% Dropping cols
-# cases_df= cases_df.drop(
-#     ['Province/State','Country/Region'],axis=1)
+
 
 # %% Checking how many rows dont contain lat and long
 
@@ -403,124 +401,7 @@ cases_df = remove_dups_and_reset_index(cases_df)
 
 # test = cases_df[(cases_df['Province_State'] == 'District of Columbia') & (cases_df['date'] == '2020-03-22 00:00:00')]
 
-# %%
 
-# UK_data = cases_df[cases_df['Country_Region'] == 'UK']
-# UK_data2 = cases_df[cases_df['Country_Region'] == 'United Kingdom']
-
-# %% Fixing UK data
-
-# Since UK rows are country level data, adding United Kingdom to its
-# "State" column so that it is interpreted as so.
-
-# cases_df.loc[cases_df['Country_Region'] == 'UK','Province_State'] = 'United Kingdom'
-
-# Renaming UK to United Kingdom
-
-# cases_df['Country_Region'] = cases_df['Country_Region'].replace('UK','United Kingdom')
-
-# Replacing UK with United Kindom in the States column 
-
-# cases_df['Province_State'] = cases_df['Province_State'].replace('UK','United Kingdom')
-
-# Now replacing the NAN values in United Kingdom's Povince_State with
-# United Kingdom as it is the same type of value.
-
-# cases_df.loc[(cases_df['Province_State'].isna()) & 
-#              (cases_df['Country_Region'] == 'United Kingdom'),
-#              'Province_State'] = 'UK'
-
-# Country level sum stopped after June 2020 so if i want to proceed with a sum
-# ill have to do it myself
-
-# %% Checking for UK dups
-# dups = cases_df[cases_df['Country_Region'] == 'United Kingdom'].duplicated(['Province_State','Country_Region','date'])
-# UK_data = UK_data2 = cases_df[cases_df['Country_Region'] == 'United Kingdom']
-
-# UK_dups = UK_data[dups]
-
-# No dups
-
-# %%
-# china_data = cases_df.loc[cases_df['Country_Region'] == 'China']
-
-# china_mainland_data = cases_df.loc[cases_df['Country_Region'] == 'Mainland China']
-
-# The midland china stopped being reported after march 2020, whilst
-# china is up to date
-# %%
-# Getting unique chinese states and midland states
-# unique_china_states = set(china_data['Province_State'])
-# unique_midland_states = set(china_mainland_data['Province_State'])
-
-
-# # Doing an intersection of their states
-# china_intersection = unique_china_states.intersection(
-#     unique_midland_states)
-
-# # Getting their symmetric difference
-# china_symmetric_diff = unique_china_states ^ unique_midland_states
-
-# Hong Kong, Macau and Unknown are their differences
-# These 3 lie in China data, not midland
-
-# %%
-
-# Renaming Mainland China to just China
-
-# cases_df.loc[cases_df['Country_Region'] == 'Mainland China','Country_Region'] = 'China'
-
-# %% Removing duplicate rows from china
-
-# Keeping first and removing second of dups
-
-# Boolean of dups from slice
-# dups = cases_df[cases_df['Country_Region'] == 'China'].duplicated(['Province_State','Country_Region','date'])
-
-# china_data = cases_df.loc[cases_df['Country_Region'] == 'China']
-
-# china_dups = china_data[dups]
-
-# %%
-# cases_df[cases_df['Country_Region'] == 'China'] = cases_df[cases_df['Country_Region'] == 'China'].drop_duplicates(
-#     ['Province_State','Country_Region','date'])
-
-# %%
-
-# bahamas_data = cases_df[cases_df['Country_Region'] == 'Bahamas']
-# the_bahamas_data = cases_df[cases_df['Country_Region'] == 'Bahamas, The']
-
-# %%
-# Renaming Bahamas, The to simply Bahamas
-
-# cases_df.loc[cases_df['Country_Region'] == 'Bahamas, The','Country_Region'] = 'Bahamas'
-
-# %%
-# bahamas_data = cases_df[cases_df['Country_Region'] == 'Bahamas']
-# the_bahamas_data = cases_df[cases_df['Country_Region'] == 'Bahamas, The']
-
-
-# %%
-# dups = cases_df[cases_df['Country_Region'] == 'Bahamas'].duplicated(['Province_State','Country_Region','date'])
-
-# bahamas_dups = bahamas_data[dups]
-# No dups
-# %%
-# 'Czechia' to 'Czech Republic' to
-# Czechia = cases_df.loc[cases_df['Country_Region'] == 'Czechia',:]
-
-# Czech_Republic = cases_df.loc[cases_df['Country_Region'] == 'Czech Republic',:]
-
-# %%
-# Renaming Czechia to Czech Republic
-# cases_df.loc[cases_df['Country_Region'] == 'Czechia','Country_Region'] = 'Czech Republic'
-
-# %%
-# Checking for dups
-# dups = cases_df[cases_df['Country_Region'] == 'Czech Republic'].duplicated(['Province_State','Country_Region','date'])
-# Czech_Republic = cases_df.loc[cases_df['Country_Region'] == 'Czech Republic',:]
-# Czech_Republic_dups = Czech_Republic[dups]
-# No dups
 
 # %% Checking for strings that are in both countries and province
 unique_province_states = set(cases_df['Province_State'])
@@ -618,35 +499,6 @@ for i,j in regions_to_state:
 
 cases_df = remove_dups_and_reset_index(cases_df)
 
-
-#%% Forward fill nan cases,death,recoveries
-# we would need to iterate ber Admin2, then state, and then country to do this
-# propperly
-
-# we gotta take into consideration values that are unknonwn or unnassigned
-
-# test =cases_df[cases_df['Admin2'].notna()].sort_values(
-#     ['Admin2','Province_State','Country_Region','date'])
-
-# test_nan_cases = test[test['Confirmed'].isna()]
-
-# There dont seem to be any County level missing values
-# %% Attempting the same only on a state level
-# test =cases_df[cases_df['Admin2'].isna()].sort_values(
-#     ['Province_State','Country_Region','date'])
-
-# There are some rows with missing confirmed cases
-
-
-# %% Removing rows with NaN cases,deaths,recoveries
-
-
-
-# %% Create column with estimated daily counts
-
-
-
-
 # %%
 # Manually renaming Washington D.C. state to District of Columbia
 cases_df.loc[cases_df.Province_State.str.contains('D.C.'),'Admin2'] = 'District of Columbia'
@@ -655,57 +507,7 @@ cases_df.loc[cases_df.Province_State.str.contains('D.C.'),'Province_State'] = 'D
 
 # %% Turn some of the US states from "County, State" to just state with county
 # as admin2
-#This is because there are some US states that have county merged in it thus
-#we either rename them and separate them by setting the county on the admin2
-#column
 
-# # Splitting the values on comma
-# us_states = cases_df[cases_df['Country_Region'] == 'US']['Province_State']
-
-# # Getting only the ones that are in county,state format
-# county_state = set()
-
-# for element in us_states:
-#     splt = element.split(',')
-    
-#     if len(splt) > 1:
-#         # 3 row touple containing the originalvalue,county,state
-#         county_state.add((element,splt[0].strip(),splt[1].strip()))
-    
-
-# # There are also some that are in the form of State,US that need to be dealt with
-
-# state_country = set()
-
-# [state_country.add((orig_val,county,state)) for orig_val,county,state in
-#  county_state if (state == 'U.S.') | (state == 'US')]
-
-# # Removing it from the county_state set
-# county_state = county_state - state_country
-
-# # There are some entries with (From Diamond Princess) which should be dealth with
-
-# county_diamond_princess = set()
-
-# [county_diamond_princess.add((orig_val,county,state)) for orig_val,county,state in
-#  county_state if (state.lower().__contains__('diamond'))]
-
-# county_state = county_state - county_diamond_princess
-
-# # There are some entries with "Washington, D.C."
-# start_time = time.time()
-# for orig_val,county,state in county_state:
-#     # Using the global dictionary for us states abbreviations we will
-#     # rename the rows appropriately
-#     cases_df.loc[cases_df.Province_State == orig_val,'Admin2'] = county
-#     cases_df.loc[cases_df.Province_State == orig_val,
-#                   'Province_State'] = data_imports.abbreviations_to_us_states[state]
-    
-# print(time.time() - start_time) 
-# # Block takes around 1 min to execute. Optimizing further is ideal, but hard.
-
-
-# %% Second approach to the block before, more vectorized
 start_time = time.time()
 filter_in_us = (cases_df['Country_Region'] == 'US') #only us states
 filter_in_split = (cases_df['Province_State'].str.contains(',')) #only values that have commas in it
@@ -802,18 +604,8 @@ cases_df = remove_dups_and_reset_index(cases_df)
 # This method takes too long as it iterates through every row
 
 
+
 # %% Replaces counties that are equal to state with NaN
-
-# tmp1 = set(cases_df['Admin2'])
-# tmp2 = set(cases_df['Province_State'])
-
-
-# county_in_state = tmp1.intersection(tmp2)
-
-# for val in county_in_state:
-#     cases_df.loc[(cases_df['Admin2'] == val) & 
-#                  (cases_df['Province_State'] == val ), 'Admin2'] = np.nan
-# %% Vectorizing previous block for even better performance
 
 filter_equal = (cases_df['Admin2'] == cases_df['Province_State'])
 
@@ -824,24 +616,6 @@ cases_df.loc[filter_equal,'Admin2'] = np.nan
 cases_df = remove_dups_and_reset_index(cases_df)
 
 # %% Same as before but with states to country
-
-
-
-# tmp1 = set(cases_df['Province_State'])
-# tmp2 = set(cases_df['Country_Region'])
-
-# state_in_country = tmp1.intersection(tmp2)
-
-# # Now filtering only these values where they are equal on both. THis is
-# # important because some of them such aas luxembourg are a state in a diff.
-# # country as well as there is a country named luxembourg itself so we don't
-# # want to mess with values like that.
-
-# for val in state_in_country:
-#     cases_df.loc[(cases_df['Province_State'] == val) &
-#                  (cases_df['Country_Region'] == val),'Province_State'] = np.nan
-
-# %% Also vecorizing previous block for better performance
 
 filter_equal = (cases_df['Province_State'] == cases_df['Country_Region'])
 
