@@ -770,18 +770,6 @@ cases_df.to_csv(".\\cases_cleaned_normal.csv")
 
 # %% Create value (row) per state containing the sum of all counties per date
 
-# state_country = set()
-
-
-# for state,country in cases_df[['Province_State','Country_Region']].values:
-     
-#      if pd.isnull(state):
-#          pass
-#      else:
-#          state_country.add((state,country))
-
-
-
 def sum_of_counties(x):
     
     new_entry = pd.DataFrame(x.iloc[[-1]])
@@ -808,91 +796,6 @@ new_entries = cases_df.loc[filter_out_na_counties, :].groupby(['date','Province_
 print(time.time() - start_time)
 
 
-
-
-# with ProcessPoolExecutor() as executor:
-#     executor.map(sum_of_counties,grouped.items())
-
-# for name, group in grouped:
-    
-#     pool = mp.Pool(processes = 6)
-    
-    
-    
-        
-
-        
-        
-
-
-
-# for day in pd.date_range(min(cases_df['date']), max(cases_df['date'])):
-#     print(day)
-    
-#     for state,country in state_country:
-#         # Looping through these specific sets of state,country
-#         vals = cases_df[(cases_df['Province_State'] == state) &
-#                         (cases_df['Country_Region'] == country) &
-#                         (cases_df['Admin2'].notna()) & 
-#                         (cases_df['date'] == day)]
-#         #Check if vals is not empty before proceeding
-#         if not vals.empty:
-        
-#             new = vals.iloc[-1]
-            
-#             new['Admin2'] = np.nan
-#             new['New_Confirmed'] = sum(vals['New_Confirmed'])
-#             new['New_Deaths'] = sum(vals['New_Deaths'])
-#             new['New_Recovered'] = sum(vals['New_Recovered'])
-#             new['Confirmed'] = 0
-#             new['Deaths'] = 0
-#             new['Recovered'] = 0
-#             new['Incident_Rate'] = np.mean(vals['Incident_Rate'])
-#             new['Case_Fatality_Ratio'] = np.mean(vals['Case_Fatality_Ratio'])
-            
-#             print(new)
-            
-#             tmp_df.append(new, ignore_index = True)
-    
-    
-
-    
-
-#tmp_df = cases_df.groupby(['date'],dropna=False).apply(total_per_date_county)
-# Still takes about 5 minutes to execute, but requires less memory overhead
-    
-
-# def total_per_date_county(x):
-#     # This method is assuming that the data is sorted by date
-#     #x = x.reset_index(drop = True)
-
-
-#     if len(x) == 1:
-#         return x
-#     else:
-        
-#         new = x.iloc[-1]
-#         new['Admin2'] = np.nan
-#         new['New_Confirmed'] = sum(x['New_Confirmed'])
-#         new['New_Deaths'] = sum(x['New_Deaths'])
-#         new['New_Recovered'] = sum(x['New_Recovered'])
-#         new['Confirmed'] = 0
-#         new['Deaths'] = 0
-#         new['Recovered'] = 0
-        
-#         print(new)
-        
-#         x.append(new)
-        
-#         return x
-    
-    
-
-    
-#     #Block takes too long to execute
-    
-# tmp_df = cases_df.groupby(['date','Province_State','Country_Region'
-#                               ],dropna=False).apply(total_per_date_county)
 # %% Appending new values to cases df
 
 cases_df = cases_df.append(new_entries, ignore_index=True)
@@ -933,78 +836,6 @@ new_entries = cases_df.loc[all_filters, :].groupby(['date','Country_Region'
                                 ]).apply(sum_of_states)
 
 print(time.time() - start_time)
-
-# countries = set(cases_df['Country_Region'].values)
-
-
-# def total_per_date_state(x):
-    
-    
-#     for country in countries:
-#         # Looping through only on these specific countries.
-#         # We only want nan counties since we will be summing the previous
-#         # state data
-#         vals = x[(x['Province_State'].notna()) &
-#                  (x['Country_Region'] == country) &
-#                  (x['Admin2'].isna())]
-        
-        
-#         #Check if vals is not empty before proceeding
-#         if not vals.empty:
-            
-#             new = vals.iloc[-1]
-            
-#             new['Admin2'] = np.nan
-#             new['Province_State'] = np.nan
-#             new['New_Confirmed'] = sum(vals['New_Confirmed'])
-#             new['New_Deaths'] = sum(vals['New_Deaths'])
-#             new['New_Recovered'] = sum(vals['New_Recovered'])
-#             new['Confirmed'] = 0
-#             new['Deaths'] = 0
-#             new['Recovered'] = 0
-#             new['Incident_Rate'] = np.mean(vals['Incident_Rate'])
-#             new['Case_Fatality_Ratio'] = np.mean(vals['Case_Fatality_Ratio'])
-#             print(new)
-#             x.append(new, ignore_index = True)
-    
-    
-#     return x
-    
-
-# tmp_df = cases_df.groupby(['date'],dropna=False).apply(total_per_date_state)
-
-
-# def total_per_date_state(x):
-#     # This method is assuming that the data is sorted by date
-#     x = x.reset_index(drop = True)
-
-    
-#     # if len(x) == 1:
-#     #     return x
-    
-#     # else:
-        
-#     #     new = x.iloc[-1]
-#     #     new['Admin2'] = np.nan
-#     #     new['Province_State'] = np.nan
-#     #     new['New_Confirmed'] = sum(x['New_Confirmed'])
-#     #     new['New_Deaths'] = sum(x['New_Deaths'])
-#     #     new['New_Recovered'] = sum(x['New_Recovered'])
-#     #     new['Confirmed'] = 0
-#     #     new['Deaths'] = 0
-#     #     new['Recovered'] = 0
-        
-#     #     x.append(new)
-        
-#     #     return x
-    
-#     print(x)
-
-    
-    
-    
-# tmp_df = cases_df.groupby(['date','Country_Region'
-#                               ],dropna=False).apply(total_per_date_state)
 
 # %% Appending new values to cases df
 
