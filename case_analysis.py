@@ -629,22 +629,7 @@ cases_df = remove_dups_and_reset_index(cases_df)
 
 def filler(x):
     
-    # creating a series of the following
-    # county = x['Admin2']
-    # state = x['Province_State']
-    # country = x['Country_Region']
-
-    # # If state is NAN it means this is country level data
-    # if state.isna().any():
-    #     # print('state is na')
-    #     pass    
-    
-    # # If county is NAN it means this is state level data
-    # elif county.isna().any():
-        
-    #     # print('county is na')
-    #     pass
-    
+   
     # #Normal Ffill and bfill method
     # x['Confirmed'] = x['Confirmed'].ffill().bfill()
     # x['Deaths'] = x['Deaths'].ffill().bfill()
@@ -652,11 +637,7 @@ def filler(x):
     # x['Active'] = x['Active'].ffill().bfill()
     # x['Lat'] = x['Lat'].ffill().bfill()
     # x['Long_'] = x['Long_'].ffill().bfill()
-    
-    # # These should be filled differently, not by bfill or ffill
-    # x['Incident_Rate'] = x['Incident_Rate'].ffill().bfill()
-    # x['Case_Fatality_Ratio'] = x['Case_Fatality_Ratio'].ffill().bfill()
-    
+        
     # Doing interpolation method
     
     first_index = x.head(1).index
@@ -726,72 +707,7 @@ def date_cases(x):
         x['New_Recovered'] = x['Recovered'].sub(x['Recovered'].shift().fillna(0)).abs()
         x['Recovered'] = x['New_Recovered'].cumsum()
         
-    
-    
-    
-    
-    return x
-    
-    #Some vlaues will be negative, and in those cases
-    
-    
-    # lenght = len(x['New_Confirmed'])
-    
-    # for i in range(1,lenght):
-    #     x['New_Confirmed'][i] = x['New_Confirmed'][i] - x['New_Confirmed'][i-1]
-    
-    
-    
-    # cases = np.array(x['Confirmed'])
-    
-    # new_cases = np.array([])
-        
-    # length = len(cases)
-    
-    # for i in range(0, length):
-        
-    #     if i == 0: #First iteration contains no previous values so we skip it
-            
-    #         new_cases = np.append(new_cases, cases[i])
-            
-    #     else: #After the first iteration we start doing the substraction
-    #         new_val = cases[i] - cases[i - 1]
-            
-    #         #If the subtraction is a negative value, add the amount to all folloing
-    #         #values in cases as well to maintain consistency.
-    #         # This is a nuance that can be dealt in other ways to get
-    #         # different results
-    #         if new_val < 0:
-    #             for j in range(i, length):
-    #                 cases[j] = cases[j] + abs(new_val)
-                    
-                    
-    #             new_cases = np.append(new_cases, 0)
-            
-    #         # If the new value is bigger than the cumulative case value,
-    #         # we need to deal with it.
-    #         # This is left here for troubleshooting purposes, but all
-    #         # values were already converted to positive earlier in the
-    #         # cleaning process.
-    #         elif new_val > cases[i]:
-                
-    #             print(cases[i], new_val)
-                
-    #             new_cases = np.append(new_cases, new_val)
-            
-    #         else:
-    #             new_cases = np.append(new_cases, new_val)
-                     
-    
-    
-    
-    
-    # x['New_Cases'] = pd.Series(new_cases)
-    #x['Confirmed'] = pd.Series(cases)
-    
-    
-    
-    
+    return x    
     
 
 cases_df = cases_df.groupby(['Admin2','Province_State','Country_Region'
