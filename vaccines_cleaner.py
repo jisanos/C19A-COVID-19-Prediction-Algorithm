@@ -199,10 +199,6 @@ for element in to_remove:
 
 
 # %%
-
-
-
-# %%
 # Creating a list of "states" in the vaccine_data_us_timeline which arent really states
 # from the US dataframe:
 # not_really_states = ["Long Term Care (LTC) Program",
@@ -327,15 +323,26 @@ vax_df.sort_values('Date').reset_index(inplace = True, drop = True)
 
 def filler(x):
     
+    cols = ['Doses_alloc','Doses_shipped','Doses_admin','Stage_One_Doses','Stage_Two_Doses']
     
-    # Assumes data is already sorted by date
+    for col in cols:
+        
+        std = x[col].std() #Getting the standard deviations
+        
+        diff = x[col].diff() #getting the difference to compare with the std
+        
+        # Getting the index of only the outlier data
+        # The shift back is to get the outlier since the diff will be 
+        # shifted forward. 
+        outliers = x.shift(-1)[diff.abs() > std].index
+        
+        # if there are outliers continue
+        if len(outliers) > 0:
+            
+            # Asggigning nan to the outliers
+            x.loc[outliers,col] = np.nan 
+            
     
-    # Simple forward filling
-    # x.Doses_alloc = x.Doses_alloc.ffill().bfill()
-    # x.Doses_shipped = x.Doses_shipped.ffill().bfill()
-    # x.Doses_admin = x.Doses_admin.ffill().bfill()
-    # x.Stage_One_Doses = x.Stage_One_Doses.ffill().bfill()
-    # x.Stage_Two_Doses = x.Stage_Two_Doses.ffill().bfill()
     
     #Setting first values to 0 for interpolation to work best
     
@@ -348,11 +355,14 @@ def filler(x):
     x.loc[first_index,'Stage_Two_Doses'] = 0
     
     # Interpolation filling. Making sure they are all round numbers
-    x['Doses_alloc'] = x['Doses_alloc'].interpolate().round()
-    x['Doses_shipped'] = x['Doses_shipped'].interpolate().round()
-    x['Doses_admin'] = x['Doses_admin'].interpolate().round()
-    x['Stage_One_Doses'] = x['Stage_One_Doses'].interpolate().round()
-    x['Stage_Two_Doses'] = x['Stage_Two_Doses'].interpolate().round()
+    x[cols] = x[cols].interpolate().round()
+    
+   
+    # x['Doses_alloc'] = x['Doses_alloc'].interpolate().round()
+    # x['Doses_shipped'] = x['Doses_shipped'].interpolate().round()
+    # x['Doses_admin'] = x['Doses_admin'].interpolate().round()
+    # x['Stage_One_Doses'] = x['Stage_One_Doses'].interpolate().round()
+    # x['Stage_Two_Doses'] = x['Stage_Two_Doses'].interpolate().round()
     
     
     return x
@@ -374,22 +384,9 @@ def date_cases(x):
     #         ('Doses_shipped','New_Doses_shipped')]
 
     
-    x[new_cols] = x[current_cols].sub(x[current_cols].shift().fillna(0)).abs()
+    x[new_cols] = x[current_cols].diff().fillna(0).abs()
     
     x[current_cols] = x[new_cols].cumsum()
-    
-    # x['New_Doses_admin'] = x.Doses_admin.sub(x.Doses_admin.shift().fillna(0)).abs()
-    
-    # x['Doses_admin'] = x['New_Doses_admin'].cumsum()
-    
-    # x['New_Stage_One_Doses'] = x.Stage_One_Doses.sub(x.Stage_One_Doses.shift().fillna(0)).abs()
-    
-    # x['Stage_One_Doses'] = x['New_Stage_One_Doses'].cumsum()
-    
-    # x['New_Stage_Two_Doses'] = x.Stage_Two_Doses.sub(x.Stage_Two_Doses.shift().fillna(0)).abs()
-    
-    # x['Stage_Two_Doses'] = x['New_Stage_Two_Doses'].cumsum()
-    
     
     
     return x

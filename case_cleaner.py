@@ -537,7 +537,7 @@ cases_df.loc[filter_all,:] = cases_df.loc[filter_all,:].groupby('Province_State'
 
 print(time.time() - start_time)
 
-#Completes roughly the same as our previos block in less than 5 seconds
+
 
 #%% removing dups again and reseting index
 cases_df = remove_dups_and_reset_index(cases_df)
@@ -558,9 +558,6 @@ filter_equal = (cases_df['Admin2'] == cases_df['Province_State'])
 
 
 cases_df.loc[filter_equal,'Admin2'] = np.nan
-#%% removing dups again and reseting index
-
-cases_df = remove_dups_and_reset_index(cases_df)
 
 # %% Same as before but with states to country
 
@@ -601,21 +598,11 @@ def filler(x):
         
         # if there are outliers continue
         if len(outliers) > 0:
-            print(x.loc[outliers,col])
+            
             # Asggigning nan to the outliers
             x.loc[outliers,col] = np.nan 
-            print(x.loc[outliers,col])
+            
     
-    
-
-    
-    # #Normal Ffill and bfill method
-    # x['Confirmed'] = x['Confirmed'].ffill().bfill()
-    # x['Deaths'] = x['Deaths'].ffill().bfill()
-    # x['Recovered'] = x['Recovered'].ffill().bfill()
-    # x['Active'] = x['Active'].ffill().bfill()
-    # x['Lat'] = x['Lat'].ffill().bfill()
-    # x['Long_'] = x['Long_'].ffill().bfill()
         
     # Doing interpolation method
     
@@ -625,10 +612,11 @@ def filler(x):
     x.loc[first_index,'Deaths'] = 0
     x.loc[first_index,'Recovered'] = 0
 
-    
-    x['Confirmed'] = x['Confirmed'].interpolate().round()
-    x['Deaths'] = x['Deaths'].interpolate().round()
-    x['Recovered'] = x['Recovered'].interpolate().round()
+    x[cols] = x[cols].interpolate().round()
+
+    # x['Confirmed'] = x['Confirmed'].interpolate().round()
+    # x['Deaths'] = x['Deaths'].interpolate().round()
+    # x['Recovered'] = x['Recovered'].interpolate().round()
     
     
     #According to the README, incident reate is cases per 100k persons
@@ -655,10 +643,6 @@ cases_df = cases_df.groupby(['Admin2','Province_State','Country_Region'
 print(time.time() - start_time)
 
 
-
-#%% removing dups again and Sorting dataframe by date again
-
-cases_df = remove_dups_and_reset_index(cases_df)
 
 # %%
 import matplotlib.pyplot as plt
@@ -712,8 +696,7 @@ cases_df = cases_df.groupby(['Admin2','Province_State','Country_Region'
                               ],dropna=False).apply(date_cases)
 
 
-# %%
-cases_df = remove_dups_and_reset_index(cases_df)
+
 
 # %%
 import matplotlib.pyplot as plt
@@ -860,18 +843,10 @@ cases_df = remove_dups_and_reset_index(cases_df)
 
 def cum_sum(x):
     
-    
-    
-    x['Confirmed'] = x['New_Confirmed'].cumsum()
-    
-    
-    # Doing the same with deaths and recoveries, but only if they are not
-    # all NaNs.
-    
+        
+    x['Confirmed'] = x['New_Confirmed'].cumsum() 
         
     x['Deaths'] = x['New_Deaths'].cumsum()
-    
-
     
     x['Recovered'] = x['New_Recovered'].cumsum()
         
