@@ -649,7 +649,7 @@ def filler(x):
 
 
 start_time = time.time()
-test_df = cases_df.groupby(['Admin2','Province_State','Country_Region'
+cases_df = cases_df.groupby(['Admin2','Province_State','Country_Region'
                              ],dropna=False).apply(filler)
 
 print(time.time() - start_time)
@@ -658,17 +658,17 @@ print(time.time() - start_time)
 
 #%% removing dups again and Sorting dataframe by date again
 
-test_df = remove_dups_and_reset_index(test_df)
+cases_df = remove_dups_and_reset_index(cases_df)
 
 # %%
 import matplotlib.pyplot as plt
-to_plot = test_df.loc[(test_df.Country_Region == 'Peru') & (test_df.Province_State.notna()),['Deaths','date']]
+to_plot = cases_df.loc[(cases_df.Country_Region == 'Peru') & (cases_df.Province_State.notna()),['Deaths','date']]
 
 plt.plot(to_plot.date,to_plot.Deaths)
 
 plt.show()
-grp = test_df.loc[(test_df.Country_Region == 'Peru')
-                 & (test_df.Province_State.notna()),['Province_State','Deaths','date']].groupby(['Province_State'])
+grp = cases_df.loc[(cases_df.Country_Region == 'Peru')
+                 & (cases_df.Province_State.notna()),['Province_State','Deaths','date']].groupby(['Province_State'])
 for g,df in grp:
     plt.title(g)
     plt.plot(df.date, df.Deaths)
@@ -708,22 +708,22 @@ def date_cases(x):
     return x    
     
 
-test_df = test_df.groupby(['Admin2','Province_State','Country_Region'
+cases_df = cases_df.groupby(['Admin2','Province_State','Country_Region'
                               ],dropna=False).apply(date_cases)
 
 
 # %%
-test_df = remove_dups_and_reset_index(test_df)
+cases_df = remove_dups_and_reset_index(cases_df)
 
 # %%
 import matplotlib.pyplot as plt
-to_plot = test_df.loc[(test_df.Country_Region == 'Peru') & (test_df.Province_State.notna()),['Deaths','date']]
+to_plot = cases_df.loc[(cases_df.Country_Region == 'Peru') & (cases_df.Province_State.notna()),['Deaths','date']]
 
 plt.plot(to_plot.date,to_plot.Deaths)
 plt.show()
 
 
-to_plot = test_df.loc[(test_df.Country_Region == 'Peru'),['New_Deaths','date']]
+to_plot = cases_df.loc[(cases_df.Country_Region == 'Peru'),['New_Deaths','date']]
 
 plt.plot(to_plot.date,to_plot.New_Deaths)
 plt.show()
