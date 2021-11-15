@@ -42,7 +42,8 @@ group_CSSE['year'] = group_CSSE['date'].dt.year
 group_CSSE['month'] = group_CSSE['month'].apply(lambda x: calendar.month_abbr[x])
 # %%
 # needed to groupby again to date since i need to group by month and year 
-group_CSSE = group_CSSE[['month','New_Confirmed','year']].groupby(['month','year']).sum().reset_index()
+group_CSSE = group_CSSE[['month','New_Confirmed','year']].groupby(
+    ['month','year']).sum().reset_index()
 
 # %%
 #finally change the dataframe structure
