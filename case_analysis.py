@@ -586,42 +586,24 @@ def filler(x):
     
     
     # removing outliers from cumulative data
-    cols = ['Deaths', 'Confirmed', 'Recovered']
-
-    # for col in cols:
-        
-    #     diff = x[col].diff()
-    #     negatives = (diff < 0)
-
-    #     #While there are any negatives then proceed
-    #     while negatives.any():
-            
-    #         #Getting the index of the negative values and the ones we'll replace them with
-    #         outliers = x[(diff.shift(-1) < 0)].index
-    #         replacer = x[(diff < 0)].index
-            
-    #         # Assigning the preceeding / smallest value to maintain
-    #         # cumulative data
-            
-            
-            
-    #         x.loc[replacer, col] = x.loc[replacer, col].values + diff[replacer].abs()
-                        
-    #         diff = x[col].diff()
-    #         negatives = (diff < 0)
-    
+    cols = ['Deaths', 'Confirmed', 'Recovered']   
     
     for col in cols:
         
-        std = x[col].std()
+        std = x[col].std() #Getting the standard deviations
         
-        diff = x[col].diff()
+        diff = x[col].diff() #getting the difference to compare with the std
         
+        # Getting the index of only the outlier data
+        # The shift back is to get the outlier since the diff will be 
+        # shifted forward. 
         outliers = x.shift(-1)[diff.abs() > std].index
         
-        if len(outliers) >0:
+        # if there are outliers continue
+        if len(outliers) > 0:
             print(x.loc[outliers,col])
-            x.loc[outliers,col] = np.nan
+            # Asggigning nan to the outliers
+            x.loc[outliers,col] = np.nan 
             print(x.loc[outliers,col])
     
     
