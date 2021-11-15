@@ -13,6 +13,8 @@ import seaborn as sns
 import altair as alt
 import data_imports
 import calendar
+import webbrowser
+alt.renderers.enable('altair_viewer')
 #set the plot's theme to something more beautiful
 sns.set()
 
@@ -96,10 +98,10 @@ plt.show()
 
 # %% Circle Chart Global Countries
 
-Top_10 = country_cases_df[country_cases_df.Country_Region.isin(
+to_plot = country_cases_df[country_cases_df.Country_Region.isin(
     top_countries['Country_Region'].unique())]
 
-chart = alt.Chart(Top_10).mark_circle().encode(
+chart = alt.Chart(to_plot).mark_circle().encode(
         x= 'date',
         y= 'Country_Region',
         color = 'Country_Region',
@@ -110,7 +112,11 @@ chart = alt.Chart(Top_10).mark_circle().encode(
             width=800,
             height=300
         )
-chart.show()
+#chart.show()
+
+chart.save('circle_chart.html')
+webbrowser.open('circle_chart.html')
+
 # %% Global State Deaths Barplot
 
 
@@ -487,7 +493,7 @@ hm_confirmed_df = hm_confirmed_df.fillna(0)
 hm_confirmed_df = hm_confirmed_df.astype(int)
 
 # %% Plotting global heatmap of monthly cases
-
+plt.figure(figsize=(6, 6), dpi = 600) 
 sns.heatmap(hm_confirmed_df, fmt="d", annot=True, cmap='YlGnBu',linewidths=.5)
 # plt.figure(figsize=(14, 6), dpi = 600) 
 plt.title('Monthly Confirmed Cases (Globally)')
@@ -515,7 +521,7 @@ hm_deaths_df = hm_deaths_df.fillna(0)
 
 hm_deaths_df = hm_deaths_df.astype(int)
 # %% Plotting global heatmap of monthly deaths
-
+plt.figure(figsize=(6, 6), dpi = 600) 
 sns.heatmap(hm_deaths_df, fmt="d", annot=True, cmap='YlGnBu',linewidths=.5)
 # plt.figure(figsize=(14, 6), dpi = 600) 
 plt.title('Monthly Deaths (Globally)')
