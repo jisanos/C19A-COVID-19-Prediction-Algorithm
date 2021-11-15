@@ -143,8 +143,8 @@ demographics_by_state_standardized = pd.read_csv(path)
 ################# world_pop_by_country
 # Contains countries with their respective populations, as of 2018 (currently)
 #
-path = ".\\CCI_C-19\\data_tables\\world_pop_by_country.csv"
-world_pop_by_country=pd.read_csv(path)
+
+world_pop_by_country=data_imports.world_pop_by_country()
 
 ################# vaccine_data global_data
 # 

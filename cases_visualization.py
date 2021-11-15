@@ -11,6 +11,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 import altair as alt
+import data_imports
 #set the plot's theme to something more beautiful
 sns.set()
 
@@ -18,8 +19,11 @@ sns.set()
 # opening up the dataset
 cases_df = pd.read_csv(".\\cases_cleaned_categorizable.csv")
 cases_cleaned_categorizable_Without_Date_Filter = pd.read_csv(".\\cases_cleaned_categorizable.csv")
-#%%
+world_pop = data_imports.world_pop_by_country()
 
+# %% Renaming world population country column
+world_pop = world_pop.rename(columns={'Country Name':'Country_Region', "2018":"Population"})
+#%%
 cases_df['date']= pd.to_datetime(cases_df['date'])
 
 # Boolean containing only latest values. To be used for filtering
@@ -43,20 +47,25 @@ country_cases_df = cases_df[cases_df['Country_Region'].notna() &
 #taking out the unknown
 country_cases_df = country_cases_df[country_cases_df['Province_State'] != 'Unknown']
 country_cases_df = country_cases_df[country_cases_df['Country_Region'] != 'Unknown']
-#%%Bubble chart
-#Top 10 results for death cases in countries
+
+# Adding country population
+country_cases_df = country_cases_df.merge(world_pop, on='Country_Region')
+#%% Global Countries Bubble chart
+#Top results for death cases in countries
 country_cases_df = country_cases_df.sort_values(['Confirmed','Deaths'], ascending=False)
 
+latest_date = (country_cases_df["date"] == country_cases_df['date'].max())
 
-top_countries = country_cases_df[latest_date].head(6)
+n_countries = 7
+
+top_countries = country_cases_df[latest_date].head(n_countries)
 
 #Other countries
 
-other_countries = country_cases_df[latest_date].tail(-6)
+other_countries = country_cases_df[latest_date].tail(-n_countries)
 
-
-
-other_countries[['Deaths','Confirmed']] = other_countries[['Deaths','Confirmed']].mean()
+other_countries[['Deaths','Confirmed','Population']] = other_countries[[
+    'Deaths','Confirmed','Population']].mean()
 
 other_countries['Country_Region'] = 'Other Countries'
 
@@ -64,10 +73,10 @@ other_countries = other_countries.head(1)
 
 to_plot = pd.concat([top_countries, other_countries])
 
+plt.figure(figsize=(14, 6), dpi = 800) 
 
-
-sns.scatterplot(data=to_plot, x="Deaths", y="Confirmed", alpha=0.7,
-                hue='Country_Region', size=200, legend=False, sizes=(20, 2000))
+sns.scatterplot(data=to_plot, x="Deaths", y="Confirmed", alpha=0.7, size='Population',
+                hue='Country_Region',sizes=(100,6000), legend=False)
 
 
 for i, txt in enumerate(to_plot.Country_Region):
@@ -80,9 +89,9 @@ plt.xlabel('Deaths')
 plt.ylabel('Confirmed')
 plt.show()
 
-# %% Circle Chart
+# %% Circle Chart Global Countries
 
-Top_10 = country_cases_df[country_cases_df.Country_Region.isin(Top_10['Country_Region'].unique())]
+Top_10 = country_cases_df[country_cases_df.Country_Region.isin(top_countries['Country_Region'].unique())]
 
 chart = alt.Chart(Top_10).mark_circle().encode(
         x= 'date',
@@ -96,41 +105,48 @@ chart = alt.Chart(Top_10).mark_circle().encode(
             height=300
         )
 chart.show()
-# %%
-# bar plot regarding the top 5 death cases when it comes to province state
-#group_CSSE = province_cases_df[['Province_State','Deaths']].groupby('Province_State').max().reset_index().sort_values('Deaths',ascending=False)
-group_CSSE = province_cases_df[['Province_State','Deaths']].sort_values('Deaths',ascending=False)
-#sns.set(rc = {'figure.figsize':(15,15)})
-sns.barplot(x='Province_State', y='Deaths', data = group_CSSE.head(5)).set_title("Top 5 number of deaths per state")
+# %% Global State Deaths Barplot
+
+latest_date = (province_cases_df["date"] == province_cases_df['date'].max())
+
+to_plot = province_cases_df[latest_date].sort_values('Deaths',ascending=False)
+
+plt.figure(figsize=(14, 6), dpi = 600) 
+sns.barplot(x='Province_State', y='Deaths', data = to_plot.head(10)).set_title("States with most deaths (Global)")
+
+plt.xlabel('State')
+plt.ylabel('Deaths')
 plt.show()
 
-# %%
+# %% Pie chart of global state deaths
+
+# group_CSSE = province_cases_df[['Province_State','Deaths']].sort_values('Deaths',ascending=False)
+
+# #plot a pie chart regarding the top 5 deaths of countries
+# group_CSSE = group_CSSE.set_index('Province_State')
+# group_CSSE.head(10).plot.pie(y='Deaths', figsize=(12, 9),autopct='%1.1f%%',legend=None)
+# plt.title("Top 10 number of deaths per state", bbox={'facecolor':'0.8', 'pad':5})
+# plt.show()
+
+# %% Global State Cases Barplot
+
+to_plot = province_cases_df[latest_date].sort_values('Confirmed',ascending=False)
+
+plt.figure(figsize=(14, 6), dpi = 600) 
+sns.barplot(x='Province_State', y='Confirmed', data = to_plot.head(10)).set_title("States with most cases (Global)")
+
+plt.xlabel('State')
+plt.ylabel('Confirmed')
+plt.show()
+# %% state pie chart of global state cases
 # group by country region
-group_CSSE = province_cases_df[['Province_State','Deaths']].sort_values('Deaths',ascending=False)
+# group_CSSE = province_cases_df[['Province_State','Confirmed']].sort_values('Confirmed',ascending=False)
 
-#plot a pie chart regarding the top 5 deaths of countries
-group_CSSE = group_CSSE.set_index('Province_State')
-group_CSSE.head(10).plot.pie(y='Deaths', figsize=(12, 9),autopct='%1.1f%%',legend=None)
-plt.title("Top 10 number of deaths per state", bbox={'facecolor':'0.8', 'pad':5})
-plt.show()
-# number of deaths per country
-# %%
-
-# group by province state but in order of the highest confirmed cases
-group_CSSE = province_cases_df[['Province_State','Confirmed']].sort_values('Confirmed',ascending=False)
-#bar plot regarding the top 5 total confirmed cases when it comes to province state
-sns.barplot(x='Province_State', y='Confirmed', data = group_CSSE.head(5)).set_title("Top 5 number of confirmed cases per state")
-plt.show()
-
-# %%
-# group by country region
-group_CSSE = province_cases_df[['Province_State','Confirmed']].sort_values('Confirmed',ascending=False)
-
-#plot a pie chart regarding the top 5 deaths of countries
-group_CSSE = group_CSSE.set_index('Province_State')
-group_CSSE.head(10).plot.pie(y='Confirmed', figsize=(11, 11),autopct='%1.1f%%',legend=None)
-plt.title("Top 10 number of confirmed cases per state", bbox={'facecolor':'0.8', 'pad':5})
-plt.show()
+# #plot a pie chart regarding the top 5 deaths of countries
+# group_CSSE = group_CSSE.set_index('Province_State')
+# group_CSSE.head(10).plot.pie(y='Confirmed', figsize=(11, 11),autopct='%1.1f%%',legend=None)
+# plt.title("Top 10 number of confirmed cases per state", bbox={'facecolor':'0.8', 'pad':5})
+# plt.show()
 # %%
 
 '''

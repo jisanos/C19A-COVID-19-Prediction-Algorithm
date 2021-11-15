@@ -57,6 +57,10 @@ def policy_data_current():
     return pd.concat(content)
 
 
+def world_pop_by_country():
+    path = ".\\CCI_C-19\\data_tables\\world_pop_by_country.csv"
+    return pd.read_csv(path)
+
 
 # Dictionary of appreviated us states
 us_states_abbreviations = {
