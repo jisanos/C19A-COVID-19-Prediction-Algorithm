@@ -581,24 +581,51 @@ plt.show()
 # %%
 ## Attempting groupby method (Which is a lot more efficient) to fill NaNs
 
-def filler(x):
+def filler(x):        
     
-    # First removing outliers from cumulative data so that
-    # the interpolation can take care of those gaps
+    
+    
+    # removing outliers from cumulative data
     cols = ['Deaths', 'Confirmed', 'Recovered']
 
+    # for col in cols:
+        
+    #     diff = x[col].diff()
+    #     negatives = (diff < 0)
+
+    #     #While there are any negatives then proceed
+    #     while negatives.any():
+            
+    #         #Getting the index of the negative values and the ones we'll replace them with
+    #         outliers = x[(diff.shift(-1) < 0)].index
+    #         replacer = x[(diff < 0)].index
+            
+    #         # Assigning the preceeding / smallest value to maintain
+    #         # cumulative data
+            
+            
+            
+    #         x.loc[replacer, col] = x.loc[replacer, col].values + diff[replacer].abs()
+                        
+    #         diff = x[col].diff()
+    #         negatives = (diff < 0)
+    
+    
     for col in cols:
         
-        #Diff and then shifting back to get where the cumulative outlier is
-        diff = x[col].diff().shift(-1)
+        std = x[col].std()
         
-        negatives = (diff <= 0)
-        #if there are any negatives then proceed
-        if negatives.any():
-            
-            x.loc[negatives, col] = np.nan
-            
+        diff = x[col].diff()
+        
+        outliers = x.shift(-1)[diff.abs() > std].index
+        
+        if len(outliers) >0:
+            print(x.loc[outliers,col])
+            x.loc[outliers,col] = np.nan
+            print(x.loc[outliers,col])
     
+    
+
     
     # #Normal Ffill and bfill method
     # x['Confirmed'] = x['Confirmed'].ffill().bfill()
@@ -634,11 +661,13 @@ def filler(x):
     x['Lat'] = x['Lat'].mean()
     x['Long_'] = x['Long_'].mean()
     
+ 
+    
     return x
 
 
 start_time = time.time()
-cases_df = cases_df.groupby(['Admin2','Province_State','Country_Region'
+test_df = cases_df.groupby(['Admin2','Province_State','Country_Region'
                              ],dropna=False).apply(filler)
 
 print(time.time() - start_time)
@@ -647,15 +676,21 @@ print(time.time() - start_time)
 
 #%% removing dups again and Sorting dataframe by date again
 
-cases_df = remove_dups_and_reset_index(cases_df)
+test_df = remove_dups_and_reset_index(test_df)
 
 # %%
 import matplotlib.pyplot as plt
-to_plot = cases_df.loc[(cases_df.Country_Region == 'Peru') & (cases_df.Province_State.notna()),['Deaths','date']]
+to_plot = test_df.loc[(test_df.Country_Region == 'Peru') & (test_df.Province_State.notna()),['Deaths','date']]
 
 plt.plot(to_plot.date,to_plot.Deaths)
 
 plt.show()
+grp = test_df.loc[(test_df.Country_Region == 'Peru')
+                 & (test_df.Province_State.notna()),['Province_State','Deaths','date']].groupby(['Province_State'])
+for g,df in grp:
+    plt.title(g)
+    plt.plot(df.date, df.Deaths)
+    plt.show()
 
 
 # %% Create a column "New_Cases" with only the total cases on that date
@@ -675,37 +710,38 @@ def date_cases(x):
     # cumulative data, we will just take their absolute value and
     # then make a new cumulative sum
     
-    # x['Confirmed'] = x['New_Confirmed'].cumsum()
+    x['Confirmed'] = x['New_Confirmed'].cumsum()
     
     
     # Doing the same with deaths and recoveries, but only if they are not
     # all NaNs.
     
     x['New_Deaths'] = x['Deaths'].diff().fillna(0).abs()
-    # x['Deaths'] = x['New_Deaths'].cumsum()
+    x['Deaths'] = x['New_Deaths'].cumsum()
     
 
     x['New_Recovered'] = x['Recovered'].diff().fillna(0).abs()
-    # x['Recovered'] = x['New_Recovered'].cumsum()
+    x['Recovered'] = x['New_Recovered'].cumsum()
         
     return x    
     
 
-cases_df = cases_df.groupby(['Admin2','Province_State','Country_Region'
+test_df = test_df.groupby(['Admin2','Province_State','Country_Region'
                               ],dropna=False).apply(date_cases)
 
 
 # %%
-cases_df = remove_dups_and_reset_index(cases_df)
+test_df = remove_dups_and_reset_index(test_df)
 
 # %%
 import matplotlib.pyplot as plt
-to_plot = cases_df.loc[cases_df.Country_Region == 'Peru',['Deaths','date']]
+to_plot = test_df.loc[(test_df.Country_Region == 'Peru') & (test_df.Province_State.notna()),['Deaths','date']]
 
 plt.plot(to_plot.date,to_plot.Deaths)
 plt.show()
 
-to_plot = cases_df.loc[cases_df.Country_Region == 'Peru',['New_Deaths','date']]
+
+to_plot = test_df.loc[(test_df.Country_Region == 'Peru'),['New_Deaths','date']]
 
 plt.plot(to_plot.date,to_plot.New_Deaths)
 plt.show()
