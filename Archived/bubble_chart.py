@@ -18,7 +18,7 @@ import matplotlib.pyplot as plt
 
 path = "C:/Users/LuisGa/Documents/GitHub/C19A-COVID-19-Prediction-Algorithm-CAPSTONE/cases_cleaned"
 
-df = pd.read_csv("cases_cleaned.csv")
+df = pd.read_csv("cases_cleaned_normal.csv")
 
 df.head()
 #%%

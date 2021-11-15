@@ -65,7 +65,8 @@ print(group_CSSE.info())
 #plot heatmap and show numbers
 sns.heatmap(group_CSSE, fmt="d", annot=True, cmap='YlGnBu',linewidths=.5)
 # adding a title to it
-plt.title('Yearly and monthly confirmed global cases')
+plt.title('Monthly Confirmed Cases (Globally)')
+plt.show()
 #%%
 print(group_CSSE.info())
 # %%
@@ -113,4 +114,5 @@ print(group_CSSE.info())
 #plot heatmap and show numbers
 sns.heatmap(group_CSSE, fmt="d", annot=True, cmap='YlGnBu',linewidths=.5)
 # adding a title to it
-plt.title('Yearly and monthly death global cases')
+plt.title('Monthly Deaths (Globally)')
+plt.show()
