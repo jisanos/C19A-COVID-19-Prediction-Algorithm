@@ -552,59 +552,6 @@ cases_df = remove_dups_and_reset_index(cases_df)
 
 # Washington County and Washington D.C. are different counties
 
-
-
-# %%  forward filling
-
-
-# state_country = cases_df[cases_df['Admin2'].isna() & cases_df[
-#     'Province_State'].notna()][['Province_State','Country_Region']].values
-
-# # Unique set of state,country touple
-# state_country_set = set()
-
-# [state_country_set.add((element[0],element[1])) for element in state_country]
-
-
-# # This takes too long to execute.
-# # i should attempt to multithread it
-# def filler(tpl):
-#     state,country = tpl
-#     print(state)
-    
-#     booleans = (cases_df['Province_State'] == state) & (cases_df['Country_Region'] == country)
-    
-#     cases_df.loc[booleans,'Confirmed'] = cases_df.loc[booleans,'Confirmed'].ffill().bfill()
-
-# # for state,country in state_country_set:
-# #     print(state)
-    
-# #     Thread(target = filler, args = (state,country)).start()
-
-# with ThreadPoolExecutor() as executor:
-#     executor.map(filler, list(state_country_set))
-    
-
-# # I should also attempt other methods of imputations that could be more useful
-
-# %% Setting NAN states that are qual to country in name
-
-# def remove_eq_state(x):
-    
-#     # Checking if state is nan
-#     if pd.isna(x['Province_State']):
-#         pass
-#     # If they are equal then we will set the state value as NA
-#     elif x['Province_State'] == x['Country_Region']:
-#         x['Province_State'] = np.nan
-        
-#     return x
-    
-# cases_df.apply(remove_eq_state,axis = 1)
-# This method takes too long as it iterates through every row
-
-
-
 # %% Replaces counties that are equal to state with NaN
 
 filter_equal = (cases_df['Admin2'] == cases_df['Province_State'])
@@ -625,11 +572,34 @@ cases_df.loc[filter_equal,'Province_State'] = np.nan
 
 cases_df = remove_dups_and_reset_index(cases_df)
 # %%
+import matplotlib.pyplot as plt
+to_plot = cases_df.loc[cases_df.Country_Region == 'Peru',['Deaths','date']]
+
+plt.plot(to_plot.date,to_plot.Deaths)
+plt.show()
+
+# %%
 ## Attempting groupby method (Which is a lot more efficient) to fill NaNs
 
 def filler(x):
     
-   
+    # First removing outliers from cumulative data so that
+    # the interpolation can take care of those gaps
+    cols = ['Deaths', 'Confirmed', 'Recovered']
+
+    for col in cols:
+        
+        #Diff and then shifting back to get where the cumulative outlier is
+        diff = x[col].diff().shift(-1)
+        
+        negatives = (diff <= 0)
+        #if there are any negatives then proceed
+        if negatives.any():
+            
+            x.loc[negatives, col] = np.nan
+            
+    
+    
     # #Normal Ffill and bfill method
     # x['Confirmed'] = x['Confirmed'].ffill().bfill()
     # x['Deaths'] = x['Deaths'].ffill().bfill()
@@ -645,7 +615,7 @@ def filler(x):
     x.loc[first_index,'Confirmed'] = 0
     x.loc[first_index,'Deaths'] = 0
     x.loc[first_index,'Recovered'] = 0
-    # x.loc[first_index,'Active'] = 0
+
     
     x['Confirmed'] = x['Confirmed'].interpolate().round()
     x['Deaths'] = x['Deaths'].interpolate().round()
@@ -678,6 +648,16 @@ print(time.time() - start_time)
 #%% removing dups again and Sorting dataframe by date again
 
 cases_df = remove_dups_and_reset_index(cases_df)
+
+# %%
+import matplotlib.pyplot as plt
+to_plot = cases_df.loc[(cases_df.Country_Region == 'Peru') & (cases_df.Province_State.notna()),['Deaths','date']]
+
+plt.plot(to_plot.date,to_plot.Deaths)
+
+plt.show()
+
+
 # %% Create a column "New_Cases" with only the total cases on that date
 
 def date_cases(x):
@@ -689,23 +669,24 @@ def date_cases(x):
     # any prior value to substract with, thus filling these with 0 make no 
     # difference.
 
-    x['New_Confirmed'] = x['Confirmed'].sub(x['Confirmed'].shift().fillna(0)).abs()
+    x['New_Confirmed'] = x['Confirmed'].diff().fillna(0).abs()
     
     # Since there is the chance of there being negative values due to inconsistent,
     # cumulative data, we will just take their absolute value and
     # then make a new cumulative sum
-    x['Confirmed'] = x['New_Confirmed'].cumsum()
+    
+    # x['Confirmed'] = x['New_Confirmed'].cumsum()
     
     
     # Doing the same with deaths and recoveries, but only if they are not
     # all NaNs.
-    if x['Deaths'].notna().all():
-        x['New_Deaths'] = x['Deaths'].sub(x['Deaths'].shift().fillna(0)).abs()
-        x['Deaths'] = x['New_Deaths'].cumsum()
-        
-    if x['Recovered'].notna().all():
-        x['New_Recovered'] = x['Recovered'].sub(x['Recovered'].shift().fillna(0)).abs()
-        x['Recovered'] = x['New_Recovered'].cumsum()
+    
+    x['New_Deaths'] = x['Deaths'].diff().fillna(0).abs()
+    # x['Deaths'] = x['New_Deaths'].cumsum()
+    
+
+    x['New_Recovered'] = x['Recovered'].diff().fillna(0).abs()
+    # x['Recovered'] = x['New_Recovered'].cumsum()
         
     return x    
     
@@ -717,6 +698,17 @@ cases_df = cases_df.groupby(['Admin2','Province_State','Country_Region'
 # %%
 cases_df = remove_dups_and_reset_index(cases_df)
 
+# %%
+import matplotlib.pyplot as plt
+to_plot = cases_df.loc[cases_df.Country_Region == 'Peru',['Deaths','date']]
+
+plt.plot(to_plot.date,to_plot.Deaths)
+plt.show()
+
+to_plot = cases_df.loc[cases_df.Country_Region == 'Peru',['New_Deaths','date']]
+
+plt.plot(to_plot.date,to_plot.New_Deaths)
+plt.show()
 
 # %% Finding latitude and longitude to locations that contain 0,0 or nans
 
@@ -857,13 +849,13 @@ def cum_sum(x):
     
     # Doing the same with deaths and recoveries, but only if they are not
     # all NaNs.
-    if x['Deaths'].notna().all():
+    
         
-        x['Deaths'] = x['New_Deaths'].cumsum()
-        
-    if x['Recovered'].notna().all():
-        
-        x['Recovered'] = x['New_Recovered'].cumsum()
+    x['Deaths'] = x['New_Deaths'].cumsum()
+    
+
+    
+    x['Recovered'] = x['New_Recovered'].cumsum()
         
     return x
     
