@@ -68,7 +68,7 @@ latest_values = country_cases_df.groupby(
     ).agg(agg_dic
           ).sort_values(['Confirmed','Deaths'], ascending=False)
 
-n_countries = 7
+n_countries = 10
 
 top_countries = latest_values.head(n_countries)
 
@@ -85,7 +85,7 @@ other_countries = other_countries.head(1)
 
 to_plot = pd.concat([top_countries, other_countries])
 
-plt.figure(figsize=(14, 6), dpi = 800) 
+plt.figure(figsize=(10, 10), dpi = 800) 
 
 sns.scatterplot(data=to_plot, x="Deaths", y="Confirmed", alpha=0.7, size='Population',
                 hue='Country_Region',sizes=(100,6000), legend=False)
@@ -133,7 +133,8 @@ to_plot = province_cases_df.groupby(
           ).sort_values(['Deaths'], ascending=False)
 
 plt.figure(figsize=(14, 6), dpi = 600) 
-sns.barplot(x='Province_State', y='Deaths', data = to_plot.head(10)).set_title("States with most deaths (Global)")
+sns.barplot(x='Province_State', y='Deaths', data = to_plot.head(10)
+            ).set_title("States with most deaths (Global)")
 
 plt.xlabel('State')
 plt.ylabel('Deaths')
@@ -382,7 +383,8 @@ to_plot = us_province_cases_df[us_province_cases_df.Province_State.isin(
 
 # filteringViolin = to_plot[to_plot['Province_State'].isin(set(top5['Province_State'].head(4)))]
 plt.figure(figsize=(14, 6), dpi = 600) 
-sns.violinplot(x='Province_State', y='New_Confirmed', data = to_plot[to_plot['New_Confirmed'] < 10000])
+sns.violinplot(x='Province_State', y='New_Confirmed',
+               data = to_plot[to_plot['New_Confirmed'] < 10000])
 
 plt.title('Daily Cases Distribution (US)')
 plt.xlabel('State')
