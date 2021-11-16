@@ -365,3 +365,32 @@ plt.show()
 # group_CSSE.head(10).plot.pie(y='Stage_Two_Doses', figsize=(13, 13),autopct='%1.1f%%',legend=None,shadow=True, startangle=140)
 # plt.title('Top 10 US province state with where people have taken the second dosis the most', bbox={'facecolor':'0.8', 'pad':5})
 # plt.show()
+# %% Catplot of different vaccine types (US)
+
+agg_dic = {'Doses_admin':'max'}
+
+top_states = us_state_vax_df.groupby(
+    ['Province_State'], as_index=False).agg(
+        agg_dic).sort_values(['Doses_admin'],ascending=False)
+
+top_states = top_states['Province_State'].unique()[:11] #Getting the first states
+
+to_plot = us_state_vax_df[us_state_vax_df.Province_State.isin(top_states)]
+        
+
+
+g=sns.catplot(data=to_plot,kind='bar',x='Province_State',y='Doses_admin',
+            hue='Vaccine_Type')
+
+g.fig.set_figwidth(14)
+g.fig.set_figheight(6)
+g.fig.set_dpi(800)
+
+plt.title('Vaccine Brand Distribution per State (US)')
+plt.xlabel('State')
+plt.ylabel('Doses Administered')
+
+plt.show()
+
+# %% Catplot of first and second stage doses
+
