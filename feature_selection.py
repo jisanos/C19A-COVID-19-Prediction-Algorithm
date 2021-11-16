@@ -49,7 +49,7 @@ sns.lineplot(data = us_country_all_vax,x='date',y='Deaths')
 plt.xticks(rotation = 45)
 plt.show()
 # %% cumulative Cases and Death scaled
-fig, ax1 = plt.subplots(figsize=(8,5))
+fig, ax1 = plt.subplots(figsize=(8,5),dpi=600)
 
 ax1.set_ylabel('Cumulative Confirmed',color='blue')
 
@@ -86,7 +86,7 @@ plt.show()
 
 # %% daily cases and death scaled
 
-fig, ax1 = plt.subplots(figsize=(8,5))
+fig, ax1 = plt.subplots(figsize=(8,5),dpi=600)
 
 ax1.set_ylabel('Daily Confirmed',color='blue')
 
@@ -98,6 +98,7 @@ ax2.set_ylabel('Daily Deaths',color='red')
 
 sns.lineplot(data = us_country_all_vax,x='date',y='New_Deaths',color='red')
 plt.xticks(rotation = 45)
+plt.title('Daily new Cases and Deaths (US)')
 plt.show()
 
 # # %% Plotting daily
@@ -111,7 +112,7 @@ plt.show()
 # plt.show()
 # %%cumulative cases and vaccines
 
-fig, ax1 = plt.subplots(figsize=(8,5))
+fig, ax1 = plt.subplots(figsize=(8,5),dpi=600)
 
 ax1.set_ylabel('Cumulative Confirmed',color='blue')
 
@@ -129,7 +130,7 @@ plt.show()
 
 # %%cumulative deaths and vaccines
 
-fig, ax1 = plt.subplots(figsize=(8,5))
+fig, ax1 = plt.subplots(figsize=(8,5),dpi=600)
 
 ax1.set_ylabel('Cumulative Deaths',color='red')
 
@@ -151,7 +152,7 @@ plt.xticks(rotation = 45)
 plt.show()
 
 # %% daily cases and vaccines
-fig, ax1 = plt.subplots(figsize=(8,5))
+fig, ax1 = plt.subplots(figsize=(8,5),dpi=600)
 
 ax1.set_ylabel('Daily Confirmed',color='blue')
 
@@ -167,35 +168,80 @@ plt.show()
 
 
 # %%
+plt.figure(figsize=(6, 6), dpi = 800) 
 sns.lineplot(data = us_country, x = 'date', y = 'Doses_admin',hue='Vaccine_Type')
 plt.xticks(rotation = 45)
 plt.show()
 # %%
+plt.figure(figsize=(6, 6), dpi = 800) 
 sns.lineplot(data = us_country, x = 'date', y = 'Stage_One_Doses',hue='Vaccine_Type')
 plt.xticks(rotation = 45)
 plt.show()
 # %%
+plt.figure(figsize=(6, 6), dpi = 800) 
 sns.lineplot(data = us_country, x = 'date', y = 'Stage_Two_Doses',hue='Vaccine_Type')
 plt.xticks(rotation = 45)
 plt.show()
 
 # %%
 
-sns.lmplot(x='Doses_admin',y='New_Confirmed',data = us_country_all_vax)
-
-# %%
-sns.lmplot(x='Doses_admin',y='New_Deaths',data = us_country_all_vax)
-
-# %%
-sns.lmplot(x='New_Confirmed',y='New_Deaths',data = us_country_all_vax)
+g = sns.lmplot(x='Doses_admin',y='New_Confirmed',data = us_country_all_vax)
+g.fig.set_figwidth(14)
+g.fig.set_figheight(6)
+g.fig.set_dpi(800)
+plt.show()
 # %%
 
+g = sns.lmplot(x='Doses_admin',y='New_Deaths',data = us_country_all_vax)
+g.fig.set_figwidth(14)
+g.fig.set_figheight(6)
+g.fig.set_dpi(800)
+plt.show()
+# %%
+ 
+g=sns.lmplot(x='New_Confirmed',y='New_Deaths',data = us_country_all_vax)
+g.fig.set_figwidth(14)
+g.fig.set_figheight(6)
+g.fig.set_dpi(800)
+plt.show()
+
+# %%
+
+g = sns.lmplot(x='average_temperature_celsius',y = 'New_Confirmed',data = us_state_all_vax)
+g.fig.set_figwidth(14)
+g.fig.set_figheight(6)
+g.fig.set_dpi(800)
+plt.show()
+# %%
+
+g = sns.lmplot(x='maximum_temperature_celsius',y = 'New_Confirmed',data = us_state_all_vax)
+g.fig.set_figwidth(14)
+g.fig.set_figheight(6)
+g.fig.set_dpi(800)
+plt.show()
+# %%
+
+g = sns.lmplot(x='minimum_temperature_celsius',y = 'New_Confirmed',
+               data = us_state_all_vax[us_state_all_vax['New_Confirmed'] < 5000])
+g.fig.set_figwidth(14)
+g.fig.set_figheight(6)
+g.fig.set_dpi(800)
+plt.show()
+# %%
+
+g = sns.lmplot(x='average_temperature_celsius',y = 'New_Confirmed',
+               data = us_state_all_vax[us_state_all_vax['New_Confirmed'] < 2000])
+g.fig.set_figwidth(14)
+g.fig.set_figheight(6)
+g.fig.set_dpi(800)
+plt.show()
+# %%
 keys = us_state_all_vax.columns[27:]
 
 # %%
-for key in keys[:40]:
-    sns.lmplot(x=key,y = 'New_Confirmed',data = us_state_all_vax[us_state_all_vax[key] > 0])
-    plt.plot()
+# for key in keys[:40]:
+#     sns.lmplot(x=key,y = 'New_Confirmed',data = us_state_all_vax[us_state_all_vax[key] > 0])
+#     plt.plot()
 
 # %%
 corr = pd.DataFrame()
@@ -208,5 +254,10 @@ corr.sort_values(by=0, inplace=True,ascending=False)
 # %%
 
 sns.lmplot(x='mask',y = 'New_Confirmed',data = us_state_all_vax[us_state_all_vax['mask'] > 0])
+plt.show()
 # %%
 sns.lineplot(data= us_state_all_vax, x='date',y='covid')
+plt.show()
+# %%
+sns.lineplot(data= us_state_all_vax, x='date',y='mask')
+plt.show()

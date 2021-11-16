@@ -17,7 +17,7 @@ from sklearn.ensemble import (RandomForestRegressor,RandomForestClassifier,
                               GradientBoostingRegressor)
 from sklearn.linear_model import LinearRegression, Ridge
 from sklearn.tree import DecisionTreeClassifier, ExtraTreeClassifier
-from sklearn.svm import SVC
+from sklearn.svm import SVR
 from sklearn.metrics import (mean_squared_error, mean_absolute_error,
                              mean_absolute_percentage_error,
                              r2_score)
@@ -51,7 +51,7 @@ us_country_all_vax = us_country[vax_filter].copy()
 
 # %% Functions for plotting train predictions and test predictions
 def train_plotter(name, prediction, X_train, y_train):
-    fig, ax = plt.subplots(figsize=(18,8))
+    fig, ax = plt.subplots(figsize=(18,8), dpi = 600)
     
     
     sns.lineplot(x = X_train.index.values, y = y_train.values, color = 'red', label='Real (Train)', ax=ax)
@@ -63,7 +63,7 @@ def train_plotter(name, prediction, X_train, y_train):
     plt.show()                
     
 def test_plotter(name, prediction, X_test, y_test):
-    fig, ax = plt.subplots(figsize=(18,8))
+    fig, ax = plt.subplots(figsize=(18,8), dpi = 600)
     
     
     sns.lineplot(x=X_test.index, y=y_test.values, color = 'red', label='Real (Test)', ax=ax)
@@ -122,19 +122,20 @@ def model_tester(model, train_df, test_df, state, title, extra_cols_drop = []):
     print()
     print(state+" "+title)
     print("Metrics on whole prediction:")
-    print("Root Mean Sqrt Err: ",mean_squared_error(y_test, y_test_pred, squared = False))
+    print("RMSE: ",mean_squared_error(y_test, y_test_pred, squared = False))
     print("R2 Score: ", r2_score(y_test, y_test_pred))
+    print('MAPE: ',mean_absolute_percentage_error(y_test, y_test_pred))
     
-    X_test_with_vax = X_test[X_test['Doses_admin'] > 0] # Selecting only when vaccines started to be administered
+    # X_test_with_vax = X_test[X_test['Doses_admin'] > 0] # Selecting only when vaccines started to be administered
     
     
     
-    lenght = len(X_test_with_vax)
+    # lenght = len(X_test_with_vax)
     
-    print("Metrics on only half prediction (2021 - ...):")
-    print("Root Mean Sqrt Err: ",mean_squared_error(np.array(y_test)[lenght:], y_test_pred[lenght:], squared = False))
-    print("R2 Score: ", r2_score(np.array(y_test)[lenght:], y_test_pred[lenght:]))
-
+    # print("Metrics on only half prediction (2021 - ...):")
+    # print("Root Mean Sqrt Err: ",mean_squared_error(np.array(y_test)[lenght:], y_test_pred[lenght:], squared = False))
+    # print("R2 Score: ", r2_score(np.array(y_test)[lenght:], y_test_pred[lenght:]))
+    
 # %% 
 
 extra = ['Doses_alloc','Doses_shipped','New_Doses_alloc','New_Doses_shipped',
@@ -145,9 +146,17 @@ extra = ['Doses_alloc','Doses_shipped','New_Doses_alloc','New_Doses_shipped',
                  'Testing','Education','Health/Medical','Emergency Level',
                  'Transportation','Budget','Social Distancing', 'Other','Vaccine','Opening (County)']
 
-tfidf_cols = us_state_all_vax.columns[25:]
+weather_cols = ['average_temperature_celsius',
+                'minimum_temperature_celsius',
+                'maximum_temperature_celsius',
+                'rainfall_mm','snowfall_mm',
+                'dew_point','relative_humidity']
 
-state = 'New York'
+tfidf_cols = np.setdiff1d(us_state_all_vax.columns[25:], weather_cols).tolist()
+
+
+
+state = 'California'
 
 # %% Train test data
 
@@ -167,63 +176,30 @@ model_tester(rfr, train_df,test_df, state,"Random Forest Regressor",tfidf_cols)
 
 
 # %% Linear Regression
-# lr = LinearRegression()
+lr = LinearRegression()
 
-# model_tester(lr, train_df,test_df, state,"Linear Regression",tfidf_cols)
+model_tester(lr, train_df,test_df, state,"Linear Regression",tfidf_cols)
 
-# %% Decision Tree Classifier
 
-dtc = DecisionTreeClassifier()
-
-model_tester(dtc, train_df,test_df, state,"Decision Tree Classifier",tfidf_cols)
-
-# This one has a small tendency to improve with the TFIDF columns
 
 # %% Support vector machine
-# svc = SVC()
+# svc = SVR()
 
 # model_tester(svc, train_df,test_df, state,"Support Vector Machine",tfidf_cols)
 
 
-
-# %% Random Forest Classifier
-
-# rfc = RandomForestClassifier(max_depth = 2)
-
-# model_tester(rfc, train_df,test_df, state,"Random Forest Classifier")
-
 # %% KNeighbors Regressor
 
-# knr = KNeighborsRegressor(n_neighbors = 8)
+knr = KNeighborsRegressor(n_neighbors = 8)
 
-# model_tester(knr, train_df,test_df, state,"KNeighbors Regressor",tfidf_cols)
+model_tester(knr, train_df,test_df, state,"KNeighbors Regressor",tfidf_cols)
 
 # %% Ridge Regression
 
-# ridge = Ridge(alpha=1.0, random_state=241)
+ridge = Ridge(alpha=1.0, random_state=241)
 
-# model_tester(ridge, train_df,test_df, state,"Ridge Regression",tfidf_cols)
-# %% Naive Bayes GaussianNB
+model_tester(ridge, train_df,test_df, state,"Ridge Regression",tfidf_cols)
 
-gnb = GaussianNB()
-
-model_tester(gnb, train_df,test_df, state,"Naive Bayes GaussianNB",tfidf_cols)
-
-# %% Extra Tree Classifier
-
-etc = ExtraTreeClassifier()
-
-model_tester(etc, train_df,test_df, state,"Extra Tree Classifier",tfidf_cols)
-# %% Bagging Classifier
-
-# bc = BaggingClassifier()
-
-# model_tester(bc, train_df,test_df, state,"Bagging Classifier")
-# %% Ada Boost Classifier
-
-# abc = AdaBoostClassifier()
-
-# model_tester(abc, train_df,test_df, state,"Ada Boost Classifier")
 
 # %% Gradient Boosting Regressor
 gbr = GradientBoostingRegressor()
