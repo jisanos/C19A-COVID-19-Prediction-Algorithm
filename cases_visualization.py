@@ -21,11 +21,12 @@ sns.set()
 # %%
 # opening up the dataset
 cases_df = pd.read_csv(".\\cases_cleaned_categorizable.csv")
-cases_cleaned_categorizable_Without_Date_Filter = pd.read_csv(".\\cases_cleaned_categorizable.csv")
+
 world_pop = data_imports.world_pop_by_country()
 
 # %% Renaming world population country column
-world_pop = world_pop.rename(columns={'Country Name':'Country_Region', "2018":"Population"})
+world_pop = world_pop.rename(columns={'Country Name':'Country_Region',
+                                      "2018":"Population"})
 #%%
 cases_df['date']= pd.to_datetime(cases_df['date'])
 
@@ -40,21 +41,25 @@ province_cases_df = cases_df[cases_df['Country_Region'].notna() &
                              cases_df['Admin2'].isna()]
 
 #taking out the unknown
-province_cases_df = province_cases_df[province_cases_df['Province_State'] != 'Unknown']
-province_cases_df = province_cases_df[province_cases_df['Country_Region'] != 'Unknown']
+province_cases_df = province_cases_df[province_cases_df[
+    'Province_State'] != 'Unknown']
+province_cases_df = province_cases_df[province_cases_df[
+    'Country_Region'] != 'Unknown']
 # %%Filtering cases cleaned categorizable for only country region
 country_cases_df = cases_df[cases_df['Country_Region'].notna() & 
                             cases_df['Province_State'].isna() &
                             cases_df['Admin2'].isna()]
 #taking out the unknown
-country_cases_df = country_cases_df[country_cases_df['Province_State'] != 'Unknown']
-country_cases_df = country_cases_df[country_cases_df['Country_Region'] != 'Unknown']
+country_cases_df = country_cases_df[country_cases_df[
+    'Province_State'] != 'Unknown']
+country_cases_df = country_cases_df[country_cases_df[
+    'Country_Region'] != 'Unknown']
 
 # Adding country population
 country_cases_df = country_cases_df.merge(world_pop, on='Country_Region')
 #%% Global Countries Bubble chart
 # Selecting the 
-country_cases_df = country_cases_df.sort_values(['Confirmed','Deaths'], ascending=False)
+
 
 agg_dic = {'Confirmed':'max','Deaths':'max','Population':'first'}
 
@@ -528,3 +533,4 @@ plt.title('Monthly Deaths (Globally)')
 plt.xlabel('Year')
 plt.ylabel('Month')
 plt.show()
+# %%

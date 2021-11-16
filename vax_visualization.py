@@ -11,54 +11,86 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 import calendar
+import data_imports
 #set the plot's theme to something more beautiful
 sns.set()
 
 # %%
-vax_cleaned_categorizable = pd.read_csv(".\\vax_cleaned_categorizable.csv")
+vax_cleaned_cat = pd.read_csv(".\\vax_cleaned_categorizable.csv")
 vax_cleaned_normal = pd.read_csv(".\\vax_cleaned_normal.csv")
-vax_cleaned_categorizable_Without_Date_Filter = pd.read_csv(".\\vax_cleaned_normal.csv")
+world_pop = data_imports.world_pop_by_country()
+# %% Renaming world population country column
+world_pop = world_pop.rename(columns={'Country Name':'Country_Region',
+                                      "2018":"Population"})
 #%%
-#using the latest data instead of all the data
-vax_cleaned_categorizable['Date']= pd.to_datetime(vax_cleaned_categorizable['Date'])
-vax_cleaned_categorizable= vax_cleaned_categorizable[vax_cleaned_categorizable["Date"] == vax_cleaned_categorizable['Date'].max()]
-
+vax_cleaned_cat['Date']= pd.to_datetime(
+    vax_cleaned_cat['Date'])
 # %%
 '''
 #Filtering cases cleaned categorizable for only country region uses
-CountryUsesOnly = vax_cleaned_categorizable[vax_cleaned_categorizable['Country_Region'].notna() & 
-              vax_cleaned_categorizable['Province_State'].isna()]
+country_vax_df = vax_cleaned_cat[vax_cleaned_cat['Country_Region'].notna() & 
+              vax_cleaned_cat['Province_State'].isna()]
 #taking out the unknown
-CountryUsesOnly = CountryUsesOnly[CountryUsesOnly['Province_State'] != 'Unknown']
-CountryUsesOnly = CountryUsesOnly[CountryUsesOnly['Country_Region'] != 'Unknown']
+country_vax_df = country_vax_df[country_vax_df['Province_State'] != 'Unknown']
+country_vax_df = country_vax_df[country_vax_df['Country_Region'] != 'Unknown']
 '''
 # %%
-#Filtering cases cleaned categorizable for only country region uses
-CountryUsesOnly = vax_cleaned_categorizable[vax_cleaned_categorizable['Country_Region'].notna() & 
-              vax_cleaned_categorizable['Province_State'].isna()]
+# Getting country level data only
+country_vax_df = vax_cleaned_cat[vax_cleaned_cat['Country_Region'].notna() & 
+                                 vax_cleaned_cat['Province_State'].isna()]
 #taking out the unknown
-CountryUsesOnly = CountryUsesOnly[CountryUsesOnly['Province_State'] != 'Unknown']
-CountryUsesOnly = CountryUsesOnly[CountryUsesOnly['Country_Region'] != 'Unknown']
-# %%
-# group by country region
-group_CSSE = CountryUsesOnly[['Country_Region','Stage_One_Doses']].sort_values('Stage_One_Doses',ascending=False)
+country_vax_df = country_vax_df[country_vax_df['Province_State'] != 'Unknown']
+country_vax_df = country_vax_df[country_vax_df['Country_Region'] != 'Unknown']
 
-#a bar plot to show the top 5 second dosis of countries
-sns.set(rc = {'figure.figsize':(9,9)})
-sns.barplot(x='Country_Region', y='Stage_One_Doses', data = group_CSSE.head(5)).set_title('Top 5 country with where people have taken the first dosis the most')
+# Adding country population
+country_vax_df = country_vax_df.merge(world_pop, on='Country_Region')
+# %% First dosage per country
+agg_dic = {'Stage_One_Doses':'max'}
+
+latest_values = country_vax_df.groupby(
+    'Country_Region', as_index=False
+    ).agg(agg_dic
+          ).sort_values(['Stage_One_Doses'], ascending=False)
+          
+          
+plt.figure(figsize=(14, 6), dpi = 800) 
+sns.barplot(x='Country_Region', y='Stage_One_Doses',data = latest_values.head(10)
+            ).set_title('First Dosage Progress per Country (Global)')
+plt.xlabel('Country')
+plt.ylabel('First Dosage')
+plt.show()
+# %% Second dosage per country
+agg_dic = {'Stage_Two_Doses':'max'}
+
+latest_values = country_vax_df.groupby(
+    'Country_Region', as_index=False
+    ).agg(agg_dic
+          ).sort_values(['Stage_Two_Doses'], ascending=False)
+
+
+plt.figure(figsize=(14, 6), dpi = 800) 
+sns.barplot(x='Country_Region', y='Stage_Two_Doses', data = latest_values.head(10)
+            ).set_title('Second Dosage Progress per Country (Global)')
+plt.xlabel('Country')
+plt.ylabel('Second Dosage')
+plt.show()
+# %% Total doses per country
+
+agg_dic = {'Doses_admin':'max'}
+
+latest_values = country_vax_df.groupby(
+    'Country_Region', as_index=False
+    ).agg(agg_dic
+          ).sort_values(['Doses_admin'], ascending=False)
+plt.figure(figsize=(14, 6), dpi = 800) 
+#plot a pie chart regarding the top 5 deaths of countries
+latest_values = latest_values.set_index('Country_Region')
+latest_values.head(10).plot.pie(y='Doses_admin', autopct='%1.1f%%',legend=None,shadow=True, startangle=140)
+plt.title("Doses administered per country", bbox={'facecolor':'0.8', 'pad':5})
 plt.show()
 # %%
 # group by country region
-group_CSSE = CountryUsesOnly[['Country_Region','Stage_Two_Doses']].sort_values('Stage_Two_Doses',ascending=False)
-
-#a bar plot to show the top 5 second dosis of countries
-sns.set(rc = {'figure.figsize':(9,9)})
-sns.barplot(x='Country_Region', y='Stage_Two_Doses', data = group_CSSE.head(5)).set_title('Top 5 country with where people have taken the second dosis the most')
-plt.show()
-
-# %%
-# group by country region
-group_CSSE = CountryUsesOnly[['Country_Region','Stage_One_Doses']].sort_values('Stage_One_Doses',ascending=False)
+group_CSSE = country_vax_df[['Country_Region','Stage_One_Doses']].sort_values('Stage_One_Doses',ascending=False)
 
 #plot a pie chart regarding the top 5 deaths of countries
 group_CSSE = group_CSSE.set_index('Country_Region')
@@ -69,7 +101,7 @@ plt.show()
 # %%
 # %%
 # group by country region
-group_CSSE = CountryUsesOnly[['Country_Region','Stage_Two_Doses']].sort_values('Stage_Two_Doses',ascending=False)
+group_CSSE = country_vax_df[['Country_Region','Stage_Two_Doses']].sort_values('Stage_Two_Doses',ascending=False)
 
 #plot a pie chart regarding the top 5 deaths of countries
 group_CSSE = group_CSSE.set_index('Country_Region')
@@ -77,19 +109,11 @@ group_CSSE.head(10).plot.pie(y='Stage_Two_Doses', figsize=(10, 10),autopct='%1.1
 plt.title('Top 10 country with where people have taken the second dosis the most', bbox={'facecolor':'0.8', 'pad':5})
 plt.show()
 
-# %%
-# group by country region
-group_CSSE = CountryUsesOnly[['Country_Region','Doses_admin']].sort_values("Doses_admin",ascending=False)
 
-#plot a pie chart regarding the top 5 deaths of countries
-group_CSSE = group_CSSE.set_index('Country_Region')
-group_CSSE.head(10).plot.pie(y='Doses_admin', figsize=(10, 10),autopct='%1.1f%%',legend=None,shadow=True, startangle=140)
-plt.title("Top 10 number of doses of admin per country", bbox={'facecolor':'0.8', 'pad':5})
-plt.show()
 
 # %%
 # group by country region
-group_CSSE = CountryUsesOnly[['Country_Region','Doses_admin']].sort_values('Doses_admin',ascending=False)
+group_CSSE = country_vax_df[['Country_Region','Doses_admin']].sort_values('Doses_admin',ascending=False)
 
 #a bar plot to show the top 5 second dosis of countries
 sns.set(rc = {'figure.figsize':(9,9)})
@@ -99,45 +123,45 @@ plt.show()
 # %%
 '''
 #Filtering cases cleaned categorizable for only country region uses
-CountryUsesOnly_without_date_filter = vax_cleaned_categorizable_Without_Date_Filter[
-    vax_cleaned_categorizable_Without_Date_Filter['Country_Region'].notna() & 
-              vax_cleaned_categorizable_Without_Date_Filter['Province_State'].isna()]
+country_vax_df_without_date_filter = vax_cleaned_cat_Without_Date_Filter[
+    vax_cleaned_cat_Without_Date_Filter['Country_Region'].notna() & 
+              vax_cleaned_cat_Without_Date_Filter['Province_State'].isna()]
 
 #filtering out the unknown values
-vax_cleaned_categorizable_Without_Date_Filter = CountryUsesOnly_without_date_filter[
-    CountryUsesOnly_without_date_filter['Country_Region'] != 'Unknown']
+vax_cleaned_cat_Without_Date_Filter = country_vax_df_without_date_filter[
+    country_vax_df_without_date_filter['Country_Region'] != 'Unknown']
 
-vax_cleaned_categorizable_Without_Date_Filter = CountryUsesOnly_without_date_filter[
-    CountryUsesOnly_without_date_filter['Province_State'] != 'Unknown']
+vax_cleaned_cat_Without_Date_Filter = country_vax_df_without_date_filter[
+    country_vax_df_without_date_filter['Province_State'] != 'Unknown']
 
-vax_cleaned_categorizable_Without_Date_Filter = CountryUsesOnly_without_date_filter[
-    CountryUsesOnly_without_date_filter['Vaccine_Type'] != 'Unknown']
+vax_cleaned_cat_Without_Date_Filter = country_vax_df_without_date_filter[
+    country_vax_df_without_date_filter['Vaccine_Type'] != 'Unknown']
 
-vax_cleaned_categorizable_Without_Date_Filter = CountryUsesOnly_without_date_filter[
-    CountryUsesOnly_without_date_filter['Vaccine_Type'] != 'All']
+vax_cleaned_cat_Without_Date_Filter = country_vax_df_without_date_filter[
+    country_vax_df_without_date_filter['Vaccine_Type'] != 'All']
 
 '''
 
 # %%
 #filtering out the unknown values
-vax_cleaned_categorizable_Without_Date_Filter = vax_cleaned_categorizable_Without_Date_Filter[
-    vax_cleaned_categorizable_Without_Date_Filter['Country_Region'] != 'Unknown']
+vax_cleaned_cat_Without_Date_Filter = vax_cleaned_cat_Without_Date_Filter[
+    vax_cleaned_cat_Without_Date_Filter['Country_Region'] != 'Unknown']
 
-vax_cleaned_categorizable_Without_Date_Filter = vax_cleaned_categorizable_Without_Date_Filter[
-    vax_cleaned_categorizable_Without_Date_Filter['Province_State'] != 'Unknown']
+vax_cleaned_cat_Without_Date_Filter = vax_cleaned_cat_Without_Date_Filter[
+    vax_cleaned_cat_Without_Date_Filter['Province_State'] != 'Unknown']
 
-vax_cleaned_categorizable_Without_Date_Filter = vax_cleaned_categorizable_Without_Date_Filter[
-    vax_cleaned_categorizable_Without_Date_Filter['Vaccine_Type'] != 'Unknown']
+vax_cleaned_cat_Without_Date_Filter = vax_cleaned_cat_Without_Date_Filter[
+    vax_cleaned_cat_Without_Date_Filter['Vaccine_Type'] != 'Unknown']
 
-vax_cleaned_categorizable_Without_Date_Filter = vax_cleaned_categorizable_Without_Date_Filter[
-    vax_cleaned_categorizable_Without_Date_Filter['Vaccine_Type'] != 'All']
+vax_cleaned_cat_Without_Date_Filter = vax_cleaned_cat_Without_Date_Filter[
+    vax_cleaned_cat_Without_Date_Filter['Vaccine_Type'] != 'All']
 # %%
 #turning the data to datatime and then sorting it by date and groupby with date and 
 #confirm to find the max value of each date
-vax_cleaned_categorizable_Without_Date_Filter['Date'] = pd.to_datetime(
-    vax_cleaned_categorizable_Without_Date_Filter['Date'], format='%Y/%m/%d')
-vax_cleaned_categorizable_Without_Date_Filter.sort_values(by='Date', inplace=True)
-group_CSSE = vax_cleaned_categorizable_Without_Date_Filter
+vax_cleaned_cat_Without_Date_Filter['Date'] = pd.to_datetime(
+    vax_cleaned_cat_Without_Date_Filter['Date'], format='%Y/%m/%d')
+vax_cleaned_cat_Without_Date_Filter.sort_values(by='Date', inplace=True)
+group_CSSE = vax_cleaned_cat_Without_Date_Filter
 
 # %%
 print(group_CSSE.info())
@@ -159,19 +183,20 @@ group_CSSE.sort_values(by='month/year', inplace=True)
 # %%
 ax = sns.barplot(y='month/year', x='New_Doses_alloc', hue="Vaccine_Type", data=group_CSSE)
 plt.title('Yearly and monthly doses of allocation for each vaccine type')
-
+plt.show()
 # %%
 ax = sns.barplot(x='month/year', y='New_Doses_alloc', hue="Vaccine_Type", data=group_CSSE)
 plt.title('Yearly and monthly doses of allocation for each vaccine type')
 plt.xticks(rotation=90)
+plt.show()
 # %%
 
 #turning the data to datatime and then sorting it by date and groupby with date and 
 #confirm to find the max value of each date
-vax_cleaned_categorizable_Without_Date_Filter['Date'] = pd.to_datetime(
-    vax_cleaned_categorizable_Without_Date_Filter['Date'], format='%Y/%m/%d')
-vax_cleaned_categorizable_Without_Date_Filter.sort_values(by='Date', inplace=True)
-group_CSSE = vax_cleaned_categorizable_Without_Date_Filter
+vax_cleaned_cat_Without_Date_Filter['Date'] = pd.to_datetime(
+    vax_cleaned_cat_Without_Date_Filter['Date'], format='%Y/%m/%d')
+vax_cleaned_cat_Without_Date_Filter.sort_values(by='Date', inplace=True)
+group_CSSE = vax_cleaned_cat_Without_Date_Filter
 
 # %%
 # creating columns of but with month,year seperately 
@@ -204,14 +229,15 @@ print(group_CSSE.info())
 #plot heatmap and show numbers
 sns.heatmap(group_CSSE, fmt="d", annot=True, cmap='YlGnBu',linewidths=.5)
 plt.title('Yearly and monthly of dosis administered globally')
+plt.show()
 # %%
 
 #turning the data to datatime and then sorting it by date and groupby with date and 
 #confirm to find the max value of each date
-vax_cleaned_categorizable_Without_Date_Filter['Date'] = pd.to_datetime(
-    vax_cleaned_categorizable_Without_Date_Filter['Date'], format='%Y/%m/%d')
-vax_cleaned_categorizable_Without_Date_Filter.sort_values(by='Date', inplace=True)
-group_CSSE = vax_cleaned_categorizable_Without_Date_Filter
+vax_cleaned_cat_Without_Date_Filter['Date'] = pd.to_datetime(
+    vax_cleaned_cat_Without_Date_Filter['Date'], format='%Y/%m/%d')
+vax_cleaned_cat_Without_Date_Filter.sort_values(by='Date', inplace=True)
+group_CSSE = vax_cleaned_cat_Without_Date_Filter
 
 # %%
 # creating columns of but with month,year seperately 
@@ -244,15 +270,15 @@ group_CSSE = group_CSSE.fillna(0)
 #plot heatmap and show numbers
 sns.heatmap(group_CSSE, fmt="f", annot=True, cmap='YlGnBu',linewidths=.5)
 plt.title('Yearly and monthly of the stage one dosis being used globally')
-
+plt.show()
 # %%
 
 #turning the data to datatime and then sorting it by date and groupby with date and 
 #confirm to find the max value of each date
-vax_cleaned_categorizable_Without_Date_Filter['Date'] = pd.to_datetime(
-    vax_cleaned_categorizable_Without_Date_Filter['Date'], format='%Y/%m/%d')
-vax_cleaned_categorizable_Without_Date_Filter.sort_values(by='Date', inplace=True)
-group_CSSE = vax_cleaned_categorizable_Without_Date_Filter
+vax_cleaned_cat_Without_Date_Filter['Date'] = pd.to_datetime(
+    vax_cleaned_cat_Without_Date_Filter['Date'], format='%Y/%m/%d')
+vax_cleaned_cat_Without_Date_Filter.sort_values(by='Date', inplace=True)
+group_CSSE = vax_cleaned_cat_Without_Date_Filter
 
 # %%
 # creating columns of but with month,year seperately 
@@ -285,13 +311,13 @@ group_CSSE = group_CSSE.fillna(0)
 #plot heatmap and show numbers
 sns.heatmap(group_CSSE, fmt="f", annot=True, cmap='YlGnBu',linewidths=.5)
 plt.title('Yearly and monthly of the stage two dosis being used globally')
-
+plt.show()
 
 
 # %%
 #Filtering cases cleaned categorizable for only province state uses
-ProvinceUsesOnly = vax_cleaned_categorizable[vax_cleaned_categorizable['Country_Region'].notna() & 
-              vax_cleaned_categorizable['Province_State'].notna()
+ProvinceUsesOnly = vax_cleaned_cat[vax_cleaned_cat['Country_Region'].notna() & 
+              vax_cleaned_cat['Province_State'].notna()
               ]
 
 #taking out the unknown

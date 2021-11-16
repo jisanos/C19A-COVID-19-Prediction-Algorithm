@@ -34,41 +34,6 @@ cases_cleaned.sort_values(by='date', inplace=True)
 #cases_cleaned['date'] = cases_cleaned['date'].sort_values(ascending=True)
 
 
-# %% Replacing 0 lat long with Nominatim search
-
-# THis is now implemented in the preprocessing steps
-
-# # should now include nans as well
-# filter_zeros = (cases_cleaned['Lat'] == 0) & (cases_cleaned['Long_'] == 0)
-# cases_zero = cases_cleaned[filter_zeros]
-
-# locator = Nominatim(user_agent="http")
-
-# def find_loc(x):
-    
-#     #Getting state and country values
-#     state = list(set(x['Province_State']))[0]
-#     country = list(set(x['Country_Region']))[0]
-    
-#     # Combining them to a single string
-#     country_state = str(state) + ", " + str(country)
-#     print(country_state)
-#     # Getting their location
-#     location = locator.geocode(country_state)
-    
-#     # Assigning their location
-#     if location != None:
-#         x['Lat'] = location.latitude
-#         x['Long_'] = location.longitude
-    
-#     return x
-    
-# cases_zero = cases_zero.groupby(['Province_State','Country_Region'], dropna=False).apply(find_loc)
-# # %% appending new values
-# cases_cleaned = cases_cleaned[np.logical_not(filter_zeros)]#removing old entries
-
-# cases_cleaned = cases_cleaned.append(cases_zero,ignore_index=True)
-
 # %%
 #removing nan or 0 lat long values
 cases_cleaned = cases_cleaned[cases_cleaned['Lat'].notna() & cases_cleaned['Long_'].notna() & 
