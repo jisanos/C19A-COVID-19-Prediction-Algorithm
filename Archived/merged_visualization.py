@@ -27,11 +27,12 @@ merged_US= merged_US[merged_US["date"] == merged_US['date'].max()]
 '''
 # %%
 # group by country region
-group_CSSE = merged_US[['Province_State','Deaths']].sort_values('Deaths',ascending=False)
+# group_CSSE = merged_US[['Province_State','Deaths']].sort_values('Deaths',ascending=False)
 
-#a bar plot to show the top 5 second dosis of countries
-sns.barplot(x='Province_State', y='Deaths', data = group_CSSE.head(6)).set_title('Top 5 country regions with where people have taken the second dosis the most')
-plt.show()
+# #a bar plot to show the top 5 second dosis of countries
+# sns.barplot(x='Province_State', y='Deaths', data = group_CSSE.head(6)
+#             ).set_title('Top 5 country regions with where people have taken the second dosis the most')
+# plt.show()
 
 # %%
 '''
@@ -56,12 +57,12 @@ ProvinceUsesOnly = ProvinceUsesOnly[ProvinceUsesOnly['Country_Region'] != 'Unkno
 '''
 # %%
 # group by country region
-group_CSSE = merged_US[['Province_State','Stage_Two_Doses']].sort_values('Stage_Two_Doses',ascending=False)
+# group_CSSE = merged_US[['Province_State','Stage_Two_Doses']].sort_values('Stage_Two_Doses',ascending=False)
 
-#a bar plot to show the top 5 second dosis of countries
-sns.set(rc = {'figure.figsize':(9,9)})
-sns.barplot(x='Province_State', y='Stage_Two_Doses', data = group_CSSE.head(5)).set_title('Top 5 country regions with where people have taken the second dosis the most')
-plt.show()
+# #a bar plot to show the top 5 second dosis of countries
+# sns.set(rc = {'figure.figsize':(9,9)})
+# sns.barplot(x='Province_State', y='Stage_Two_Doses', data = group_CSSE.head(5)).set_title('Top 5 country regions with where people have taken the second dosis the most')
+# plt.show()
 # %%
 #Filtering cases cleaned categorizable for only country region uses
 CountryUsesOnly = merged_US_Without_Date_Filter[
@@ -102,3 +103,4 @@ group_CSSE = group_CSSE.sort_index()
 sns.heatmap(group_CSSE, annot=True)
 # %%
 ax = sns.lineplot(x='New_Doses_alloc', y='Deaths', data=group_CSSE)
+#%%
