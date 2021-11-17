@@ -19,6 +19,29 @@ Alternate branch of CCI containing US State Level Policy Tracker:
 
 [Weather Data](https://storage.googleapis.com/covid19-open-data/v3/weather.csv)
 
+## Third-Party libraries
+
+pandas 
+
+numpy 
+
+faker 
+
+matplotlib 
+
+seaborn 
+
+sklearn 
+
+geopy 
+
+folium 
+
+nltk 
+
+wordcloud 
+
+gensim 
 
 ## Dictionary
 CSSE: Johns Hopkins Center for Systems Science and Engineering
