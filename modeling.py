@@ -25,7 +25,7 @@ from sklearn.neighbors import KNeighborsRegressor, RadiusNeighborsClassifier
 from sklearn.naive_bayes import GaussianNB
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis, QuadraticDiscriminantAnalysis
 
-
+from sklearn.preprocessing import MinMaxScaler, StandardScaler
 
 # %% Importing csv and separating between state only and country only
 
@@ -83,6 +83,8 @@ def model_tester(model, train_df, test_df, state, title, extra_cols_drop = []):
     train_df = train_df.sort_values('date').set_index('date')
     test_df = test_df.sort_values('date').set_index('date')
     
+
+    
     # Declaring default columns to drop
     cols_to_drop = ['Country_Region','Province_State','Lat','Long_','Confirmed',
                     'Deaths','Recovered', 'Active','New_Confirmed','New_Deaths',
@@ -96,11 +98,23 @@ def model_tester(model, train_df, test_df, state, title, extra_cols_drop = []):
     # Selecting training cols, by dropping the ones we dont need
     train_cols = np.setdiff1d(train_df.columns.values, cols_to_drop)
     
+    # scaler = MinMaxScaler()
+    
+    # train_df[train_cols] = scaler.fit_transform(train_df[train_cols])
+    # test_df[train_cols] = scaler.fit_transform(test_df[train_cols])
+    
+    # scaler = StandardScaler()
+    # train_df[train_cols] = scaler.fit_transform(train_df[train_cols])
+    # test_df[train_cols] = scaler.fit_transform(test_df[train_cols])
+    
     y_train = train_df['New_Confirmed']
     X_train = train_df[train_cols]
     
     y_test = test_df['New_Confirmed']
     X_test = test_df[train_cols]
+    
+
+    
     
     model.fit(X_train, y_train)
     
@@ -152,8 +166,12 @@ weather_cols = ['average_temperature_celsius',
                 'rainfall_mm','snowfall_mm',
                 'dew_point','relative_humidity']
 
+#Dropping these improve predictions by a good amount
 tfidf_cols = np.setdiff1d(us_state_all_vax.columns[25:], weather_cols).tolist()
 
+
+
+extra_cols = ['Doses_alloc','Doses_shipped','New_Doses_alloc']
 
 
 state = 'California'
@@ -166,6 +184,12 @@ state = 'California'
 data = us_state_all_vax[us_state_all_vax['Province_State'] == state].copy().fillna(0)
 # Splitting into train test
 train_df,test_df = train_test_split(data, test_size=0.3, train_size=0.7)
+
+# scaler = MinMaxScaler()
+
+# train_df = train_df.
+
+
 
 # %% Random Forest Regressor
 
@@ -190,9 +214,12 @@ model_tester(lr, train_df,test_df, state,"Linear Regression",tfidf_cols)
 
 # %% KNeighbors Regressor
 
-knr = KNeighborsRegressor(n_neighbors = 8)
+knr = KNeighborsRegressor(n_neighbors = 4, weights='distance',algorithm='auto',
+                          leaf_size=30, p=1)
 
-model_tester(knr, train_df,test_df, state,"KNeighbors Regressor",tfidf_cols)
+model_tester(knr, train_df,test_df, state,"KNeighbors Regressor",tfidf_cols + extra_cols)
+
+# Dropping extra cols improves it
 
 # %% Ridge Regression
 
@@ -202,7 +229,20 @@ model_tester(ridge, train_df,test_df, state,"Ridge Regression",tfidf_cols)
 
 
 # %% Gradient Boosting Regressor
-gbr = GradientBoostingRegressor()
-
+gbr = GradientBoostingRegressor(loss = 'absolute_error', learning_rate = 0.1,
+                                n_estimators = 500, subsample = 1.0,
+                                criterion = 'squared_error',
+                                min_samples_split = 10,
+                                min_samples_leaf = 1, min_weight_fraction_leaf= 0,
+                                max_depth=6,min_impurity_decrease = 0.0,
+                                init = None, random_state = 6,
+                                max_features=None, alpha = 0.9,
+                                verbose = 1, max_leaf_nodes=None,
+                                warm_start= False, validation_fraction= 0.1,
+                                n_iter_no_change=None, ccp_alpha = 0.0)
+# Best score with n estimator=30000
+# Min samples split 10 gave best results
+# max_depth=6 gave best results
+# random_state = 6 produced best results
 model_tester(gbr, train_df,test_df, state,"Gradient Boosting Regressor",tfidf_cols)
 

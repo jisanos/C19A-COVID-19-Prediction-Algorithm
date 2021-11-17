@@ -11,19 +11,18 @@ from faker import Faker
 import numpy as np
 import random
 # %%
-file = ".\\cases_cleaned_categorizable.csv"
-cases_cleaned = pd.read_csv(file)
 
-# %%
+us_data = pd.read_csv(".\\merged_US.csv")
 
-us_Data_Only = cases_cleaned[cases_cleaned["Country_Region"] == "US"].head(50)
 
 # %%
 fake = Faker('en_US')
 
 # %%
-usPState = us_Data_Only['Province_State'].values
-usRegion = us_Data_Only['Country_Region'].values
+states = us_data['Province_State'].values
+region = us_data['Country_Region'].values
+
+latest_date = us_data.date.max()
 
 #%%
 
@@ -35,13 +34,12 @@ def synthetic(num = None, seed = None):
     fake_data = [
         
         {
-            #"Country_Region": fake.country(),
-            #"Province_State": fake.state(),
-            "Province_State": random.choice(usPState),
-            "Country_Region": random.choice(usRegion),
-            "Confirmed": np.random.randint(30),
-            "Deaths": np.random.randint(23),
-            "date": fake.date_between(start_date="+1y",end_date="+2y")
+            
+            "Province_State": random.choice(states),
+            "Country_Region": random.choice(region),
+            "New_Confirmed": np.random.randint(30),
+            "New_Deaths": np.random.randint(23),
+            "date": fake.date_between(start_date=str(latest_date),end_date="2021-12-15")
             }
         
         for x in range(num)
