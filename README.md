@@ -17,6 +17,9 @@ Alternate branch of CCI containing US State Level Policy Tracker:
 
 `git clone -b govex_data https://github.com/govex/COVID-19.git "./CCI_C-19_Policies"`
 
+[Weather Data](https://storage.googleapis.com/covid19-open-data/v3/weather.csv)
+
+
 ## Dictionary
 CSSE: Johns Hopkins Center for Systems Science and Engineering
 
