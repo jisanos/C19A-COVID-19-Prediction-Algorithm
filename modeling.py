@@ -26,7 +26,7 @@ from sklearn.naive_bayes import GaussianNB
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis, QuadraticDiscriminantAnalysis
 
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
-
+import pickle
 # %% Importing csv and separating between state only and country only
 
 us_df = pd.read_csv('.\\merged_US.csv', index_col=0)
@@ -113,7 +113,7 @@ def model_tester(model, train_df, test_df, state, title, extra_cols_drop = []):
     y_test = test_df['New_Confirmed']
     X_test = test_df[train_cols]
     
-
+    print(train_cols)
     
     
     model.fit(X_train, y_train)
@@ -142,7 +142,8 @@ def model_tester(model, train_df, test_df, state, title, extra_cols_drop = []):
     
     # X_test_with_vax = X_test[X_test['Doses_admin'] > 0] # Selecting only when vaccines started to be administered
     
-    
+    with open('model.pkl','wb') as file:
+        pickle.dump(model, file)
     
     # lenght = len(X_test_with_vax)
     
@@ -244,5 +245,6 @@ gbr = GradientBoostingRegressor(loss = 'absolute_error', learning_rate = 0.1,
 # Min samples split 10 gave best results
 # max_depth=6 gave best results
 # random_state = 6 produced best results
-model_tester(gbr, train_df,test_df, state,"Gradient Boosting Regressor",tfidf_cols)
+model_tester(gbr, train_df,test_df, state,"Gradient Boosting Regressor",tfidf_cols + 
+             ['Doses_alloc','Doses_shipped','New_Doses_alloc', 'New_Doses_shipped'])
 

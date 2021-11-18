@@ -11,11 +11,15 @@ from faker import Faker
 import numpy as np
 import random
 import datetime
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.neighbors import KNeighborsRegressor
+import pickle
 # %%
 
-us_data = pd.read_csv(".\\merged_US.csv")
+us_data = pd.read_csv(".\\merged_US.csv", index_col=0)
 
-us_data = us_data[us_data['Vaccine_Type'] == 'All'].copy()
+us_data = us_data[(us_data['Vaccine_Type'] == 'All') | (us_data['Vaccine_Type'].isna()) ].copy()
 
 cols_to_keep = ['Province_State', 'Country_Region',
                 'date', 'Doses_admin',
@@ -25,7 +29,8 @@ cols_to_keep = ['Province_State', 'Country_Region',
                 'minimum_temperature_celsius',
                 'maximum_temperature_celsius',
                 'rainfall_mm','snowfall_mm',
-                'dew_point','relative_humidity']
+                'dew_point','relative_humidity',
+                'New_Confirmed']
 
 us_data = us_data[cols_to_keep].copy()
 
@@ -116,7 +121,7 @@ def synthetic(num = None, seed = None):
     
     last_row = state_data[state_data['date'] == state_data['date'].max()]
     
-    fake_data_df = fake_data_df.append(last_row,ignore_index = True)
+    
     
     fake_data_df['date'] = fake_data_df['date'].astype('datetime64[ns]')
     
@@ -125,12 +130,61 @@ def synthetic(num = None, seed = None):
     fake_data_df[['Doses_admin','Stage_One_Doses','Stage_Two_Doses'
                   ]] = fake_data_df[['New_Doses_admin','New_Stage_One_Doses',
                                      'New_Stage_Two_Doses']].cumsum()
-    
+          
+    # Adding the previous to cumulative data fro consistency
+    fake_data_df[['Doses_admin','Stage_One_Doses','Stage_Two_Doses']] \
+        +=  last_row[['Doses_admin','Stage_One_Doses','Stage_Two_Doses']].values
+        
+        
+    # Calculating the 7 day moving average to smooth out the data
+    fake_data_df["average_temperature_celsius"] = fake_data_df[
+        "average_temperature_celsius"].rolling(window=7).mean()
+                                     
     return fake_data_df
 
 # %%
-synthetic_df = synthetic(num = 50, seed = 0)
+synthetic_df = synthetic(num = 90, seed = 0)
 
 
+# %% Plotting synthetic data against real data to see if patterns are similar
+
+for col in cols_to_keep:
+
+    fig = plt.figure(dpi=600)
+    sns.lineplot(data = state_data, x='date',y=col)
+    
+    sns.lineplot(data = synthetic_df, x='date',y=col)
+    plt.show()
+
+# %% plotting both continuously 
+# to_plot = pd.concat([state_data,synthetic_df]).drop_duplicates('date').reset_index(drop=True)
+# fig = plt.figure(dpi=600)
+# sns.lineplot(data =to_plot , x='date',y='average_temperature_celsius')
+# plt.show()
+
+# %% 
+X_test = synthetic_df.set_index('date')
+X_test = X_test.drop(['Province_State', 'Country_Region'], axis=1)
+
+X_test = X_test[['Doses_admin', 'New_Doses_admin', 'New_Stage_One_Doses',
+             'New_Stage_Two_Doses', 'Stage_One_Doses', 'Stage_Two_Doses',
+             'average_temperature_celsius', 'dew_point', 'maximum_temperature_celsius',
+             'minimum_temperature_celsius', 'rainfall_mm', 'relative_humidity',
+             'snowfall_mm']]
+# %%
+with open('model.pkl','rb') as file:
+    model= pickle.load(file)
+    
+# %%
+X_test = X_test.fillna(0)
+Y_pred = model.predict(X_test)
 
 
+# %% 
+
+fig = plt.figure(dpi=600)
+
+sns.lineplot(x=state_data.date, y=state_data.New_Confirmed)
+
+sns.lineplot(x=X_test.index, y=Y_pred)
+plt.show()
