@@ -44,11 +44,15 @@ years = mdates.YearLocator()
 months = mdates.MonthLocator()
 years_fmt = mdates.DateFormatter('%Y-%m')
 # %% cumulative Cases and Death unscaled
+plt.figure(figsize=(8, 5), dpi = 600) 
 sns.lineplot(data = us_country_all_vax,x='date',y='Confirmed')
-sns.lineplot(data = us_country_all_vax,x='date',y='Deaths')
-plt.xticks(rotation = 45)
+sns.lineplot(data = us_country_all_vax,x='date',y='Deaths', color='red')
+# plt.xticks(rotation = 45)
+plt.title('Cumulative Cases and Deaths not Properly Scaled (US)')
+plt.ylabel("Cases and Deaths")
+plt.xlabel("Date (YYYY-MM)")
 plt.show()
-# %% cumulative Cases and Death scaled
+# %% cumulative Cases and Death scaled properly
 fig, ax1 = plt.subplots(figsize=(8,5),dpi=600)
 
 ax1.set_ylabel('Cumulative Confirmed',color='blue')
@@ -60,23 +64,12 @@ ax2 = ax1.twinx() #Instantiate second axe sharing the same x axis
 ax2.set_ylabel('Cumulative Deaths',color='red')
 sns.lineplot(data = us_country_all_vax,x='date',y='Deaths',color='red')
 
+plt.title('Cumulative Cases and Deaths Properly Scaled (US)')
 
+ax1.set_xlabel("Date (YYYY-MM)")
 
-plt.xticks(rotation = 45)
+# plt.xticks(rotation = 45)
 plt.show()
-
-# # %% Plotting cumulative
-# # fig, axes = plt.subplots(figsize=(8,5))
-# sns.lineplot(data = us_country_all_vax,x='date',y='Confirmed')
-# # axes.xaxis.set_major_locator(months)
-# # axes.xaxis.set_major_formatter(years_fmt)
-# # axes.xaxis.set_minor_locator(years)
-# plt.xticks(rotation = 45)
-# plt.show()
-# #%%
-# sns.lineplot(data = us_country_all_vax,x='date',y='Deaths')
-# plt.xticks(rotation = 45)
-# plt.show()
 
 # %% daily cases and death unscaled
 sns.lineplot(data = us_country_all_vax,x='date',y='New_Confirmed',color='blue')

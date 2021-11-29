@@ -669,35 +669,22 @@ def date_cases(x):
     # self. Any value that is NA will be the first value which does not have
     # any prior value to substract with, thus filling these with 0 make no 
     # difference.
-
-    x['New_Confirmed'] = x['Confirmed'].diff().fillna(0).abs()
     
+    cols = ['Confirmed', 'Deaths', 'Recovered']
+    new_cols = ['New_Confirmed','New_Deaths','New_Recovered']
     
-    # Replacing zeros with nan so that interpolation can take care of them
-    x['New_Confirmed'] = x['New_Confirmed'].replace(0,np.nan)
+    # new daily value columns
+    x[new_cols] = x[cols].diff().fillna(0).abs() 
     
+    # Assigning nan to zeroes to interpolate
+    # x[new_cols] = x[new_cols].replace(0, np.nan) 
+    # Interpolating nans 
+    # x[new_cols] = x[new_cols].interpolate().round()
+    # turning to 5 day moving average
+    x[new_cols] = x[new_cols].rolling(window=9).mean()
     
-    x['New_Confirmed'] = x['New_Confirmed'].interpolate().round()
+    x[cols] = x[new_cols].cumsum()
     
-    # Now calculating the moving average
-    x['New_Confirmed'] = x['New_Confirmed'].rolling(window=7).mean()
-    
-    # Since there is the chance of there being negative values due to inconsistent,
-    # cumulative data, we will just take their absolute value and
-    # then make a new cumulative sum
-    
-    x['Confirmed'] = x['New_Confirmed'].cumsum()
-    
-    
-    # Doing the same with deaths and recoveries, but only if they are not
-    # all NaNs.
-    
-    x['New_Deaths'] = x['Deaths'].diff().fillna(0).abs()
-    x['Deaths'] = x['New_Deaths'].cumsum()
-    
-
-    x['New_Recovered'] = x['Recovered'].diff().fillna(0).abs()
-    x['Recovered'] = x['New_Recovered'].cumsum()
         
     return x    
     

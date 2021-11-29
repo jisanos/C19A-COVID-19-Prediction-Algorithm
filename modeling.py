@@ -113,7 +113,7 @@ def model_tester(model, train_df, test_df, state, title, extra_cols_drop = []):
     y_test = test_df['New_Confirmed']
     X_test = test_df[train_cols]
     
-    print(train_cols)
+    # print(train_cols)
     
     
     model.fit(X_train, y_train)
@@ -140,14 +140,15 @@ def model_tester(model, train_df, test_df, state, title, extra_cols_drop = []):
     print("R2 Score: ", r2_score(y_test, y_test_pred))
     print('MAPE: ',mean_absolute_percentage_error(y_test, y_test_pred))
     
-    # X_test_with_vax = X_test[X_test['Doses_admin'] > 0] # Selecting only when vaccines started to be administered
+   
     
     with open('model.pkl','wb') as file:
         pickle.dump(model, file)
+        
+    # X_test_with_vax = X_test[X_test['Doses_admin'] > 0] # Selecting only when vaccines started to be administered
+    # lenght = -(len(y_test) - 25)
     
-    # lenght = len(X_test_with_vax)
-    
-    # print("Metrics on only half prediction (2021 - ...):")
+    # print("Metrics on only part prediction:")
     # print("Root Mean Sqrt Err: ",mean_squared_error(np.array(y_test)[lenght:], y_test_pred[lenght:], squared = False))
     # print("R2 Score: ", r2_score(np.array(y_test)[lenght:], y_test_pred[lenght:]))
     
@@ -175,7 +176,7 @@ tfidf_cols = np.setdiff1d(us_state_all_vax.columns[25:], weather_cols).tolist()
 extra_cols = ['Doses_alloc','Doses_shipped','New_Doses_alloc']
 
 
-state = 'California'
+state = 'Washington'
 
 # %% Train test data
 
@@ -183,12 +184,15 @@ state = 'California'
 
 # Selecting the state
 data = us_state_all_vax[us_state_all_vax['Province_State'] == state].copy().fillna(0)
+
+# Only data from after 2020-04-20
+# Anythinf before this date carries little weight so not worth training with
+data = data[data['date'] > '2020-04-20'].copy()
+
 # Splitting into train test
 train_df,test_df = train_test_split(data, test_size=0.3, train_size=0.7)
 
-# scaler = MinMaxScaler()
 
-# train_df = train_df.
 
 
 

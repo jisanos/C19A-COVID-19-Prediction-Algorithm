@@ -386,6 +386,9 @@ def date_cases(x):
     
     x[new_cols] = x[current_cols].diff().fillna(0).abs()
     
+    # 3 day moving average
+    # x[new_cols] = x[new_cols].rolling(window=3).mean()
+    
     x[current_cols] = x[new_cols].cumsum()
     
     

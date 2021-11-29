@@ -46,6 +46,7 @@ def state_conv(x):
 
 weather_df['State'] = weather_df['State'].apply(state_conv)
 
+
 # %% Rename and drop some columns
 
 rename = {'State':'Province_State'}
