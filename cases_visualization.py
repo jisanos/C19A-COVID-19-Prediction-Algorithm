@@ -593,7 +593,7 @@ hm_confirmed_df.columns = hm_confirmed_df.columns.map(str)
 data = hm_confirmed_df.to_dict('list')
 source = ColumnDataSource(data = data)
 # 100000000
-output_file('vbar.html')
+output_file("vbar.html")
 p = figure(x_range=hm_confirmed_df.Country_Region.tolist(),
            y_range=(0, 650000), 
            title='Yearly Deaths Cases (Globally)',
