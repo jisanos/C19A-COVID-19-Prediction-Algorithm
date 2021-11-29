@@ -15,7 +15,7 @@ import data_imports
 import calendar
 import webbrowser
 from bokeh.models import ColumnDataSource
-from bokeh.plotting import figure, show
+from bokeh.plotting import figure, show, output_file
 from bokeh.transform import dodge
 alt.renderers.enable('altair_viewer')
 #set the plot's theme to something more beautiful
@@ -557,6 +557,7 @@ hm_confirmed_df.columns = hm_confirmed_df.columns.map(str)
 data = hm_confirmed_df.to_dict('list')
 source = ColumnDataSource(data = data)
 # 100000000
+output_file('vbar.html')
 p = figure(x_range=hm_confirmed_df.Country_Region.tolist(),
            y_range=(0, 25000000), 
            title='Yearly Confirmed Cases (Globally)',
@@ -575,5 +576,78 @@ p.xgrid.grid_line_color = None
 p.legend.location = "top_right"
 p.legend.orientation = "horizontal"
 show(p)
-# %%
-print(hm_confirmed_df.to_dict('list'))
+
+# %% Grouping for confirmed cases
+hm_confirmed_df = hm_df[['Country_Region','New_Deaths','year']].groupby(
+    ['Country_Region','year']).sum().reset_index()
+
+# Pivoc the dataframe
+hm_confirmed_df = hm_confirmed_df.pivot(index='Country_Region', columns='year',
+                                        values='New_Deaths')
+
+hm_confirmed_df = hm_confirmed_df.sort_values([2020,2021], ascending=False)
+hm_confirmed_df = hm_confirmed_df.reset_index()
+hm_confirmed_df = hm_confirmed_df.head(6)
+hm_confirmed_df.columns = hm_confirmed_df.columns.map(str)
+
+data = hm_confirmed_df.to_dict('list')
+source = ColumnDataSource(data = data)
+# 100000000
+output_file('vbar.html')
+p = figure(x_range=hm_confirmed_df.Country_Region.tolist(),
+           y_range=(0, 650000), 
+           title='Yearly Deaths Cases (Globally)',
+           height=350, toolbar_location=None, tools="")
+
+p.vbar(x=dodge('Country_Region', -0.25, range=p.x_range), top='2020',
+       source=source,
+       width=0.2, color="#c9d9d3", legend_label='2020')
+
+p.vbar(x=dodge('Country_Region',  0.0,  range=p.x_range), top='2021', 
+       source=source,
+       width=0.2, color="#718dbf", legend_label='2021')
+
+p.x_range.range_padding = 0.1
+p.xgrid.grid_line_color = None
+p.legend.location = "top_right"
+p.legend.orientation = "horizontal"
+show(p)
+# %% Grouping for confirmed cases
+
+hm_confirmed_df = hm_df[['New_Confirmed','date']].groupby(
+    ['date']).sum().reset_index()
+
+hm_confirmed_df = hm_confirmed_df.sort_index()
+#remove the dates that have no values since theyre future months of 2021
+hm_confirmed_df = hm_confirmed_df.fillna(0)
+
+#hm_confirmed_df['date'] = hm_confirmed_df.to_datetime(hm_confirmed_df['date'])
+# Plotting line monthly cases
+output_file("datetime.html")
+
+# create a new plot with a datetime axis type
+p = figure(width=800, height=250, x_axis_type="datetime",title = 'Monthly Confirmed Cases (Globally)')
+
+p.line(hm_confirmed_df['date'], hm_confirmed_df['New_Confirmed'], color='navy', alpha=0.5)
+
+show(p)
+
+# %% Grouping for death cases
+
+hm_confirmed_df = hm_df[['New_Deaths','date']].groupby(
+    ['date']).sum().reset_index()
+
+hm_confirmed_df = hm_confirmed_df.sort_index()
+#remove the dates that have no values since theyre future months of 2021
+hm_confirmed_df = hm_confirmed_df.fillna(0)
+
+#hm_confirmed_df['date'] = hm_confirmed_df.to_datetime(hm_confirmed_df['date'])
+# Plotting line monthly cases
+output_file("datetime.html")
+
+# create a new plot with a datetime axis type
+p = figure(width=800, height=250, x_axis_type="datetime",title = 'Monthly Death Cases (Globally)')
+
+p.line(hm_confirmed_df['date'], hm_confirmed_df['New_Deaths'], color='navy', alpha=0.5)
+
+show(p)
