@@ -105,7 +105,9 @@ Alternate branch of CCI containing US State Level Policy Tracker:
 
 * wordcloud 
 
-* gensim 
+* gensim
+
+* bokeh
 
 ## Dictionary
 CSSE: Johns Hopkins Center for Systems Science and Engineering
