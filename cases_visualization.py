@@ -114,7 +114,7 @@ to_plot = country_cases_df[country_cases_df.Country_Region.isin(
 
 chart = alt.Chart(to_plot, title='Daily Cases Over Time Per Country (Global)')\
         .mark_circle().encode(
-        x= alt.X('date', title = 'Date'),
+        x= alt.X('yearmonthdate(date):T', title = 'Date'),
         y= alt.Y('Country_Region', title = 'Country'),
         color = 'Country_Region',
         size = alt.Size('New_Confirmed',

@@ -41,24 +41,24 @@ cases_cleaned = cases_cleaned[cases_cleaned['Lat'].notna() & cases_cleaned['Long
 # max_date = cases_cleaned.date.max()
 # from https://stackoverflow.com/questions/30056399/interpolate-and-fill-pandas-dataframe-with-datetime-index
 
-def fill_missing_dates(x):
+# def fill_missing_dates(x):
     
     
-    # Setting date index
-    x.set_index('date',inplace=True)
+#     # Setting date index
+#     x.set_index('date',inplace=True)
     
-    #x = x.reindex(pd.date_range(start=min_date,end = max_date, freq='1D'))
+#     #x = x.reindex(pd.date_range(start=min_date,end = max_date, freq='1D'))
     
-    # Rexampling by date and interpolating values
-    x = x.resample('D').interpolate()
+#     # Rexampling by date and interpolating values
+#     x = x.resample('D').interpolate().round()
     
-    #x = x.interpolate(method='linear')
+#     #x = x.interpolate(method='linear')
     
-    # Returning the group with date as a column again
-    return x.reset_index()
+#     # Returning the group with date as a column again
+#     return x.reset_index()
 
-cases_cleaned = cases_cleaned.groupby(['Admin2', 'Province_State', 'Country_Region'],
-                      dropna=False).apply(fill_missing_dates).reset_index(drop=True)
+# cases_cleaned = cases_cleaned.groupby(['Admin2', 'Province_State', 'Country_Region'],
+#                       dropna=False).apply(fill_missing_dates).reset_index(drop=True)
 
 
 

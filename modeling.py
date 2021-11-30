@@ -51,7 +51,7 @@ us_country_all_vax = us_country[vax_filter].copy()
 
 # %% Functions for plotting train predictions and test predictions
 def train_plotter(name, prediction, X_train, y_train):
-    fig, ax = plt.subplots(figsize=(18,8), dpi = 600)
+    fig, ax = plt.subplots(figsize=(12,5), dpi = 600)
     
     
     sns.lineplot(x = X_train.index.values, y = y_train.values, color = 'red', label='Real (Train)', ax=ax)
@@ -62,13 +62,15 @@ def train_plotter(name, prediction, X_train, y_train):
     plt.title(name)
     plt.show()                
     
-def test_plotter(name, prediction, X_test, y_test):
-    fig, ax = plt.subplots(figsize=(18,8), dpi = 600)
+def test_plotter(name, prediction, X_test, y_test, RMSE, R2, MAPE):
+    fig, ax = plt.subplots(figsize=(12,5), dpi = 600)
     
     
     sns.lineplot(x=X_test.index, y=y_test.values, color = 'red', label='Real (Test)', ax=ax)
     sns.lineplot(x=X_test.index, y=prediction, color = 'blue', ax=ax, label = 'Predicted (Fit)')
-    
+    ax.text(.7,.7,'RMSE: ' + str(RMSE), transform=ax.transAxes)
+    ax.text(.7,.65,'R2 Score: ' + str(R2), transform=ax.transAxes)
+    ax.text(.7,.6,'MAPE: ' + str(MAPE), transform=ax.transAxes)
   
     plt.legend()
     plt.title(name)
@@ -130,15 +132,22 @@ def model_tester(model, train_df, test_df, state, title, extra_cols_drop = []):
     
     # test_plotter(state+" "+title, new_conf_pred, y_test, test_df['New_Confirmed'])
     
+    RMSE = mean_squared_error(y_test, y_test_pred, squared = False)
+    RMSE = round(RMSE, 4)
+    R2 = r2_score(y_test, y_test_pred)
+    R2 = round(R2, 4)
+    MAPE = mean_absolute_percentage_error(y_test, y_test_pred)
+    MAPE = round(MAPE, 4)
+    
     train_plotter(state+" "+title, y_train_pred, X_train, y_train)
-    test_plotter(state+" "+title, y_test_pred,X_test, y_test)
+    test_plotter(state+" "+title, y_test_pred,X_test, y_test, RMSE, R2, MAPE)
     
     print()
     print(state+" "+title)
     print("Metrics on whole prediction:")
-    print("RMSE: ",mean_squared_error(y_test, y_test_pred, squared = False))
-    print("R2 Score: ", r2_score(y_test, y_test_pred))
-    print('MAPE: ',mean_absolute_percentage_error(y_test, y_test_pred))
+    print("RMSE: ",RMSE)
+    print("R2 Score: ", R2)
+    print('MAPE: ',MAPE)
     
    
     
@@ -176,7 +185,7 @@ tfidf_cols = np.setdiff1d(us_state_all_vax.columns[25:], weather_cols).tolist()
 extra_cols = ['Doses_alloc','Doses_shipped','New_Doses_alloc']
 
 
-state = 'Puerto Rico'
+state = 'California'
 
 # %% Train test data
 
