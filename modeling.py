@@ -176,7 +176,7 @@ tfidf_cols = np.setdiff1d(us_state_all_vax.columns[25:], weather_cols).tolist()
 extra_cols = ['Doses_alloc','Doses_shipped','New_Doses_alloc']
 
 
-state = 'Washington'
+state = 'Puerto Rico'
 
 # %% Train test data
 
@@ -222,7 +222,7 @@ model_tester(lr, train_df,test_df, state,"Linear Regression",tfidf_cols)
 knr = KNeighborsRegressor(n_neighbors = 4, weights='distance',algorithm='auto',
                           leaf_size=30, p=1)
 
-model_tester(knr, train_df,test_df, state,"KNeighbors Regressor",tfidf_cols + extra_cols)
+model_tester(knr, train_df,test_df, state,"KNeighbors Regressor",extra_cols)
 
 # Dropping extra cols improves it
 

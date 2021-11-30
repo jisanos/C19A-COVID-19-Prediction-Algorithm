@@ -20,11 +20,14 @@ abbreviations_to_us_states = data_imports.abbreviations_to_us_states
 
     
 # %% only select US weather data
-weather_df = weather_df.dropna(subset=['date','location_key']) # Dropping key nans
+
+# Dropping key nans
+weather_df = weather_df.dropna(subset=['date','location_key']) 
 
 weather_df = weather_df.reset_index(drop = True)
 
-location_key_split = pd.DataFrame(list(weather_df.location_key.str.upper().str.split('_')))
+location_key_split = pd.DataFrame(list(
+    weather_df.location_key.str.upper().str.split('_')))
 
 weather_df['State'] = location_key_split[1]
 
@@ -126,7 +129,14 @@ merge_us = merge_us.merge(policies_df,how='outer',on=cols_to_merge_on)
 
 #%% Forward filling policies
 
-merge_us['policy'] = merge_us.groupby(['Province_State','Country_Region'])['policy'].apply( lambda x: x.ffill())
+# merge_us['policy'] = merge_us.groupby(['Province_State','Country_Region']
+#                                       )['policy'].apply( lambda x: x.ffill())
+
+#%% interpolating policies
+
+# merge_us['policy'] = merge_us.groupby(['Province_State','Country_Region']
+#                                       )['policy'].apply( lambda x: x.ffill())
+
 # %% merging weather data
 
 
@@ -136,17 +146,24 @@ merge_us = merge_us.merge(weather_df, how='left', on = cols_to_merge_on)
 # %% Interpolating any missing data
 
 def fill_missing(x):
-    cols_to_interpolate = ['average_temperature_celsius',
-                           'minimum_temperature_celsius',
-                           'maximum_temperature_celsius',
-                           'rainfall_mm','snowfall_mm',
-                           'dew_point','relative_humidity']
+    # cols_to_interpolate = ['average_temperature_celsius',
+    #                        'minimum_temperature_celsius',
+    #                        'maximum_temperature_celsius',
+    #                        'rainfall_mm','snowfall_mm',
+    #                        'dew_point','relative_humidity']
+    
+    cols_to_interpolate = x.columns[27:]
+    
+    # cols_to_interpolate.extend(tfidf_cols)
+    
+    x[cols_to_interpolate] = x[cols_to_interpolate].replace(0,np.nan)
     
     x[cols_to_interpolate] = x[cols_to_interpolate].interpolate()
     
     return x
 
-merge_us = merge_us.groupby(['Province_State','Country_Region'], dropna=False).apply(fill_missing)
+merge_us = merge_us.groupby(['Province_State','Country_Region'],
+                            dropna=False).apply(fill_missing)
 
 # %% Exporting
 

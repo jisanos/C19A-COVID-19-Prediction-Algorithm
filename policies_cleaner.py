@@ -486,7 +486,6 @@ policies_df = policies_df.groupby('State').apply(to_tfidf).reset_index(drop=True
 
 
 
-
 # %%
 policies_df.to_csv('.\\policies_cleaned.csv')
 
