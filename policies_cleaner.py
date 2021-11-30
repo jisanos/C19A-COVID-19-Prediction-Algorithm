@@ -324,9 +324,10 @@ print("Uncommon Words: ", word_frequency.tail(15))
 
 
 # %%
-plt.figure(figsize=(15, 4))
+plt.figure(figsize=(10, 5), dpi=600)
+
 plt.xticks(rotation=90)
-plt.bar(word_frequency.index[:100], word_frequency[:100])
+plt.bar(word_frequency.index[:30], word_frequency[:30])
 
 
 # %%

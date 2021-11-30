@@ -6,18 +6,15 @@ Created on Tue Nov  2 20:29:42 2021
 """
 
 import pandas as pd
-import seaborn as sns
 import folium
 from folium import plugins
 import webbrowser
 from collections import defaultdict, OrderedDict
 import sys
-# import numpy as np
+import numpy as np
 # from geopy.geocoders import Nominatim
 
 
-# %%
-sns.set()
 # %%
 ## open cases_cleaned.csv and store it in an dataframe and then filter the date to the newest date
 file = ".\\cases_cleaned_normal.csv"
@@ -64,9 +61,7 @@ cases_cleaned = cases_cleaned.groupby(['Admin2', 'Province_State', 'Country_Regi
                       dropna=False).apply(fill_missing_dates).reset_index(drop=True)
 
 
-# reindexed_df = cases_cleaned.set_index('date')
 
-# test = reindexed_df.resample('D').interpolate('cubic')
 
 
 # %% Formatting the date column to work appropriately
@@ -80,6 +75,9 @@ cases_cleaned_us = cases_cleaned.loc[filter_us,:].copy()
 # %% Getting only PR data
 filter_pr = cases_cleaned['Province_State'] == 'Puerto Rico'
 cases_cleaned_pr = cases_cleaned.loc[filter_pr,:].copy()
+
+
+
 # %% creating weights
 cases_cleaned['Weight'] = cases_cleaned['Confirmed'] / cases_cleaned['Confirmed'].max()
 
@@ -87,16 +85,16 @@ cases_cleaned_us['Weight'] = cases_cleaned_us['Confirmed']/cases_cleaned_us['Con
 
 cases_cleaned_pr['Weight'] = cases_cleaned_pr['Confirmed']/cases_cleaned_pr['Confirmed'].max()
 
-# %% Replacing zeros with the smallest possible number
+# %% Replacing zeros and nan weights with smalles number
 
-filter_ = (cases_cleaned['Weight'] == 0)
+cases_cleaned['Weight'] = cases_cleaned['Weight'].replace(0, sys.float_info.min)
+cases_cleaned['Weight'] = cases_cleaned['Weight'].replace(np.nan, sys.float_info.min)
 
-cases_cleaned.loc[filter_ ,'Weight'] = sys.float_info.min
+cases_cleaned_us['Weight'] = cases_cleaned_us['Weight'].replace(0, sys.float_info.min)
+cases_cleaned_us['Weight'] = cases_cleaned_us['Weight'].replace(np.nan, sys.float_info.min)
 
-cases_cleaned_us.loc[(cases_cleaned_us['Weight']==0),'Weight'] = sys.float_info.min
-
-cases_cleaned_pr.loc[(cases_cleaned_pr['Weight']==0),'Weight'] = sys.float_info.min
-
+cases_cleaned_pr['Weight'] = cases_cleaned_pr['Weight'].replace(0, sys.float_info.min)
+cases_cleaned_pr['Weight'] = cases_cleaned_pr['Weight'].replace(np.nan, sys.float_info.min)
 #%% global data for heatmap
 # Ref https://stackoverflow.com/questions/64325958/heatmapwithtime-plugin-in-folium
 

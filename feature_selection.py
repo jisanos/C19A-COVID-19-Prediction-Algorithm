@@ -66,6 +66,7 @@ sns.lineplot(data = us_country_all_vax,x='date',y='Confirmed',color='blue')
 ax2 = ax1.twinx() #Instantiate second axe sharing the same x axis
 
 ax2.set_ylabel('Cumulative Deaths',color='red')
+
 sns.lineplot(data = us_country_all_vax,x='date',y='Deaths',color='red')
 
 plt.title('Cumulative Cases and Deaths Properly Scaled (US)')
@@ -407,7 +408,7 @@ corr.sort_values(by=0, inplace=True,ascending=False)
 # plt.show()
 
 # %% Barplot of top corelations
-top_corr = corr[(corr[0]> 0.35) | (corr[0] < -0.35)]
+top_corr = corr[(corr[0]> 0.4) | (corr[0] < -0.4)]
 plt.figure(figsize=(14, 6), dpi = dpi) 
 sns.barplot(y=top_corr[0], x=top_corr.index)
 plt.title('Corelation Between Word and Daily Cases')

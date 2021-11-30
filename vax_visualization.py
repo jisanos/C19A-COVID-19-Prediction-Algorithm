@@ -55,7 +55,7 @@ latest_values = country_vax_df.groupby(
           
 plt.figure(figsize=(14, 6), dpi = 800) 
 sns.barplot(x='Country_Region', y='Stage_One_Doses',data = latest_values.head(10)
-            ).set_title('First Dosage Progress per Country (Global)')
+            ).set_title('First Dosage Distribution per Country (Global)')
 plt.xlabel('Country')
 plt.ylabel('First Dosage')
 plt.show()
@@ -70,7 +70,7 @@ latest_values = country_vax_df.groupby(
 
 plt.figure(figsize=(14, 6), dpi = 800) 
 sns.barplot(x='Country_Region', y='Stage_Two_Doses', data = latest_values.head(10)
-            ).set_title('Second Dosage Progress per Country (Global)')
+            ).set_title('Second Dosage Distribution per Country (Global)')
 plt.xlabel('Country')
 plt.ylabel('Second Dosage')
 plt.show()
@@ -90,15 +90,16 @@ plt.xlabel('Country')
 plt.ylabel('Total Doses')
 plt.show()
 
+# %% Doses administered pie chart
 
-plt.figure(figsize=(6, 6), dpi = 800) 
-#plot a pie chart regarding the top 5 deaths of countries
-latest_values = latest_values.set_index('Country_Region')
-latest_values.head(10).plot.pie(y='Doses_admin', autopct='%1.1f%%',legend=None,shadow=True, startangle=140)
-plt.title("Doses Administered per Country (Global)", bbox={'facecolor':'0.8', 'pad':5})
-plt.xlabel('')
-plt.ylabel('')
-plt.show()
+# plt.figure(figsize=(6, 6), dpi = 800) 
+
+# latest_values = latest_values.set_index('Country_Region')
+# latest_values.head(10).plot.pie(y='Doses_admin', autopct='%1.1f%%',legend=None,shadow=True, startangle=140)
+# plt.title("Doses Administered per Country (Global)", bbox={'facecolor':'0.8', 'pad':5})
+# plt.xlabel('')
+# plt.ylabel('')
+# plt.show()
 # %%
 # group by country region
 # group_CSSE = country_vax_df[['Country_Region','Stage_One_Doses']].sort_values('Stage_One_Doses',ascending=False)
@@ -350,10 +351,10 @@ to_plot = us_state_vax_df.groupby(
 
 plt.figure(figsize=(14, 6), dpi = 600) 
 sns.barplot(x='Province_State', y='Stage_Two_Doses', data = to_plot.head(10)
-            ).set_title('First Dosage Administered per State (US)')
-plt.title('Stage One Dosage Distribution (US)')
+            ).set_title('Second Dosage Administered per State (US)')
+plt.title('Stage Two Dosage Distribution (US)')
 plt.xlabel('State')
-plt.ylabel('Stage One Doses')
+plt.ylabel('Stage Two Doses')
 plt.show()
 
 # # %%
@@ -384,7 +385,7 @@ g=sns.catplot(data=to_plot,kind='bar',x='Province_State',y='Doses_admin',
 
 g.fig.set_figwidth(14)
 g.fig.set_figheight(6)
-g.fig.set_dpi(800)
+g.fig.set_dpi(600)
 
 plt.title('Vaccine Brand Distribution per State (US)')
 plt.xlabel('State')

@@ -4,7 +4,10 @@ Created on Tue Nov  2 15:28:41 2021
 
 @author: rayni
 """
-
+# %% Global vars
+width = 10
+height = 5
+dpi = 600
 # %%
 #adding libraries needed
 import pandas as pd
@@ -71,7 +74,7 @@ latest_values = country_cases_df.groupby(
     ).agg(agg_dic
           ).sort_values(['Confirmed','Deaths'], ascending=False)
 
-n_countries = 10
+n_countries = 7
 
 top_countries = latest_values.head(n_countries)
 
@@ -88,7 +91,7 @@ other_countries = other_countries.head(1)
 
 to_plot = pd.concat([top_countries, other_countries])
 
-plt.figure(figsize=(10, 10), dpi = 800) 
+plt.figure(figsize=(width, height), dpi = dpi) 
 
 sns.scatterplot(data=to_plot, x="Deaths", y="Confirmed", alpha=0.7, size='Population',
                 hue='Country_Region',sizes=(100,6000), legend=False)
@@ -109,9 +112,10 @@ plt.show()
 to_plot = country_cases_df[country_cases_df.Country_Region.isin(
     top_countries['Country_Region'].unique())]
 
-chart = alt.Chart(to_plot).mark_circle().encode(
-        x= 'date',
-        y= 'Country_Region',
+chart = alt.Chart(to_plot, title='Daily Cases Over Time Per Country (Global)')\
+        .mark_circle().encode(
+        x= alt.X('date', title = 'Date'),
+        y= alt.Y('Country_Region', title = 'Country'),
         color = 'Country_Region',
         size = alt.Size('New_Confirmed',
                         scale = alt.Scale(range=[0,1000]),
@@ -121,27 +125,26 @@ chart = alt.Chart(to_plot).mark_circle().encode(
             height=300
         )
 #chart.show()
-
 chart.save('circle_chart.html')
 webbrowser.open('circle_chart.html')
 
 # %% Global State Deaths Barplot
 
 
-agg_dic = {'Deaths':'max'}
+# agg_dic = {'Deaths':'max'}
 
-to_plot = province_cases_df.groupby(
-    'Province_State', as_index=False
-    ).agg(agg_dic
-          ).sort_values(['Deaths'], ascending=False)
+# to_plot = province_cases_df.groupby(
+#     'Province_State', as_index=False
+#     ).agg(agg_dic
+#           ).sort_values(['Deaths'], ascending=False)
 
-plt.figure(figsize=(14, 6), dpi = 600) 
-sns.barplot(x='Province_State', y='Deaths', data = to_plot.head(10)
-            ).set_title("States with most deaths (Global)")
+# plt.figure(figsize=(14, 6), dpi = 600) 
+# sns.barplot(x='Province_State', y='Deaths', data = to_plot.head(10)
+#             ).set_title("States with most deaths (Global)")
 
-plt.xlabel('State')
-plt.ylabel('Deaths')
-plt.show()
+# plt.xlabel('State')
+# plt.ylabel('Deaths')
+# plt.show()
 
 # %% Pie chart of global state deaths
 
@@ -154,20 +157,20 @@ plt.show()
 # plt.show()
 
 # %% Global State Cases Barplot
-agg_dic = {'Confirmed':'max'}
+# agg_dic = {'Confirmed':'max'}
 
 
-to_plot = province_cases_df.groupby(
-    'Province_State', as_index=False
-    ).agg(agg_dic
-          ).sort_values(['Confirmed'], ascending=False)
+# to_plot = province_cases_df.groupby(
+#     'Province_State', as_index=False
+#     ).agg(agg_dic
+#           ).sort_values(['Confirmed'], ascending=False)
 
-plt.figure(figsize=(14, 6), dpi = 600) 
-sns.barplot(x='Province_State', y='Confirmed', data = to_plot.head(10)).set_title("States with most cases (Global)")
+# plt.figure(figsize=(14, 6), dpi = 600) 
+# sns.barplot(x='Province_State', y='Confirmed', data = to_plot.head(10)).set_title("States with most cases (Global)")
 
-plt.xlabel('State')
-plt.ylabel('Confirmed')
-plt.show()
+# plt.xlabel('State')
+# plt.ylabel('Confirmed')
+# plt.show()
 # %% state pie chart of global state cases
 # group by country region
 # to_plot = province_cases_df[['Province_State','Confirmed']].sort_values('Confirmed',ascending=False)
@@ -211,7 +214,7 @@ sns.violinplot(x='Province_State', y='New_Deaths', data = filteringViolin) '''
 
 agg_dic = {'Deaths':'max'}
 
-to_plot = province_cases_df.groupby(
+to_plot = country_cases_df.groupby(
     'Country_Region', as_index=False
     ).agg(agg_dic
           ).sort_values(['Deaths'], ascending=False)
@@ -241,17 +244,18 @@ plt.show()
 # plt.title('Top 10 number of confirmed cases per country', bbox={'facecolor':'0.8', 'pad':5})
 # plt.show()
 # %%
-# group by country region
+# Cases per country
 
 agg_dic = {'Confirmed':'max'}
 
-to_plot = province_cases_df.groupby(
+to_plot = country_cases_df.groupby(
     'Country_Region', as_index=False
     ).agg(agg_dic
           ).sort_values(['Confirmed'], ascending=False)
 
 plt.figure(figsize=(14, 6), dpi = 600) 
-sns.barplot(x='Country_Region', y='Confirmed', data = to_plot.head(10)).set_title('Cases per Country')
+sns.barplot(x='Country_Region', y='Confirmed', data = to_plot.head(10)
+            ).set_title('Cases per Country')
 plt.xlabel('Country')
 plt.ylabel('Confirmed')
 plt.show()
@@ -511,7 +515,7 @@ plt.xlabel('Year')
 plt.ylabel('Month')
 plt.show()
 # %%
-total = hm_confirmed_df.loc[:,2020].sum() + hm_df.loc[:,2021].sum()
+total = hm_confirmed_df.loc[:,2020].sum() + hm_confirmed_df.loc[:,2021].sum()
 # %% Grouping for deaths
 
 hm_deaths_df= hm_df[['month','New_Deaths','year']].groupby(
@@ -541,7 +545,7 @@ plt.show()
 
 # %% 
 
-# %% Grouping for confirmed cases
+# %% Yearly Confirmed Cases per Country (Globally)
 hm_confirmed_df = hm_df[['Country_Region','New_Confirmed','year']].groupby(
     ['Country_Region','year']).sum().reset_index()
 
@@ -557,10 +561,10 @@ hm_confirmed_df.columns = hm_confirmed_df.columns.map(str)
 data = hm_confirmed_df.to_dict('list')
 source = ColumnDataSource(data = data)
 # 100000000
-output_file('vbar.html')
+output_file('vbar_cases.html')
 p = figure(x_range=hm_confirmed_df.Country_Region.tolist(),
            y_range=(0, 25000000), 
-           title='Yearly Confirmed Cases (Globally)',
+           title='Yearly Confirmed Cases per Country (Globally)',
            height=350, toolbar_location=None, tools="")
 
 p.vbar(x=dodge('Country_Region', -0.25, range=p.x_range), top='2020',
@@ -577,7 +581,7 @@ p.legend.location = "top_right"
 p.legend.orientation = "horizontal"
 show(p)
 
-# %% Grouping for confirmed cases
+# %% Yearly Death Cases per Country (Globally)
 hm_confirmed_df = hm_df[['Country_Region','New_Deaths','year']].groupby(
     ['Country_Region','year']).sum().reset_index()
 
@@ -593,10 +597,10 @@ hm_confirmed_df.columns = hm_confirmed_df.columns.map(str)
 data = hm_confirmed_df.to_dict('list')
 source = ColumnDataSource(data = data)
 # 100000000
-output_file("vbar.html")
+output_file("vbar_deaths.html")
 p = figure(x_range=hm_confirmed_df.Country_Region.tolist(),
            y_range=(0, 650000), 
-           title='Yearly Deaths Cases (Globally)',
+           title='Yearly Death Cases per Country (Globally)',
            height=350, toolbar_location=None, tools="")
 
 p.vbar(x=dodge('Country_Region', -0.25, range=p.x_range), top='2020',
@@ -612,7 +616,7 @@ p.xgrid.grid_line_color = None
 p.legend.location = "top_right"
 p.legend.orientation = "horizontal"
 show(p)
-# %% Grouping for confirmed cases
+# %% Daily Confirmed Cases over time (Globally)
 
 hm_confirmed_df = hm_df[['New_Confirmed','date']].groupby(
     ['date']).sum().reset_index()
@@ -623,16 +627,17 @@ hm_confirmed_df = hm_confirmed_df.fillna(0)
 
 #hm_confirmed_df['date'] = hm_confirmed_df.to_datetime(hm_confirmed_df['date'])
 # Plotting line monthly cases
-output_file("datetime.html")
+output_file("datetime_cases.html")
 
 # create a new plot with a datetime axis type
-p = figure(width=800, height=250, x_axis_type="datetime",title = 'Monthly Confirmed Cases (Globally)')
+p = figure(width=800, height=250, x_axis_type="datetime",
+           title = 'Daily Confirmed Cases Over Time (Globally)')
 
 p.line(hm_confirmed_df['date'], hm_confirmed_df['New_Confirmed'], color='navy', alpha=0.5)
 
 show(p)
 
-# %% Grouping for death cases
+# %% Daily Deaths Over Time (Globally)
 
 hm_confirmed_df = hm_df[['New_Deaths','date']].groupby(
     ['date']).sum().reset_index()
@@ -643,10 +648,11 @@ hm_confirmed_df = hm_confirmed_df.fillna(0)
 
 #hm_confirmed_df['date'] = hm_confirmed_df.to_datetime(hm_confirmed_df['date'])
 # Plotting line monthly cases
-output_file("datetime.html")
+output_file("datetime_deaths.html")
 
 # create a new plot with a datetime axis type
-p = figure(width=800, height=250, x_axis_type="datetime",title = 'Monthly Death Cases (Globally)')
+p = figure(width=800, height=250, x_axis_type="datetime",
+           title = 'Daily Deaths Over Time (Globally)')
 
 p.line(hm_confirmed_df['date'], hm_confirmed_df['New_Deaths'], color='navy', alpha=0.5)
 
