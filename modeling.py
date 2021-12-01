@@ -72,6 +72,9 @@ def test_plotter(name, prediction, X_test, y_test, RMSE, R2, MAPE):
     ax.text(.7,.65,'R2 Score: ' + str(R2), transform=ax.transAxes)
     ax.text(.7,.6,'MAPE: ' + str(MAPE), transform=ax.transAxes)
   
+    
+    plt.ylabel('Daily Cases')
+    plt.xlabel('Date (YYYY-MM)')
     plt.legend()
     plt.title(name)
     plt.show()
@@ -207,23 +210,39 @@ train_df,test_df = train_test_split(data, test_size=0.3, train_size=0.7)
 
 # %% Random Forest Regressor
 
-rfr = RandomForestRegressor(n_estimators = 1000)
+rfr = RandomForestRegressor(n_estimators = 1000, criterion = "squared_error",
+                            max_depth = 150, min_samples_split = 2,
+                            min_samples_leaf = 1, min_weight_fraction_leaf = 0.00,
+                            max_features= 'auto', max_leaf_nodes= None,
+                            min_impurity_decrease = 0.0, bootstrap=True,
+                            oob_score = True,n_jobs=10, random_state = None,
+                            verbose = 1, warm_start = False, ccp_alpha = 0.0,
+                            max_samples = None)
 
-model_tester(rfr, train_df,test_df, state,"Random Forest Regressor",tfidf_cols)
+# Criterion: absolute_error performs better BUT takes way too long to process
+# thus squared_error should be used as it deliveres near similar results.
+# max_depth = 150 performs best with California. But might work better as None for
+# other states
+# min_samples_split = 2 Default performs best
+# min_samples_leaf = 1 Doesnt seem to make much of a difference
+# min_weight_fraction_leaf = 0.00 hinders prediction if modified
+# max_features= 'auto' leave as auto for the moment
+# max_leaf_nodes= None not worth changing
+# min_impurity_decrease = 0.0 not much difference
+# bootstrap=True modifying will hinder predictions
+# oob_score = True not sure if it made a difference
+# random_state = None worsened preds
+# ccp_alpha = 0.0 does not change anything
+
+model_tester(rfr, train_df,test_df, state,"Random Forest Regressor", extra_cols )
 
 
 
 # %% Linear Regression
 lr = LinearRegression()
 
-model_tester(lr, train_df,test_df, state,"Linear Regression",tfidf_cols)
+model_tester(lr, train_df,test_df, state,"Linear Regression")
 
-
-
-# %% Support vector machine
-# svc = SVR()
-
-# model_tester(svc, train_df,test_df, state,"Support Vector Machine",tfidf_cols)
 
 
 # %% KNeighbors Regressor
@@ -258,6 +277,5 @@ gbr = GradientBoostingRegressor(loss = 'absolute_error', learning_rate = 0.1,
 # Min samples split 10 gave best results
 # max_depth=6 gave best results
 # random_state = 6 produced best results
-model_tester(gbr, train_df,test_df, state,"Gradient Boosting Regressor",tfidf_cols + 
-             ['Doses_alloc','Doses_shipped','New_Doses_alloc', 'New_Doses_shipped'])
+model_tester(gbr, train_df,test_df, state,"Gradient Boosting Regressor")
 
