@@ -234,7 +234,7 @@ rfr = RandomForestRegressor(n_estimators = 1000, criterion = "squared_error",
 # random_state = None worsened preds
 # ccp_alpha = 0.0 does not change anything
 
-model_tester(rfr, train_df,test_df, state,"Random Forest Regressor", extra_cols )
+model_tester(rfr, train_df,test_df, state,"Random Forest Regressor" )
 
 
 
@@ -250,7 +250,7 @@ model_tester(lr, train_df,test_df, state,"Linear Regression")
 knr = KNeighborsRegressor(n_neighbors = 4, weights='distance',algorithm='auto',
                           leaf_size=30, p=1)
 
-model_tester(knr, train_df,test_df, state,"KNeighbors Regressor",extra_cols)
+model_tester(knr, train_df,test_df, state,"KNeighbors Regressor",extra_cols + weather_cols)
 
 # Dropping extra cols improves it
 
@@ -277,5 +277,6 @@ gbr = GradientBoostingRegressor(loss = 'absolute_error', learning_rate = 0.1,
 # Min samples split 10 gave best results
 # max_depth=6 gave best results
 # random_state = 6 produced best results
-model_tester(gbr, train_df,test_df, state,"Gradient Boosting Regressor")
+model_tester(gbr, train_df,test_df, state,"Gradient Boosting Regressor",
+             extra_cols+weather_cols)
 
