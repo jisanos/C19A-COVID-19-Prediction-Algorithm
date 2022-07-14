@@ -1,6 +1,6 @@
-# C19A (CIPA) COVID-19 Prediction Algorithm (CAPSTONE Project)
+# C19A (CIPA) COVID-19 Prediction Algorithm
 
-Repository for CIPA Capstone project in which is pre-processed, visualized and modeled a machine learning algorithm that can predict cases of the spread.
+Repository for CIPA Capstone project which pre-processes, visualizes and modeles a machine learning algorithm that can predict cases of COVID-19.
 
 ## Abstract
 We analyzed JHU COVID-19 data, pre-processed, visualized and modeled a machine learning algorithm that can predict cases of the spread. This was done using python and various third-party data analysis libraries.
@@ -63,6 +63,8 @@ Alternate branch of CCI containing US State Level Policy Tracker:
 * Hector G. Sanchez Mercado - [jisanos](https://github.com/jisanos)
 
 * Rayniel Ramirez Albizu - [RaynielRamirezz](https://github.com/RaynielRamirezz)
+
+* Luis Rodriguez - [LuisRodriguez01](https://github.com/LuisRodriguez01)
 
 ## Third-Party libraries
 
