@@ -1,31 +1,16 @@
 # C19A (CIPA) COVID-19 Prediction Algorithm (CAPSTONE Project)
 
-Repository for CIPA Capstone project in which is pre-processed, visualized and modeled a machine learning algorithm that can predict future cases of the spread.
+Repository for CIPA Capstone project in which is pre-processed, visualized and modeled a machine learning algorithm that can predict cases of the spread.
 
 ## Abstract
-We analyzed JHU COVID-19 data, pre-processed, visualized and modeled a machine learning algorithm that can predict future cases of the spread. This was done using python and various third-party data analysis libraries.  We also generated synthetic data to test our modeled algorithm against it and attempt to see how the spread might continue in the future. 
+We analyzed JHU COVID-19 data, pre-processed, visualized and modeled a machine learning algorithm that can predict cases of the spread. This was done using python and various third-party data analysis libraries.
 
-The source code of this project is licensed under the GPLv3, allowing for an open-source development and community approach to what is a global issue. 
-
-## Purpose
-Due to the recent surge of COVID-19 cases, we believe that this pandemic will remain afloat for longer than expected, and we do not see enough tools that can help us see the evolution of the spread of the pandemic in the future. Thus, we decided that it would be beneficial to work on developing a model that can predict future cases of COVID-19 based on pre-existing data. Hopefully, this can let us better observe how the virus behaves under different conditions and help with formulating future prevention strategies. 
-
-## Objectives
-Our objective with this project is to attempt to model a machine learning algorithm able to predict future cases of COVID-19. To do this we must use valid publicly available pre-existing data that we must analyze, pre-process, and visualize. After this we may begin testing different algorithms, that can properly project accurate predictions, or create our algorithm if the existing ones are not good enough.
-
-## Libraries and Languages
-
-* Python with various Data Science libraries such as:
-   * pandas 
-   * matplotlib 
-   * Others
-
-Disclaimer: These libraries already come with the Anaconda package.    
+The source code of this project is licensed under the GPLv3.
 
 ## Getting Started
 
 ### installing
-To run the scrypts, you will need anaconda to access Spyder or download spyder separately. 
+To run the scripts, you will need anaconda to access Spyder, or alternatively download spyder separately. 
 Link for downloading anaconda: https://www.anaconda.com/products/individual
 Link for downloading spyder: https://www.spyder-ide.org/
 
@@ -73,10 +58,6 @@ Alternate branch of CCI containing US State Level Policy Tracker:
 `git clone -b govex_data https://github.com/govex/COVID-19.git "./CCI_C-19_Policies"`
 
 [Weather Data](https://storage.googleapis.com/covid19-open-data/v3/weather.csv)
-
-## Built with
-* Anaconda 
-* Spyder
 
 ## Authors
 * Hector G. Sanchez Mercado - [jisanos](https://github.com/jisanos)
