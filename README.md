@@ -1,6 +1,6 @@
 # C19A (CIPA) COVID-19 Prediction Algorithm
 
-Repository for CIPA Capstone project which pre-processes, visualizes and modeles a machine learning algorithm that can predict cases of COVID-19.
+Repository for CIPA Capstone project which pre-processes, visualizes and models a machine learning algorithm that can predict cases of COVID-19.
 
 ## Abstract
 We analyzed JHU COVID-19 data, pre-processed, visualized and modeled a machine learning algorithm that can predict cases of the spread. This was done using python and various third-party data analysis libraries.
